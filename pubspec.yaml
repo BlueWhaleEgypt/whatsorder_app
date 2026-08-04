@@ -1,0 +1,100 @@
+name: whats_order
+
+description: "Flutter app scaffolded with Bloc + factory-based repository architecture."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  # State management
+  flutter_bloc: ^8.1.5
+  equatable: ^2.0.5
+
+  # Networking
+  dio: ^5.4.3
+
+  # Functional error handling (Either)
+  dartz: ^0.10.1
+
+  # DI / service locator
+  get_it: ^7.7.0
+
+  # Local storage
+  shared_preferences: ^2.2.3
+
+  # Image picking (ID card uploads)
+  image_picker: ^1.2.3
+
+  # Connectivity check
+  internet_connection_checker: ^1.0.0+1
+
+  # JSON serialization
+  json_annotation: ^4.10.1
+
+  # Logging
+  logger: ^2.3.0
+
+  # Maps & location
+  google_maps_flutter: ^2.10.0
+  geolocator: ^13.0.2
+  geocoding: ^3.0.0
+  pinput: ^5.0.1
+  cupertino_icons: ^1.0.6
+  location: ^8.0.1
+  intl: ^0.20.2
+
+  # PDF
+  pdf: ^3.13.0
+  path_provider: ^2.1.5
+  permission_handler: ^12.0.3
+  downloadsfolder: ^1.2.0
+
+  firebase_core: ^4.12.1
+  firebase_auth: ^6.5.6
+  firebase_messaging: ^16.4.3
+  flutter_secure_storage: ^10.3.1
+  url_launcher: ^6.3.2
+  webview_flutter: ^4.0.0
+
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.7.1
+  json_serializable: ^6.11.0
+  change_app_package_name: ^1.4.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+    android: true
+    ios: true
+    image_path: "assets/images/whatsman.png"
+    adaptive_icon_background: "#E4FFEE"
+    adaptive_icon_foreground: "assets/images/whatsman.png"
+
+flutter:
+  uses-material-design: true
+  assets:
+     - assets/images/
+     - assets/fonts/
+  fonts:
+    - family: Cairo
+      fonts:
+        - asset: assets/fonts/Cairo-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Cairo-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Cairo-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Cairo-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Cairo-Light.ttf
+          weight: 300
