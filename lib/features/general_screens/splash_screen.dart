@@ -40,7 +40,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: const Color(0xffE4FFEE),
       body: Center(
         child: Image.asset(
-          'assets/images/whatsorderman.png',
+          'assets/images/new_whats_icon.png',
           width: 120,
           height: 120,
         ),

@@ -2,7 +2,7 @@ name: whats_order
 
 description: "Flutter app scaffolded with Bloc + factory-based repository architecture."
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: '>=3.8.0 <4.0.0'
@@ -76,9 +76,9 @@ dev_dependencies:
 flutter_launcher_icons:
     android: true
     ios: true
-    image_path: "assets/images/whatsman.png"
-    adaptive_icon_background: "#E4FFEE"
-    adaptive_icon_foreground: "assets/images/whatsman.png"
+    image_path: "assets/images/new_whats_icon.png"
+    adaptive_icon_background: "#FFFFFF"
+    adaptive_icon_foreground: "assets/images/new_whats_icon.png"
 
 flutter:
   uses-material-design: true
