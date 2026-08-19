@@ -264,22 +264,7 @@ Neighborhood: ${_neighborhood.text}
               ),
             ),
           ),
-          // AppTextField(
-          //   controller: _serviceDistance,
-          //   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          //   label: context.tr("service_distance"),
-          //   hint: "50",
-          //   suffixIcon: Padding(
-          //     padding: const EdgeInsets.only(right: 12),
-          //     child: Center(
-          //       widthFactor: 1.0,
-          //       child: Text(
-          //         "KM",
-          //         style: TextStyle(color: Colors.grey[600], fontSize: 14),
-          //       ),
-          //     ),
-          //   ),
-          // ),
+
           const SizedBox(height: 28),
           GradientButton(
             label: context.tr("continue"),
@@ -301,14 +286,6 @@ Neighborhood: ${_neighborhood.text}
         ServiceArea.allRegions: 30.0,
       };
 
-      // final defaultDistance = defaults[area]!;
-
-      // final current = double.tryParse(_serviceDistance.text.trim()) ?? 0;
-
-      // // لو المستخدم كتب رقم أكبر احتفظ بيه
-      // final value = current > defaultDistance ? current : defaultDistance;
-
-      //_serviceDistance.text = value.toStringAsFixed(0);
       _serviceDistance.text = defaults[area]!.toStringAsFixed(0);
     });
   }

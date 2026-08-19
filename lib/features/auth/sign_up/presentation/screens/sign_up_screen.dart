@@ -66,18 +66,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  // void _onContinue() {
-
-  //   if (!_formKey.currentState!.validate()) return;
-  //   Navigator.of(context).pushNamed(
-  //     NamedRoutes.onboarding,
-  //     arguments: {
-  //       'phone': _phoneController.text.trim(),
-  //       'password': _passwordController.text,
-  //     },
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,33 +108,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ? context.tr('phone_required')
                       : null,
                 ),
-                // AppTextField(
-                //   label: context.tr("phone"),
-                //   required: true,
-                //   hint: "2012345****",
-                //   controller: _phoneController,
-                //   keyboardType: TextInputType.phone,
-                //   maxLength: 12,
-                //   inputFormatters: [
-                //     FilteringTextInputFormatter.digitsOnly,
-                //     LengthLimitingTextInputFormatter(12),
-                //   ],
-                //   validator: (value) {
-                //     final phone = value?.trim() ?? '';
 
-                //     if (phone.isEmpty) {
-                //       return context.tr("phone_required");
-                //     }
-
-                //     if (!RegExp(r'^2\d{11}$').hasMatch(phone)) {
-                //       return context.tr(
-                //         "phone_must_start_with_2_and_contain_exactly_12_digits",
-                //       );
-                //     }
-
-                //     return null;
-                //   },
-                // ),
                 const SizedBox(height: 16),
                 PasswordField(
                   label: context.tr("password"),

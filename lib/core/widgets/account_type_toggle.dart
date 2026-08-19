@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/utils/account_type.dart';
 import '../theme/app_colors.dart';
 
@@ -34,7 +35,7 @@ class AccountTypeToggle extends StatelessWidget {
           Expanded(
             child: _Segment(
               icon: Icons.person_outline,
-              label: "Person",
+              label: context.tr("person"),
               selected: value == AccountType.person,
               onTap: () => onChanged(AccountType.person),
             ),
@@ -42,7 +43,7 @@ class AccountTypeToggle extends StatelessWidget {
           Expanded(
             child: _Segment(
               icon: Icons.apartment_outlined,
-              label: "Company",
+              label: context.tr("company"),
               selected: value == AccountType.company,
               onTap: () => onChanged(AccountType.company),
             ),

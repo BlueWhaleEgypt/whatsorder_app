@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whats_order/core/cache/cache_helper.dart';
 import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
+import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/core/utils/logger.dart';
 import 'package:whats_order/core/widgets/app_text_field.dart';
 import 'package:whats_order/core/widgets/gradient_button.dart';
@@ -208,7 +209,10 @@ class _SignInScreenState extends State<SignInScreen> {
                               });
                             },
                           ),
-                          const Text("Remember me"),
+                          Text(
+                            context.tr('remember_me'),
+                            style: AppTextStyles.cellText13,
+                          ),
                         ],
                       ),
                       const SizedBox(height: 18),

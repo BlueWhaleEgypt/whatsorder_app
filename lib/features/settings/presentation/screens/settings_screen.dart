@@ -9,6 +9,7 @@ import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/localization/locale_cubit.dart';
 import 'package:whats_order/features/auth/sign_in/data/user_model.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_counter.dart';
+import 'package:whats_order/features/settings/presentation/screens/terms_conditions_screen.dart';
 import '../../../../core/routing/named_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -79,8 +80,15 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 _SettingsTile(
                   icon: Icons.lock_outline,
-                  label: context.tr('privacy_security'),
-                  onTap: openWebsite,
+                  label: context.tr('terms_conditions'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const TermsConditionsScreen(),
+                      ),
+                    );
+                  },
                 ),
                 _SettingsTile(
                   icon: Icons.help_outline,
@@ -132,11 +140,11 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Future<void> openWebsite() async {
-    final uri = Uri.parse("https://whatsorder.shop/ar/terms-conditions");
+  // Future<void> openWebsite() async {
+  //   final uri = Uri.parse("https://whatsorder.shop/ar/terms-conditions");
 
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
-  }
+  //   await launchUrl(uri, mode: LaunchMode.externalApplication);
+  // }
 
   Future<void> openWhatsApp() async {
     const phone = "19296190855";

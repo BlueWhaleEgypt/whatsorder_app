@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:whats_order/core/localization/app_localizations.dart';
 import '../theme/app_colors.dart';
 
 /*
@@ -61,9 +62,9 @@ class DashedUploadBox extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        "Tap to upload",
-                        style: TextStyle(
+                      Text(
+                        context.tr("tap_to_upload"),
+                        style: const TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primaryGreen,

@@ -43,6 +43,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'secure_platform_desc': 'All transactions safe',
     'fast_delivery': 'Fast Delivery',
     'fast_delivery_desc': 'Get service fast',
+    'remember_me': 'Remember me',
 
     // Sign up
     'create_account': 'Create Account',
@@ -56,6 +57,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'email_invalid': 'Enter a valid email',
     'already_have_account': 'Already have an account? ',
     'passwords_dont_match': "Passwords don't match",
+    'minimum_8_characters': "Minimum 8 characters",
 
     // Onboarding stepper
     'step_info': 'Info',
@@ -95,6 +97,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'serving_governorate': 'Serving the entire governorate',
     'serving_area': 'Serving the entire area',
     'serving_all_regions': 'Available in all regions',
+    'service_distance': 'Service distance',
 
     // Upload files step
     'upload_files': 'Upload Files',
@@ -104,6 +107,8 @@ const Map<String, Map<String, String>> kTranslations = {
     'commercial_register': 'COMMERCIAL REGISTER',
     'tap_to_upload': 'Tap to upload',
     'agree_license': 'I agree to the terms & license',
+    'account_type': 'Account Type',
+    'store_front_photo': 'STORE FRONT Photo',
 
     // Verify phone
     'verify_phone_title': 'Verify your phone',
@@ -112,6 +117,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'resend_code': 'Resend code',
     'code_resent': 'Code resent',
     'phone_verified_msg': 'Phone verified — please sign in.',
+    'commercial_register_photo': 'COMMERCIAL REGISTER PHOTO',
 
     // Orders / home
     'your_order': 'Your Orders',
@@ -128,6 +134,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'order_location': 'Order Location',
     'view': 'View',
     'account_not_verified': 'Your account is not verified',
+    'account_verified': 'Your account is verified',
     //Order Details
     'order_details': 'Order Details',
     'loading_location': 'Loading location…',
@@ -180,6 +187,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'logout_msg': 'Are you sure you want to logout?',
     'cancel': 'Cancel',
     'no_Notifications': 'No Notifications',
+    'terms_conditions': 'Terms & Conditions',
     //profile
     'profile': 'Profile',
     'address': 'Address',
@@ -220,6 +228,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'secure_platform_desc': 'جميع المعاملات آمنة',
     'fast_delivery': 'توصيل سريع',
     'fast_delivery_desc': 'احصل على الخدمة بسرعة',
+    'remember_me': 'تذكرني',
 
     // Sign up
     'create_account': 'إنشاء حساب',
@@ -233,6 +242,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'email_invalid': 'أدخل بريدًا إلكترونيًا صالحًا',
     'already_have_account': 'هل لديك حساب بالفعل؟ ',
     'passwords_dont_match': "كلمتا المرور غير متطابقتين",
+    "minimum_8_characters": "الحد الأدنى 8 أحرف",
 
     // Onboarding stepper
     'step_info': 'معلومات',
@@ -272,6 +282,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'serving_governorate': 'أخدم المحافظة بأكملها',
     'serving_area': 'أخدم المنطقة بأكملها',
     'serving_all_regions': 'متاح في جميع المناطق',
+    'service_distance': "مسافة الخدمة",
 
     // Upload files step
     'upload_files': 'رفع الملفات',
@@ -281,6 +292,9 @@ const Map<String, Map<String, String>> kTranslations = {
     'commercial_register': 'السجل التجاري',
     'tap_to_upload': 'اضغط للرفع',
     'agree_license': 'أوافق على الشروط والترخيص',
+    'account_type': 'نوع الحساب',
+    'store_front_photo': "صورة واجهة المحل",
+    'commercial_register_photo': "صورة السجل التجاري",
 
     // Verify phone
     'verify_phone_title': 'تحقق من رقم هاتفك',
@@ -306,6 +320,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'view': 'عرض',
     'no_internet': 'لا يوجد اتصال بالانترنت',
     'account_not_verified': 'حسابك غير مفعل',
+    'account_verified': 'تم التحقق من حسابك',
     //Order Details
     'order_details': 'تفاصيل الطلب',
     'loading_location': 'جاري تحميل الموقع…',
@@ -357,6 +372,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'logout_msg': 'هل انت متأكد من تسجيل الخروج؟',
     'cancel': 'إلغاء',
     'no_Notifications': "لا يوجد إشعارات",
+    'terms_conditions': 'الشروط والأحكام',
     //profile
     'profile': 'الملف الشخصي',
     'address': 'العنوان',

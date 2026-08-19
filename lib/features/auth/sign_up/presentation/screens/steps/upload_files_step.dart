@@ -168,10 +168,7 @@ class UploadFilesStep extends StatelessWidget {
                 // Third photo's label depends on account type; same field
                 // (commercialRegister) either way.
                 _FieldLabel(
-                  (isPerson
-                          ? context.tr("store_front_photo")
-                          : context.tr("commercial_register_photo")) +
-                      " *",
+                  "${isPerson ? context.tr("store_front_photo") : context.tr("commercial_register_photo")} *",
                 ),
                 const SizedBox(height: 8),
                 DashedUploadBox(
