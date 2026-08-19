@@ -76,7 +76,9 @@ class SignInResponse extends Equatable implements BaseRepository {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final signInResponse = SignInResponse.fromJson(response.data);
-
+        logger.i(
+          'Verification Status: ${signInResponse.user?.verificationStatus}',
+        );
         await CacheHelper.saveDataSharedPreference(
           key: CacheKeys.accessToken,
           value: signInResponse.accessToken,
@@ -100,7 +102,10 @@ class SignInResponse extends Equatable implements BaseRepository {
             key: CacheKeys.userModel,
             value: jsonEncode(signInResponse.user!.toJson()),
           );
-
+          await CacheHelper.saveDataSharedPreference(
+            key: CacheKeys.verificationStatus,
+            value: signInResponse.user!.verificationStatus ?? '',
+          );
           // final userPhoto = signInResponse.user!.photo;
           // await CacheHelper.saveDataSharedPreference(
           //   key: CacheKeys.photo,

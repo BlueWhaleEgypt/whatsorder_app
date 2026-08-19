@@ -127,6 +127,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'open_map': 'Open Map',
     'order_location': 'Order Location',
     'view': 'View',
+    'account_not_verified': 'Your account is not verified',
     //Order Details
     'order_details': 'Order Details',
     'loading_location': 'Loading location…',
@@ -304,6 +305,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'order_location': 'موقع الطلب',
     'view': 'عرض',
     'no_internet': 'لا يوجد اتصال بالانترنت',
+    'account_not_verified': 'حسابك غير مفعل',
     //Order Details
     'order_details': 'تفاصيل الطلب',
     'loading_location': 'جاري تحميل الموقع…',

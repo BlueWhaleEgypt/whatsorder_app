@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
+import 'package:whats_order/core/utils/logger.dart';
 import '../../../../../core/routing/named_routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/app_text_field.dart';
@@ -41,16 +41,42 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
+  String normalizePhone(String phone) {
+    phone = phone.trim().replaceAll(' ', '');
+
+    if (phone.startsWith('0')) {
+      return '2$phone';
+    }
+
+    if (phone.startsWith('20')) {
+      return phone;
+    }
+
+    return phone;
+  }
+
   void _onContinue() {
     if (!_formKey.currentState!.validate()) return;
+
+    final phone = normalizePhone(_phoneController.text);
+    logger.d("phone: $phone");
     Navigator.of(context).pushNamed(
       NamedRoutes.onboarding,
-      arguments: {
-        'phone': _phoneController.text.trim(),
-        'password': _passwordController.text,
-      },
+      arguments: {'phone': phone, 'password': _passwordController.text},
     );
   }
+
+  // void _onContinue() {
+
+  //   if (!_formKey.currentState!.validate()) return;
+  //   Navigator.of(context).pushNamed(
+  //     NamedRoutes.onboarding,
+  //     arguments: {
+  //       'phone': _phoneController.text.trim(),
+  //       'password': _passwordController.text,
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -84,32 +110,43 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 const SizedBox(height: 28),
                 AppTextField(
-                  label: context.tr("phone"),
+                  label: context.tr('phone'),
                   required: true,
-                  hint: "2012345****",
+                  hint: context.tr('phone_hint_signin'),
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
-                  maxLength: 12,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(12),
-                  ],
-                  validator: (value) {
-                    final phone = value?.trim() ?? '';
-
-                    if (phone.isEmpty) {
-                      return context.tr("phone_required");
-                    }
-
-                    if (!RegExp(r'^2\d{11}$').hasMatch(phone)) {
-                      return context.tr(
-                        "phone_must_start_with_2_and_contain_exactly_12_digits",
-                      );
-                    }
-
-                    return null;
-                  },
+                  maxLength: 11,
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? context.tr('phone_required')
+                      : null,
                 ),
+                // AppTextField(
+                //   label: context.tr("phone"),
+                //   required: true,
+                //   hint: "2012345****",
+                //   controller: _phoneController,
+                //   keyboardType: TextInputType.phone,
+                //   maxLength: 12,
+                //   inputFormatters: [
+                //     FilteringTextInputFormatter.digitsOnly,
+                //     LengthLimitingTextInputFormatter(12),
+                //   ],
+                //   validator: (value) {
+                //     final phone = value?.trim() ?? '';
+
+                //     if (phone.isEmpty) {
+                //       return context.tr("phone_required");
+                //     }
+
+                //     if (!RegExp(r'^2\d{11}$').hasMatch(phone)) {
+                //       return context.tr(
+                //         "phone_must_start_with_2_and_contain_exactly_12_digits",
+                //       );
+                //     }
+
+                //     return null;
+                //   },
+                // ),
                 const SizedBox(height: 16),
                 PasswordField(
                   label: context.tr("password"),
@@ -140,7 +177,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ).pushReplacementNamed(NamedRoutes.signin),
                     child: RichText(
                       text: TextSpan(
-                        text: context.tr("already_have_account") + " ",
+                        text: "${context.tr("already_have_account")} ",
                         style: const TextStyle(
                           fontFamily: "Cairo",
                           fontSize: 13,

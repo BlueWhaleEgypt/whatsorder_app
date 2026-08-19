@@ -140,7 +140,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         hint: context.tr('phone_hint_signin'),
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
-                        maxLength: 12,
+                        maxLength: 11,
                         validator: (v) => (v == null || v.trim().isEmpty)
                             ? context.tr('phone_required')
                             : null,

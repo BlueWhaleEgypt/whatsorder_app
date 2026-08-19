@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -235,10 +236,21 @@ Neighborhood: ${_neighborhood.text}
             onChanged: _onServiceAreaChanged,
           ),
           const SizedBox(height: 16),
-
           AppTextField(
             controller: _serviceDistance,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+              TextInputFormatter.withFunction((oldValue, newValue) {
+                final value = double.tryParse(newValue.text);
+
+                if (value == null || value <= 50) {
+                  return newValue;
+                }
+
+                return oldValue;
+              }),
+            ],
             label: context.tr("service_distance"),
             hint: "50",
             suffixIcon: Padding(
@@ -252,6 +264,22 @@ Neighborhood: ${_neighborhood.text}
               ),
             ),
           ),
+          // AppTextField(
+          //   controller: _serviceDistance,
+          //   keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          //   label: context.tr("service_distance"),
+          //   hint: "50",
+          //   suffixIcon: Padding(
+          //     padding: const EdgeInsets.only(right: 12),
+          //     child: Center(
+          //       widthFactor: 1.0,
+          //       child: Text(
+          //         "KM",
+          //         style: TextStyle(color: Colors.grey[600], fontSize: 14),
+          //       ),
+          //     ),
+          //   ),
+          // ),
           const SizedBox(height: 28),
           GradientButton(
             label: context.tr("continue"),
@@ -268,19 +296,20 @@ Neighborhood: ${_neighborhood.text}
       _serviceArea = area;
 
       const defaults = {
-        ServiceArea.governorate: 50.0,
-        ServiceArea.area: 10.0,
-        ServiceArea.allRegions: 1000.0,
+        ServiceArea.governorate: 20.0,
+        ServiceArea.area: 7.0,
+        ServiceArea.allRegions: 30.0,
       };
 
-      final defaultDistance = defaults[area]!;
+      // final defaultDistance = defaults[area]!;
 
-      final current = double.tryParse(_serviceDistance.text.trim()) ?? 0;
+      // final current = double.tryParse(_serviceDistance.text.trim()) ?? 0;
 
-      // لو المستخدم كتب رقم أكبر احتفظ بيه
-      final value = current > defaultDistance ? current : defaultDistance;
+      // // لو المستخدم كتب رقم أكبر احتفظ بيه
+      // final value = current > defaultDistance ? current : defaultDistance;
 
-      _serviceDistance.text = value.toStringAsFixed(0);
+      //_serviceDistance.text = value.toStringAsFixed(0);
+      _serviceDistance.text = defaults[area]!.toStringAsFixed(0);
     });
   }
 }

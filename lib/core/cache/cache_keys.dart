@@ -23,4 +23,5 @@ class CacheKeys {
   static const String rememberMe = "rememberMe";
   static const String phone = "phone";
   static const String password = "password";
+  static const String verificationStatus = "verificationStatus";
 }

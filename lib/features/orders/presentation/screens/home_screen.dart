@@ -12,6 +12,7 @@ import 'package:whats_order/core/utils/pdf_export.dart';
 import 'package:whats_order/features/auth/sign_in/data/user_model.dart';
 import 'package:whats_order/features/orders/data/order_model.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_counter.dart';
+import 'package:whats_order/features/orders/presentation/screens/account_verification_screen.dart';
 import 'package:whats_order/features/orders/presentation/screens/widgets/date_picker.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../bloc/orders_bloc.dart';
@@ -210,7 +211,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                         ),
                       ),
-                      // const SizedBox(height: 4),
                     ],
                   ),
                 ),
@@ -289,6 +289,116 @@ class _WelcomeCard extends StatelessWidget {
                   context.tr("welcome_subtitle"),
                   style: const TextStyle(color: Colors.white70, fontSize: 12.5),
                 ),
+                Builder(
+                  builder: (context) {
+                    final verificationStatus =
+                        CacheHelper.getDataFromSharedPreference(
+                          key: CacheKeys.verificationStatus,
+                        );
+
+                    final isVerified =
+                        verificationStatus?.toString().toLowerCase() ==
+                        'verified';
+
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 14),
+                      child: InkWell(
+                        onTap: isVerified
+                            ? null
+                            : () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        const AccountVerificationScreen(),
+                                  ),
+                                );
+                              },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 9,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.22),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isVerified
+                                    ? Icons.check_circle_rounded
+                                    : Icons.error_outline_rounded,
+                                color: isVerified
+                                    ? Colors.greenAccent
+                                    : Colors.orangeAccent,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                isVerified
+                                    ? context.tr("account_verified")
+                                    : context.tr("account_not_verified"),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              if (!isVerified) ...[
+                                const SizedBox(width: 8),
+                                const Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  color: Colors.white,
+                                  size: 12,
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                // GestureDetector(
+                //   onTap: () {
+                //     final status = CacheHelper.getDataFromSharedPreference(
+                //       key: CacheKeys.verificationStatus,
+                //     );
+
+                //     if (status == null ||
+                //         status.toString().toLowerCase() == 'unverified') {
+                //       Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //           builder: (_) => const AccountVerificationScreen(),
+                //         ),
+                //       );
+                //     }
+                //   },
+                //   child: Row(
+                //     mainAxisSize: MainAxisSize.min,
+                //     children: [
+                //       Text(
+                //         CacheHelper.getDataFromSharedPreference(
+                //               key: CacheKeys.verificationStatus,
+                //             ) ??
+                //             'Unverified',
+                //         style: const TextStyle(
+                //           fontSize: 14,
+                //           fontWeight: FontWeight.w600,
+                //         ),
+                //       ),
+                //       const SizedBox(width: 4),
+                //       const Icon(Icons.arrow_forward_ios, size: 12),
+                //     ],
+                //   ),
+                // ),
               ],
             ),
           ),
