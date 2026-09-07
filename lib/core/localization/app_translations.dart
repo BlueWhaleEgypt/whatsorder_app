@@ -78,6 +78,9 @@ const Map<String, Map<String, String>> kTranslations = {
     'your_sector': 'YOUR SECTOR',
     'select_your_sector': 'Select your sector',
     'sectors_load_error': "Couldn't load sectors — tap to retry",
+    'email_is_required': 'Email is required',
+    'enter_a_valid_email': 'Enter a valid email',
+    'sector_is_required': 'Please select a sector',
 
     // Location step
     'your_location': 'Your Location',
@@ -123,6 +126,11 @@ const Map<String, Map<String, String>> kTranslations = {
     'phone_verified_msg': 'Phone verified — please sign in.',
     'commercial_register_photo': 'COMMERCIAL REGISTER PHOTO',
 
+    // Forgot password
+    'Send_OTP': 'Send OTP',
+    'Verify_OTP': 'Verify OTP',
+    'Reset_Password': 'Reset Password',
+
     // Orders / home
     'your_order': 'Your Orders',
     'order_id_label': 'ORDER ID',
@@ -163,6 +171,8 @@ const Map<String, Map<String, String>> kTranslations = {
     '1_hour': '1 hour',
     '2_hours': '2 hours',
     'no_internet': "No internet connection",
+    'offer_sent_successfully': 'Offer sent successfully',
+    'unknown_location': 'Unknown location',
     // Wallet
     'your_wallet': 'Your Wallet',
     'total_balance': 'Total balance',
@@ -172,6 +182,8 @@ const Map<String, Map<String, String>> kTranslations = {
     'order_refund': 'Order refund',
     'order_payment': 'Order payment',
     'payment_successful': 'Payment successful',
+    'payment_cancelled_or_failed': 'Payment cancelled or failed',
+    'no_transactions': 'No transactions yet',
     'enter_amount': 'Enter amount',
     'confirm': 'Confirm',
     'less_than_250': "Minimum amount is 250",
@@ -197,6 +209,8 @@ const Map<String, Map<String, String>> kTranslations = {
     'address': 'Address',
     'sector': 'Sector',
     'sector_name': 'Sector Name',
+    //sms
+    'sms_messages': 'SMS Messages',
 
     // Bottom nav
     'nav_orders': 'Orders',
@@ -267,6 +281,9 @@ const Map<String, Map<String, String>> kTranslations = {
     'your_sector': 'قطاعك',
     'select_your_sector': 'اختر قطاعك',
     'sectors_load_error': 'تعذر تحميل القطاعات — اضغط لإعادة المحاولة',
+    'email_is_required': 'البريد الإلكتروني مطلوب',
+    'enter_a_valid_email': 'أدخل بريدًا إلكترونيًا صالحًا',
+    'sector_is_required': 'يرجى اختيار القطاع',
 
     // Location step
     'your_location': 'موقعك',
@@ -312,6 +329,11 @@ const Map<String, Map<String, String>> kTranslations = {
     'code_resent': 'تم إعادة إرسال الرمز',
     'phone_verified_msg': 'تم التحقق من الهاتف — يرجى تسجيل الدخول.',
 
+    // Forgot password
+    'Send_OTP': 'إرسال الرمز',
+    'Verify_OTP': 'تحقق من الرمز',
+    'Reset_Password': 'إعادة تعيين كلمة المرور',
+
     // Orders / home
     'your_order': 'طلبك',
     'order_id_label': 'رقم الطلب',
@@ -352,6 +374,8 @@ const Map<String, Map<String, String>> kTranslations = {
     '45_minutes': '45 دقيقة',
     '1_hour': '1 ساعة',
     '2_hours': '2 ساعة',
+    'offer_sent_successfully': 'تم إرسال العرض بنجاح',
+    'unknown_location': 'موقع غير معروف',
     // Wallet
     'your_wallet': 'محفظتك',
     'total_balance': 'الرصيد الإجمالي',
@@ -361,6 +385,8 @@ const Map<String, Map<String, String>> kTranslations = {
     'order_refund': 'استرداد الطلب',
     'order_payment': 'دفع الطلب',
     'payment_successful': 'تم الدفع بنجاح',
+    'payment_cancelled_or_failed': 'تم إلغاء الدفع أو فشل',
+    'no_transactions': 'لا توجد معاملات بعد',
     'enter_amount': 'أدخل المبلغ',
     'confirm': 'تأكيد',
     'less_than_250': "أقل قيمة هي 250",
