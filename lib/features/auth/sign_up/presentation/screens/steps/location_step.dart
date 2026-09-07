@@ -76,6 +76,19 @@ class _LocationStepState extends State<LocationStep> {
   }
 
   void _commitAndContinue() {
+    if (_lat == null || _lng == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.tr("location_is_required"))),
+      );
+      return;
+    }
+    if (_serviceArea == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.tr("service_area_is_required"))),
+      );
+      return;
+    }
+
     context.read<OnboardingCubit>().updateLocation(
       governorate: _governorate.text.trim(),
       city: _city.text.trim(),
@@ -137,6 +150,8 @@ class _LocationStepState extends State<LocationStep> {
                 if (placemarks.isNotEmpty) {
                   final place = placemarks.first;
                   logger.i("""
+ _lat = <${location.latitude}>,;
+                _lng = <<${location.longitude}>>;
 Name: ${place.name}
 Street: ${place.street}
 SubLocality: ${place.subLocality}

@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pinput/pinput.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/theme/app_colors.dart';
-import 'package:whats_order/core/utils/logger.dart';
 import 'package:whats_order/core/widgets/gradient_button.dart';
 import 'package:whats_order/features/auth/otp/presentation/bloc/otp_bloc.dart';
 import 'package:whats_order/features/auth/otp/presentation/bloc/otp_event.dart';
@@ -26,6 +25,24 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   int currentStep = 0;
   String? userId;
+  late String _phone;
+
+  @override
+  void initState() {
+    super.initState();
+    _phone = widget.phone;
+    _phoneController.text = widget.phone;
+  }
+
+  String _normalizePhone(String phone) {
+    phone = phone.trim().replaceAll(' ', '');
+
+    if (phone.startsWith('0')) {
+      return '2$phone';
+    }
+
+    return phone;
+  }
 
   @override
   void dispose() {
@@ -121,7 +138,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                 if (currentStep == 0) ...[
                   TextFormField(
-                    controller: TextEditingController(text: widget.phone),
+                    controller: _phoneController,
                     keyboardType: TextInputType.phone,
                     decoration: const InputDecoration(
                       labelText: "Phone Number",
@@ -142,13 +159,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     onPressed: () {
                       if (!_formKey.currentState!.validate()) return;
 
-                      context.read<OtpBloc>().add(SendOtpEvent(widget.phone));
+                      _phone = _normalizePhone(_phoneController.text);
+                      context.read<OtpBloc>().add(SendOtpEvent(_phone));
                     },
                   ),
                 ],
 
                 if (currentStep == 1) ...[
-                  Text("OTP sent to ${widget.phone}"),
+                  Text("OTP sent to $_phone"),
 
                   const SizedBox(height: 20),
                   Directionality(
@@ -162,7 +180,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () {
-                        context.read<OtpBloc>().add(SendOtpEvent(widget.phone));
+                        context.read<OtpBloc>().add(SendOtpEvent(_phone));
                       },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
@@ -189,7 +207,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                       context.read<OtpBloc>().add(
                         VerifyOtpEvent(
-                          phone: widget.phone,
+                          phone: _phone,
                           otp: _otpController.text,
                         ),
                       );
@@ -219,11 +237,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     loading: loading,
                     onPressed: () {
                       if (!_formKey.currentState!.validate()) return;
-                      logger.i("============ ${widget.phone}");
                       context.read<OtpBloc>().add(
                         ForgetPasswordEvent(
                           userId: userId!,
-                          newPassword: widget.phone,
+                          newPassword: _passwordController.text,
                         ),
                       );
                     },

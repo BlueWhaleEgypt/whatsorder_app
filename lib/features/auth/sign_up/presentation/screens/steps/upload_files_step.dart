@@ -109,7 +109,11 @@ class UploadFilesStep extends StatelessWidget {
             prev.submitError != curr.submitError,
         listener: (_, __) {},
         builder: (context, state) {
-          final canSubmit = state.data.isFilesStepValid && !state.isSubmitting;
+          final isLocationValid = state.data.isLocationStepValid;
+          final canSubmit =
+              state.data.isFilesStepValid &&
+              isLocationValid &&
+              !state.isSubmitting;
           final isPerson = state.data.accountType == AccountType.person;
 
           return SingleChildScrollView(
@@ -177,6 +181,14 @@ class UploadFilesStep extends StatelessWidget {
                       _pickImage(context, target: _PickTarget.commercial),
                 ),
 
+                if (!isLocationValid) ...[
+                  const SizedBox(height: 16),
+                  _LocationWarningBanner(
+                    onTap: () =>
+                        context.read<OnboardingCubit>().goToStep(1),
+                  ),
+                ],
+
                 const SizedBox(height: 28),
                 GradientButton(
                   label: context.tr("submit"),
@@ -195,6 +207,41 @@ class UploadFilesStep extends StatelessWidget {
 }
 
 enum _PickTarget { front, back, commercial }
+
+class _LocationWarningBanner extends StatelessWidget {
+  final VoidCallback onTap;
+  const _LocationWarningBanner({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+        decoration: BoxDecoration(
+          color: Colors.orange.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.orange.withOpacity(0.4)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.location_off_outlined, size: 18, color: Colors.orange),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                context.tr("location_and_service_area_required"),
+                style: const TextStyle(fontSize: 12.5, color: AppColors.textDark),
+              ),
+            ),
+            const Icon(Icons.chevron_right, size: 18, color: Colors.orange),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class _FieldLabel extends StatelessWidget {
   final String text;

@@ -262,8 +262,14 @@ class OnboardingData {
       email.trim().isNotEmpty &&
       sectorId.trim().isNotEmpty;
 
+  /// The map pin (latitude/longitude) and a chosen service area are
+  /// required — the API needs coordinates to place the vendor and a
+  /// coverage radius to route orders, and neither is recoverable later.
   bool get isLocationStepValid =>
-      city.trim().isNotEmpty || street.trim().isNotEmpty;
+      (city.trim().isNotEmpty || street.trim().isNotEmpty) &&
+      latitude != null &&
+      longitude != null &&
+      serviceArea != null;
 
   /// Required files differ by account type:
   ///   person  -> ID card front + back + store front photo

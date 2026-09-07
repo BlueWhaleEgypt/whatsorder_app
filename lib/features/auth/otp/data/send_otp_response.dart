@@ -13,9 +13,7 @@ part 'send_otp_response.g.dart';
 class SendOtpResponse extends Equatable implements BaseRepository {
   final String? message;
 
-  const SendOtpResponse({
-    this.message,
-  });
+  const SendOtpResponse({this.message});
 
   factory SendOtpResponse.fromJson(Map<String, dynamic> json) =>
       _$SendOtpResponseFromJson(json);
@@ -25,24 +23,20 @@ class SendOtpResponse extends Equatable implements BaseRepository {
   @override
   Future<Either<Failure, BaseRepository>> getData(dynamic request) async {
     try {
+      logger.i("<<<<<< Send OTP ${request}");
+
       final response = await DioHelper.postData(
         url: "${EndPoints.baseUrl}${EndPoints.epSendOtp}",
-        query: {
-          "phone": request,
-        },
+        query: {"phone": request},
       );
 
       logger.i("<<<<<< Send OTP >>>>>> ${response.data}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return Right(
-          SendOtpResponse.fromJson(response.data),
-        );
+        return Right(SendOtpResponse.fromJson(response.data));
       }
 
-      return Left(
-        ServerFailure("Error ${response.statusCode}"),
-      );
+      return Left(ServerFailure("Error ${response.statusCode}"));
     } catch (e) {
       logger.e(e);
       return Left(ServerFailure(e.toString()));

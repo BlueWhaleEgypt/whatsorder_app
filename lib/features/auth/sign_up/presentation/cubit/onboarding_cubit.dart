@@ -190,6 +190,10 @@ class OnboardingCubit extends Cubit<OnboardingState> {
       if (data.commercialRegister == null) return;
     }
 
+    // Guard: the API needs coordinates and a service area to place the
+    // vendor and route orders — never fire the request without them.
+    if (!data.isLocationStepValid) return;
+
     emit(state.copyWith(isSubmitting: true, clearError: true));
     final fcmToken = await FirebaseMessaging.instance.getToken() ?? '';
     // Build the full request from accumulated wizard data.
