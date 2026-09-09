@@ -142,9 +142,15 @@ class _SignInScreenState extends State<SignInScreen> {
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
                         maxLength: 11,
-                        validator: (v) => (v == null || v.trim().isEmpty)
-                            ? context.tr('phone_required')
-                            : null,
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) {
+                            return context.tr('phone_required');
+                          }
+                          if (v.trim().length < 11) {
+                            return context.tr('phone_invalid_length');
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 16),
                       PasswordField(
