@@ -153,10 +153,11 @@ class _SignInScreenState extends State<SignInScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
-                      PasswordField(
+                      PasswordField( 
                         label: context.tr('password'),
                         hint: context.tr('password_hint'),
                         controller: _passwordController,
+                      
                         validator: (v) => (v == null || v.isEmpty)
                             ? context.tr('password_required')
                             : null,
