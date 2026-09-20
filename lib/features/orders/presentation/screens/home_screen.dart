@@ -194,6 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     children: [
                       _WelcomeCard(),
+                      const _InactiveAccountBanner(),
                       const SizedBox(height: 10),
 
                       Align(
@@ -251,6 +252,13 @@ class _HomeScreenState extends State<HomeScreen> {
 class _WelcomeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final user = UserModel.fromJson(
+      jsonDecode(
+        CacheHelper.getDataFromSharedPreference(key: CacheKeys.userModel) ??
+            '{}',
+      ),
+    );
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -277,7 +285,7 @@ class _WelcomeCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "${context.tr("welcome")} ${UserModel.fromJson(jsonDecode(CacheHelper.getDataFromSharedPreference(key: CacheKeys.userModel) ?? '{}')).firstName ?? 'UserName'}",
+                  "${context.tr("welcome")} ${user.firstName ?? 'UserName'}",
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -331,12 +339,8 @@ class _WelcomeCard extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                isVerified
-                                    ? Icons.check_circle_rounded
-                                    : Icons.error_outline_rounded,
-                                color: isVerified
-                                    ? Colors.greenAccent
-                                    : Colors.orangeAccent,
+                                isVerified ? Icons.check_circle_rounded : null,
+                                color: isVerified ? Colors.greenAccent : null,
                                 size: 16,
                               ),
                               const SizedBox(width: 8),
@@ -365,40 +369,6 @@ class _WelcomeCard extends StatelessWidget {
                     );
                   },
                 ),
-                // GestureDetector(
-                //   onTap: () {
-                //     final status = CacheHelper.getDataFromSharedPreference(
-                //       key: CacheKeys.verificationStatus,
-                //     );
-
-                //     if (status == null ||
-                //         status.toString().toLowerCase() == 'unverified') {
-                //       Navigator.push(
-                //         context,
-                //         MaterialPageRoute(
-                //           builder: (_) => const AccountVerificationScreen(),
-                //         ),
-                //       );
-                //     }
-                //   },
-                //   child: Row(
-                //     mainAxisSize: MainAxisSize.min,
-                //     children: [
-                //       Text(
-                //         CacheHelper.getDataFromSharedPreference(
-                //               key: CacheKeys.verificationStatus,
-                //             ) ??
-                //             'Unverified',
-                //         style: const TextStyle(
-                //           fontSize: 14,
-                //           fontWeight: FontWeight.w600,
-                //         ),
-                //       ),
-                //       const SizedBox(width: 4),
-                //       const Icon(Icons.arrow_forward_ios, size: 12),
-                //     ],
-                //   ),
-                // ),
               ],
             ),
           ),
@@ -448,6 +418,57 @@ class _WelcomeCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _InactiveAccountBanner extends StatelessWidget {
+  const _InactiveAccountBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final user = UserModel.fromJson(
+      jsonDecode(
+        CacheHelper.getDataFromSharedPreference(key: CacheKeys.userModel) ??
+            '{}',
+      ),
+    );
+
+    if (user.activation ?? true) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFDECEA),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFF5C6C2)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.error_outline_rounded,
+              color: Color(0xFFC0392B),
+              size: 18,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                context.tr("account_inactive_banner"),
+                style: const TextStyle(
+                  color: Color(0xFFC0392B),
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  height: 1.35,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

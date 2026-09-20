@@ -41,7 +41,6 @@ class SmsMessagesResponse extends Equatable implements BaseRepository {
       final selectedDate = request is DateTime ? request : DateTime.now();
 
       final today = DateFormat('yyyy-MM-dd').format(selectedDate);
-      logger.i("<<<<<<<<<<< Today >>>>>>>>> $today");
       final response = await DioHelper.getData(
         url: "${EndPoints.baseUrl}${EndPoints.epSmsMessages}",
         query: {"vendorId": user.id, "day": today},

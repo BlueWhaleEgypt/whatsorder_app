@@ -57,8 +57,6 @@ class SignInResponse extends Equatable implements BaseRepository {
   @override
   Future<Either<Failure, BaseRepository>> getData(dynamic request) async {
     final signInRequest = request as SignInRequest;
-    logger.w("${request.password}===============");
-    logger.w("${request.phone}===============");
 
     try {
       final response = await DioHelper.postData(
@@ -66,7 +64,7 @@ class SignInResponse extends Equatable implements BaseRepository {
         body: signInRequest.toJson(),
       );
 
-      logger.i("<<<<<<<<<<< SignIn >>>>>>>>> ${response.data}");
+      logger.i("<<<<<<<<<<< SignIn >>>>>>>>> ${response.data.toString()}");
 
       if (response.data is Map<String, dynamic> &&
           response.data['message'] != null &&
@@ -79,6 +77,7 @@ class SignInResponse extends Equatable implements BaseRepository {
         logger.i(
           'Verification Status: ${signInResponse.user?.verificationStatus}',
         );
+        logger.i('activation Status: ${signInResponse.user?.activation}');
         await CacheHelper.saveDataSharedPreference(
           key: CacheKeys.accessToken,
           value: signInResponse.accessToken,

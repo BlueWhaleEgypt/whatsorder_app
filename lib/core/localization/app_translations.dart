@@ -148,6 +148,8 @@ const Map<String, Map<String, String>> kTranslations = {
     'view': 'View',
     'account_not_verified': 'Your account is not verified',
     'account_verified': 'Your account is verified',
+    'account_inactive_banner':
+        "Account is inactive. You won't receive orders. Contact support at 01556132000",
     //Order Details
     'order_details': 'Order Details',
     'loading_location': 'Loading location…',
@@ -351,8 +353,10 @@ const Map<String, Map<String, String>> kTranslations = {
     'order_location': 'موقع الطلب',
     'view': 'عرض',
     'no_internet': 'لا يوجد اتصال بالانترنت',
-    'account_not_verified': 'حسابك غير مفعل',
-    'account_verified': 'تم التحقق من حسابك',
+    'account_not_verified': 'حسابك غير موثق',
+    'account_verified': 'تم توثيق حسابك',
+    'account_inactive_banner':
+        'الحساب غير مفعل. لن تصلك طلبات جديدة. تواصل مع الدعم على 01556132000',
     //Order Details
     'order_details': 'تفاصيل الطلب',
     'loading_location': 'جاري تحميل الموقع…',

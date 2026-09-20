@@ -1,7 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dartz/dartz.dart';
-import 'package:whats_order/core/utils/logger.dart';
 import '../../../../../base/base_repository.dart';
 import '../../../../../core/error/failures.dart';
 import '../../../../../core/network/network_info.dart';
@@ -32,11 +30,8 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
         'SignInResponse',
       ).getData(event.request);
 
-      logger.w("${event.request.password}===============");
-      logger.w("${event.request.phone}===============");
-      debugPrint(">>>>>>>>>>>before$failureOrResult");
+      
       emit(_mapFailureOrPostsToSigInState(failureOrResult));
-      debugPrint(">>>>>>>>>>>after");
     });
   }
 
