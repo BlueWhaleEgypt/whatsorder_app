@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:whats_order/core/localization/locale_cubit.dart';
 import 'package:whats_order/features/auth/otp/presentation/bloc/otp_bloc.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_bloc.dart';
+import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
 import 'package:whats_order/features/wallet/presentation/bloc/transaction_bloc.dart';
 import 'package:whats_order/features/wallet/presentation/bloc/wallet_bloc.dart';
 import '../core/network/network_info.dart';
@@ -30,6 +31,7 @@ Future<void> init() async {
   sl.registerFactory(() => SignInBloc(sl()));
   sl.registerFactory(() => SignUpBloc(sl()));
   sl.registerFactory(() => OrdersBloc(sl()));
+  sl.registerFactory(() => VendorBloc(sl()));
   sl.registerFactory(() => OtpBloc(sl()));
   sl.registerFactory(() => WalletBloc(sl()));
   sl.registerFactory(() => TransactionBloc(sl()));

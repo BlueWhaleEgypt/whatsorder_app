@@ -7,6 +7,8 @@ import 'package:whats_order/core/utils/logger.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_counter.dart';
 import 'package:whats_order/features/orders/presentation/bloc/orders_bloc.dart';
 import 'package:whats_order/features/orders/presentation/bloc/orders_event.dart';
+import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
+import 'package:whats_order/features/orders/presentation/bloc/vendor_event.dart';
 import 'package:whats_order/features/wallet/presentation/bloc/transaction_bloc.dart';
 import 'package:whats_order/features/wallet/presentation/bloc/wallet_bloc.dart';
 import 'package:whats_order/features/wallet/presentation/bloc/wallet_event.dart';
@@ -42,6 +44,9 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
       providers: [
         BlocProvider(
           create: (_) => sl<OrdersBloc>()..add(const FetchOrdersEvent()),
+        ),
+        BlocProvider(
+          create: (_) => sl<VendorBloc>()..add(const FetchVendorEvent()),
         ),
       ],
       child: const HomeScreen(),
@@ -256,6 +261,7 @@ class _FloatingNavBar extends StatelessWidget {
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () => onTap(i),
+
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

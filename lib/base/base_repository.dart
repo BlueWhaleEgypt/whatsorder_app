@@ -3,6 +3,7 @@ import 'package:whats_order/features/auth/otp/data/forget_password_response.dart
 import 'package:whats_order/features/auth/otp/data/send_otp_response.dart';
 import 'package:whats_order/features/auth/otp/data/verify_otp_response.dart';
 import 'package:whats_order/features/orders/data/makeofferresponse.dart';
+import 'package:whats_order/features/orders/data/vendor_response.dart';
 import 'package:whats_order/features/orders/notification/data/PressNotificationResponse.dart';
 import 'package:whats_order/features/orders/notification/data/notification_response.dart';
 import 'package:whats_order/features/orders/notification/data/press_sms_response.dart';
@@ -56,6 +57,8 @@ abstract class BaseRepository {
     if (responseType == 'PressNotificationResponse')
       return const PressNotificationResponse();
     if (responseType == 'PressSmsResponse') return const PressSmsResponse();
+        if (responseType == 'VendorResponse') return const VendorResponse();
+
     // Add new feature responses above this line, e.g.:
     // if (responseType == 'WalletResponse') return const WalletResponse();
 

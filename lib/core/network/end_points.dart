@@ -28,7 +28,8 @@ class EndPoints {
   static const String epOrders = "/api/order/getAll";
   static const String epOrderDetails = "/api/orders/details";
   static const String epVendorOrders = "/api/order/getVendorOrders";
-  // static const String epGetVendorOrdersById = "/api/order/getVendorOrdersById";
+  static const String epGetVendorOrdersById = "/api/order/getVendorOrdersById";
+  static const String epGetVendorById = "/api/auth/vendors";
   static const String epFindAllByVendorIdAndOrderDate =
       "/api/order/findAllByVendorIdAndOrderDate";
   static const String epWalletByVendor = "/api/wallet/by-vendor";

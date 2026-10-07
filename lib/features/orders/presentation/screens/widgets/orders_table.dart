@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
@@ -32,9 +33,20 @@ class OrdersTable extends StatelessWidget {
         Expanded(
           child: orders.isEmpty
               ? Center(
-                  child: Text(
-                    context.tr("no_orders_yet"),
-                    style: AppTextStyles.tableHeader12,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        CupertinoIcons.cube_box,
+                        size: 55,
+                        color: Color(0xFFB0C4BE),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        context.tr("no_orders_yet"),
+                        style: AppTextStyles.tableHeader12,
+                      ),
+                    ],
                   ),
                 )
               : ListView.separated(

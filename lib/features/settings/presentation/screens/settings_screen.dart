@@ -51,7 +51,8 @@ class SettingsScreen extends StatelessWidget {
                   icon: Icons.language_outlined,
                   label: context.tr('language'),
                   trailing: context.tr('language_label'),
-                  onTap: () => context.read<LocaleCubit>().toggle(),
+                  onTap: () => _showLanguageDialog(context),
+                  // onTap: () => context.read<LocaleCubit>().toggle(),
                 ),
                 ValueListenableBuilder<int>(
                   valueListenable: NotificationCounter.notificationCount,
@@ -284,4 +285,41 @@ class _SettingsTile extends StatelessWidget {
             ),
     );
   }
+}
+
+void _showLanguageDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (dialogContext) {
+      return AlertDialog(
+        title: Text(context.tr('language'), style: AppTextStyles.heading18),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Text('🇸🇦', style: TextStyle(fontSize: 20)),
+              title: const Text('العربية'),
+              onTap: () {
+                Navigator.pop(dialogContext);
+
+                // لو اللغة الحالية English
+                context.read<LocaleCubit>().toggle();
+              },
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Text('🇬🇧', style: TextStyle(fontSize: 20)),
+              title: const Text('English'),
+              onTap: () {
+                Navigator.pop(dialogContext);
+
+                // لو اللغة الحالية Arabic
+                context.read<LocaleCubit>().toggle();
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }

@@ -7,11 +7,13 @@ import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/routing/named_routes.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
-import 'package:whats_order/core/utils/logger.dart';
 import 'package:whats_order/core/utils/pdf_export.dart';
 import 'package:whats_order/features/auth/sign_in/data/user_model.dart';
 import 'package:whats_order/features/orders/data/order_model.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_counter.dart';
+import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
+import 'package:whats_order/features/orders/presentation/bloc/vendor_event.dart';
+import 'package:whats_order/features/orders/presentation/bloc/vendor_state.dart';
 import 'package:whats_order/features/orders/presentation/screens/account_verification_screen.dart';
 import 'package:whats_order/features/orders/presentation/screens/widgets/date_picker.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -177,11 +179,13 @@ class _HomeScreenState extends State<HomeScreen> {
         child: RefreshIndicator(
           color: AppColors.primaryGreen,
           onRefresh: () async {
-            final bloc = context.read<OrdersBloc>();
+            final ordersBloc = context.read<OrdersBloc>();
+            final vendorBloc = context.read<VendorBloc>();
 
-            bloc.add(const FetchOrdersEvent());
+            ordersBloc.add(const FetchOrdersEvent());
+            vendorBloc.add(const FetchVendorEvent());
 
-            await bloc.stream.firstWhere(
+            await ordersBloc.stream.firstWhere(
               (state) => state is! LoadingOrdersState,
             );
           },
@@ -194,7 +198,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     children: [
                       _WelcomeCard(),
-                      const _InactiveAccountBanner(),
+                      //const _InactiveAccountBanner(),
+                      BlocBuilder<VendorBloc, VendorState>(
+                        builder: (context, state) {
+                          if (state is VendorLoaded) {
+                            return _InactiveAccountBanner(
+                              activation:
+                                  state.vendorResponse.vendor?.activation,
+                            );
+                          }
+
+                          return const SizedBox.shrink();
+                        },
+                      ),
                       const SizedBox(height: 10),
 
                       Align(
@@ -227,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
 
                       if (state is LoadedOrdersState) {
-                        logger.w(state.response.orders);
+                        // logger.w(state.response.orders);
 
                         return OrdersTable(orders: state.response.orders);
                       }
@@ -297,78 +313,152 @@ class _WelcomeCard extends StatelessWidget {
                   context.tr("welcome_subtitle"),
                   style: const TextStyle(color: Colors.white70, fontSize: 12.5),
                 ),
-                Builder(
-                  builder: (context) {
-                    final verificationStatus =
-                        CacheHelper.getDataFromSharedPreference(
-                          key: CacheKeys.verificationStatus,
-                        );
+                BlocBuilder<VendorBloc, VendorState>(
+                  builder: (context, state) {
+                    if (state is VendorLoaded) {
+                      final verificationStatus =
+                          state.vendorResponse.vendor?.verificationStatus;
 
-                    final isVerified =
-                        verificationStatus?.toString().toLowerCase() ==
-                        'verified';
+                      final isVerified = verificationStatus == 'Verified';
 
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 14),
-                      child: InkWell(
-                        onTap: isVerified
-                            ? null
-                            : () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        const AccountVerificationScreen(),
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 14),
+                        child: InkWell(
+                          onTap: isVerified
+                              ? null
+                              : () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const AccountVerificationScreen(),
+                                    ),
+                                  );
+                                },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 9,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.22),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (isVerified) ...[
+                                  const Icon(
+                                    Icons.check_circle_rounded,
+                                    color: Colors.greenAccent,
+                                    size: 16,
                                   ),
-                                );
-                              },
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 9,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.22),
+                                  const SizedBox(width: 8),
+                                ],
+                                Text(
+                                  isVerified
+                                      ? context.tr("account_verified")
+                                      : context.tr("account_not_verified"),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                if (!isVerified) ...[
+                                  const SizedBox(width: 8),
+                                  const Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    color: Colors.white,
+                                    size: 12,
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                isVerified ? Icons.check_circle_rounded : null,
-                                color: isVerified ? Colors.greenAccent : null,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                isVerified
-                                    ? context.tr("account_verified")
-                                    : context.tr("account_not_verified"),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              if (!isVerified) ...[
-                                const SizedBox(width: 8),
-                                const Icon(
-                                  Icons.arrow_forward_ios_rounded,
-                                  color: Colors.white,
-                                  size: 12,
-                                ),
-                              ],
-                            ],
-                          ),
                         ),
-                      ),
-                    );
+                      );
+                    }
+
+                    return const SizedBox.shrink();
                   },
                 ),
+                // Builder(
+                //   builder: (context) {
+                //     final verificationStatus =
+                //         CacheHelper.getDataFromSharedPreference(
+                //           key: CacheKeys.verificationStatus,
+                //         );
+
+                //     final isVerified =
+                //         verificationStatus?.toString().toLowerCase() ==
+                //         'verified';
+
+                //     return Padding(
+                //       padding: const EdgeInsets.only(top: 14),
+                //       child: InkWell(
+                //         onTap: isVerified
+                //             ? null
+                //             : () {
+                //                 Navigator.push(
+                //                   context,
+                //                   MaterialPageRoute(
+                //                     builder: (_) =>
+                //                         const AccountVerificationScreen(),
+                //                   ),
+                //                 );
+                //               },
+                //         borderRadius: BorderRadius.circular(12),
+                //         child: Container(
+                //           padding: const EdgeInsets.symmetric(
+                //             horizontal: 12,
+                //             vertical: 9,
+                //           ),
+                //           decoration: BoxDecoration(
+                //             color: Colors.white.withOpacity(0.12),
+                //             borderRadius: BorderRadius.circular(12),
+                //             border: Border.all(
+                //               color: Colors.white.withOpacity(0.22),
+                //             ),
+                //           ),
+                //           child: Row(
+                //             mainAxisSize: MainAxisSize.min,
+                //             children: [
+                //               Icon(
+                //                 isVerified ? Icons.check_circle_rounded : null,
+                //                 color: isVerified ? Colors.greenAccent : null,
+                //                 size: 16,
+                //               ),
+                //               const SizedBox(width: 8),
+                //               Text(
+                //                 isVerified
+                //                     ? context.tr("account_verified")
+                //                     : context.tr("account_not_verified"),
+                //                 style: const TextStyle(
+                //                   color: Colors.white,
+                //                   fontSize: 12,
+                //                   fontWeight: FontWeight.w700,
+                //                 ),
+                //               ),
+                //               if (!isVerified) ...[
+                //                 const SizedBox(width: 8),
+                //                 const Icon(
+                //                   Icons.arrow_forward_ios_rounded,
+                //                   color: Colors.white,
+                //                   size: 12,
+                //                 ),
+                //               ],
+                //             ],
+                //           ),
+                //         ),
+                //       ),
+                //     );
+                //   },
+                // ),
               ],
             ),
           ),
@@ -424,18 +514,15 @@ class _WelcomeCard extends StatelessWidget {
 }
 
 class _InactiveAccountBanner extends StatelessWidget {
-  const _InactiveAccountBanner();
+  final bool? activation;
+
+  const _InactiveAccountBanner({required this.activation});
 
   @override
   Widget build(BuildContext context) {
-    final user = UserModel.fromJson(
-      jsonDecode(
-        CacheHelper.getDataFromSharedPreference(key: CacheKeys.userModel) ??
-            '{}',
-      ),
-    );
-
-    if (user.activation ?? true) return const SizedBox.shrink();
+    if (activation != false) {
+      return const SizedBox.shrink();
+    }
 
     return Padding(
       padding: const EdgeInsets.only(top: 10),
@@ -473,6 +560,54 @@ class _InactiveAccountBanner extends StatelessWidget {
     );
   }
 }
+// class _InactiveAccountBanner extends StatelessWidget {
+//   const _InactiveAccountBanner();
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final bool? vendorActivation = CacheHelper.getDataFromSharedPreference(
+//       key: CacheKeys.vendorActivation,
+//     );
+
+//     if (vendorActivation != false) {
+//       return const SizedBox.shrink();
+//     }
+//     return Padding(
+//       padding: const EdgeInsets.only(top: 10),
+//       child: Container(
+//         width: double.infinity,
+//         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+//         decoration: BoxDecoration(
+//           color: const Color(0xFFFDECEA),
+//           borderRadius: BorderRadius.circular(12),
+//           border: Border.all(color: const Color(0xFFF5C6C2)),
+//         ),
+//         child: Row(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             const Icon(
+//               Icons.error_outline_rounded,
+//               color: Color(0xFFC0392B),
+//               size: 18,
+//             ),
+//             const SizedBox(width: 10),
+//             Expanded(
+//               child: Text(
+//                 context.tr("account_inactive_banner"),
+//                 style: const TextStyle(
+//                   color: Color(0xFFC0392B),
+//                   fontSize: 12.5,
+//                   fontWeight: FontWeight.w600,
+//                   height: 1.35,
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 class _OrderSearchDelegate extends SearchDelegate<OrderModel?> {
   final List<OrderModel> orders;

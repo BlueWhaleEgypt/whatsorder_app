@@ -14,6 +14,7 @@ class LoadingOrdersState extends OrdersState {}
 
 class LoadedOrdersState extends OrdersState {
   final OrdersResponse response;
+  
 
   const LoadedOrdersState(this.response);
 

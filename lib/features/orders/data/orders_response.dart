@@ -41,31 +41,58 @@ class OrdersResponse extends Equatable implements BaseRepository {
   @override
   Future<Either<Failure, BaseRepository>> getData(dynamic request) async {
     try {
+      // final user = UserModel.fromJson(
+      //   jsonDecode(
+      //     CacheHelper.getDataFromSharedPreference(key: CacheKeys.userModel) ??
+      //         '{}',
+      //   ),
+      // );
+      // logger.i("<<<<<<<<<<< User ID >>>>>>>>> ${user.id}");
+
+      // final selectedDate = request is DateTime ? request : DateTime.now();
+
+      // final today = DateFormat('yyyy-MM-dd').format(selectedDate);
+
+      // final response = await DioHelper.getData(
+      //   url: "${EndPoints.baseUrl}${EndPoints.epFindAllByVendorIdAndOrderDate}",
+      //   query: {
+      //     // "id": "1196d012-899f-49ae-b26c-ee5682cf434f",
+      //     // "day": "2026-06-16",
+      //     "id": "${user.id}",
+      //     "day": "$today",
+      //   },
+      // );
       final user = UserModel.fromJson(
         jsonDecode(
           CacheHelper.getDataFromSharedPreference(key: CacheKeys.userModel) ??
               '{}',
         ),
       );
-      logger.i("<<<<<<<<<<< User ID >>>>>>>>> ${user.id}");
-     
-      final selectedDate = request is DateTime ? request : DateTime.now();
 
-      final today = DateFormat('yyyy-MM-dd').format(selectedDate);
+      final selectedDate = request is DateTime ? request : null;
 
-      final response = await DioHelper.getData(
-        url: "${EndPoints.baseUrl}${EndPoints.epFindAllByVendorIdAndOrderDate}",
-        query: {
-          // "id": "1196d012-899f-49ae-b26c-ee5682cf434f",
-          // "day": "2026-06-16",
-          "id": "${user.id}",
-          "day": "$today",
-        },
-      );
-      logger.i("<<<<<<<<<<< Response >>>>>>>>> ${response.data}");
+      final String url;
+
+      if (selectedDate == null) {
+        // First load → ALL orders
+        url = "${EndPoints.baseUrl}${EndPoints.epGetVendorOrdersById}";
+      } else {
+        // Date selected → orders for selected day
+        url =
+            "${EndPoints.baseUrl}${EndPoints.epFindAllByVendorIdAndOrderDate}";
+      }
+
+      final Map<String, dynamic> query = {"id": "${user.id}"};
+
+      if (selectedDate != null) {
+        query["day"] = DateFormat('yyyy-MM-dd').format(selectedDate);
+      }
+
+      final response = await DioHelper.getData(url: url, query: query);
+      // logger.i("<<<<<<<<<<< Response >>>>>>>>> ${response.data}");
       if (response.statusCode == 200) {
         final ordersResponse = OrdersResponse.fromJson(response.data);
-        logger.i(response.data);
+        // logger.i(response.data);
         if (ordersResponse.orders.isNotEmpty) {
           await CacheHelper.saveDataSharedPreference(
             key: CacheKeys.vendorId,
