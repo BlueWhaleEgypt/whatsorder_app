@@ -1,9 +1,10 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:whats_order/core/constants/app_assets.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/routing/named_routes.dart';
-import 'package:whats_order/core/utils/logger.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_counter.dart';
 import 'package:whats_order/features/orders/presentation/bloc/orders_bloc.dart';
 import 'package:whats_order/features/orders/presentation/bloc/orders_event.dart';
@@ -96,11 +97,11 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
     NotificationCounter.loadFromCache();
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      logger.i("========== FOREGROUND MESSAGE ==========");
-      logger.i("Message ID: ${message.messageId}");
-      logger.i("Title: ${message.notification?.title}");
-      logger.i("Body: ${message.notification?.body}");
-      logger.i("Data: ${message.data}");
+      // logger.i("========== FOREGROUND MESSAGE ==========");
+      // logger.i("Message ID: ${message.messageId}");
+      // logger.i("Title: ${message.notification?.title}");
+      // logger.i("Body: ${message.notification?.body}");
+      // logger.i("Data: ${message.data}");
 
       final title = message.data['title'] ?? message.notification?.title ?? '';
 
@@ -112,11 +113,11 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      logger.i("========== OPENED APP FROM NOTIFICATION ==========");
-      logger.i("Message ID: ${message.messageId}");
-      logger.i("Title: ${message.notification?.title}");
-      logger.i("Body: ${message.notification?.body}");
-      logger.i("Data: ${message.data}");
+      // logger.i("========== OPENED APP FROM NOTIFICATION ==========");
+      // logger.i("Message ID: ${message.messageId}");
+      // logger.i("Title: ${message.notification?.title}");
+      // logger.i("Body: ${message.notification?.body}");
+      // logger.i("Data: ${message.data}");
 
       _handleNotification(message);
     });
@@ -159,11 +160,11 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
 
     if (message == null) return;
 
-    logger.i("========== INITIAL MESSAGE ==========");
-    logger.i("Message ID: ${message.messageId}");
-    logger.i("Title: ${message.notification?.title}");
-    logger.i("Body: ${message.notification?.body}");
-    logger.i("Data: ${message.data}");
+    // logger.i("========== INITIAL MESSAGE ==========");
+    // logger.i("Message ID: ${message.messageId}");
+    // logger.i("Title: ${message.notification?.title}");
+    // logger.i("Body: ${message.notification?.body}");
+    // logger.i("Data: ${message.data}");
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _handleNotification(message);
@@ -173,18 +174,9 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final items = [
-      _NavItemData(
-        icon: Icons.shopping_bag_outlined,
-        label: context.tr('nav_orders'),
-      ),
-      _NavItemData(
-        icon: Icons.account_balance_wallet_outlined,
-        label: context.tr('nav_wallet'),
-      ),
-      _NavItemData(
-        icon: Icons.settings_outlined,
-        label: context.tr('nav_settings'),
-      ),
+      _NavItemData(icon: AppAssets.orders, label: context.tr('nav_orders')),
+      _NavItemData(icon: AppAssets.wallet, label: context.tr('nav_wallet')),
+      _NavItemData(icon: AppAssets.settings, label: context.tr('nav_settings')),
     ];
 
     return Scaffold(
@@ -217,7 +209,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
 }
 
 class _NavItemData {
-  final IconData icon;
+  final String icon;
   final String label;
 
   const _NavItemData({required this.icon, required this.label});
@@ -240,7 +232,7 @@ class _FloatingNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
@@ -273,13 +265,17 @@ class _FloatingNavBar extends StatelessWidget {
                         : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
+                  child: SvgPicture.asset(
                     item.icon,
-                    color: selected ? _activeColor : _inactiveColor,
-                    size: 22,
-                  ),
+                    width: 22,
+                    height: 22,
+                    colorFilter: ColorFilter.mode(
+                      selected ? _activeColor : _inactiveColor,
+                      BlendMode.srcIn,
+                    ),
+                  ),                 
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   item.label,
                   style: TextStyle(

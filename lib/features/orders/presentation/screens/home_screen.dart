@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:whats_order/core/cache/cache_helper.dart';
 import 'package:whats_order/core/cache/cache_keys.dart';
+import 'package:whats_order/core/constants/app_assets.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/routing/named_routes.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
@@ -76,13 +78,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    const CircleAvatar(
-                      radius: 16,
-                      backgroundColor: AppColors.primaryGreen,
-                      child: Icon(
-                        Icons.notifications_none_rounded,
-                        color: Colors.white,
-                        size: 16,
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: const BoxDecoration(
+                        color: AppColors.primaryGreenTint,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: SvgPicture.asset(
+                          AppAssets.ring,
+                          width: 16,
+                          height: 16,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                        ),
                       ),
                     ),
                     if (count > 0)
@@ -126,10 +138,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    const CircleAvatar(
-                      radius: 16,
-                      backgroundColor: AppColors.primaryGreen,
-                      child: Icon(Icons.message, color: Colors.white, size: 16),
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: const BoxDecoration(
+                        color: AppColors.primaryGreenTint,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: SvgPicture.asset(
+                          AppAssets.chat,
+                          width: 16,
+                          height: 16,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      ),
                     ),
                     if (count > 0)
                       Positioned(
@@ -165,10 +191,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
           GestureDetector(
             onTap: () => Navigator.pushNamed(context, NamedRoutes.profile),
-            child: const CircleAvatar(
-              radius: 16,
-              backgroundColor: AppColors.primaryGreen,
-              child: Icon(Icons.person, color: Colors.white, size: 16),
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: const BoxDecoration(
+                color: AppColors.primaryGreenTint,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: SvgPicture.asset(
+                  AppAssets.person,
+                  width: 16,
+                  height: 16,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
             ),
           ),
 
@@ -268,19 +308,21 @@ class _HomeScreenState extends State<HomeScreen> {
 class _WelcomeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final user = UserModel.fromJson(
-      jsonDecode(
-        CacheHelper.getDataFromSharedPreference(key: CacheKeys.userModel) ??
-            '{}',
-      ),
+    // final user = UserModel.fromJson(
+    //   jsonDecode(
+    //     CacheHelper.getDataFromSharedPreference(key: CacheKeys.userModel) ??
+    //         '{}',
+    //   ),
+    // );
+    final user = CacheHelper.getDataFromSharedPreference(
+      key: CacheKeys.firstName,
     );
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppColors.primaryGreen, AppColors.primaryGreenDark],
+          colors: [AppColors.primaryGreenShade, AppColors.primaryGreenTint],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -301,7 +343,7 @@ class _WelcomeCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "${context.tr("welcome")} ${user.firstName ?? 'UserName'}",
+                  "${context.tr("welcome")} ${user ?? 'UserName'}",
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -320,7 +362,6 @@ class _WelcomeCard extends StatelessWidget {
                           state.vendorResponse.vendor?.verificationStatus;
 
                       final isVerified = verificationStatus == 'Verified';
-
                       return Padding(
                         padding: const EdgeInsets.only(top: 14),
                         child: InkWell(
@@ -352,10 +393,24 @@ class _WelcomeCard extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 if (isVerified) ...[
-                                  const Icon(
-                                    Icons.check_circle_rounded,
-                                    color: Colors.greenAccent,
-                                    size: 16,
+                                  Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.border,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: SvgPicture.asset(
+                                        AppAssets.verified,
+                                        width: 20,
+                                        height: 20,
+
+                                        colorFilter: const ColorFilter.mode(
+                                          Color.fromARGB(255, 0, 136, 214),
+                                          BlendMode.srcIn,
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                   const SizedBox(width: 8),
                                 ],
@@ -387,78 +442,6 @@ class _WelcomeCard extends StatelessWidget {
                     return const SizedBox.shrink();
                   },
                 ),
-                // Builder(
-                //   builder: (context) {
-                //     final verificationStatus =
-                //         CacheHelper.getDataFromSharedPreference(
-                //           key: CacheKeys.verificationStatus,
-                //         );
-
-                //     final isVerified =
-                //         verificationStatus?.toString().toLowerCase() ==
-                //         'verified';
-
-                //     return Padding(
-                //       padding: const EdgeInsets.only(top: 14),
-                //       child: InkWell(
-                //         onTap: isVerified
-                //             ? null
-                //             : () {
-                //                 Navigator.push(
-                //                   context,
-                //                   MaterialPageRoute(
-                //                     builder: (_) =>
-                //                         const AccountVerificationScreen(),
-                //                   ),
-                //                 );
-                //               },
-                //         borderRadius: BorderRadius.circular(12),
-                //         child: Container(
-                //           padding: const EdgeInsets.symmetric(
-                //             horizontal: 12,
-                //             vertical: 9,
-                //           ),
-                //           decoration: BoxDecoration(
-                //             color: Colors.white.withOpacity(0.12),
-                //             borderRadius: BorderRadius.circular(12),
-                //             border: Border.all(
-                //               color: Colors.white.withOpacity(0.22),
-                //             ),
-                //           ),
-                //           child: Row(
-                //             mainAxisSize: MainAxisSize.min,
-                //             children: [
-                //               Icon(
-                //                 isVerified ? Icons.check_circle_rounded : null,
-                //                 color: isVerified ? Colors.greenAccent : null,
-                //                 size: 16,
-                //               ),
-                //               const SizedBox(width: 8),
-                //               Text(
-                //                 isVerified
-                //                     ? context.tr("account_verified")
-                //                     : context.tr("account_not_verified"),
-                //                 style: const TextStyle(
-                //                   color: Colors.white,
-                //                   fontSize: 12,
-                //                   fontWeight: FontWeight.w700,
-                //                 ),
-                //               ),
-                //               if (!isVerified) ...[
-                //                 const SizedBox(width: 8),
-                //                 const Icon(
-                //                   Icons.arrow_forward_ios_rounded,
-                //                   color: Colors.white,
-                //                   size: 12,
-                //                 ),
-                //               ],
-                //             ],
-                //           ),
-                //         ),
-                //       ),
-                //     );
-                //   },
-                // ),
               ],
             ),
           ),
@@ -560,54 +543,6 @@ class _InactiveAccountBanner extends StatelessWidget {
     );
   }
 }
-// class _InactiveAccountBanner extends StatelessWidget {
-//   const _InactiveAccountBanner();
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final bool? vendorActivation = CacheHelper.getDataFromSharedPreference(
-//       key: CacheKeys.vendorActivation,
-//     );
-
-//     if (vendorActivation != false) {
-//       return const SizedBox.shrink();
-//     }
-//     return Padding(
-//       padding: const EdgeInsets.only(top: 10),
-//       child: Container(
-//         width: double.infinity,
-//         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-//         decoration: BoxDecoration(
-//           color: const Color(0xFFFDECEA),
-//           borderRadius: BorderRadius.circular(12),
-//           border: Border.all(color: const Color(0xFFF5C6C2)),
-//         ),
-//         child: Row(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             const Icon(
-//               Icons.error_outline_rounded,
-//               color: Color(0xFFC0392B),
-//               size: 18,
-//             ),
-//             const SizedBox(width: 10),
-//             Expanded(
-//               child: Text(
-//                 context.tr("account_inactive_banner"),
-//                 style: const TextStyle(
-//                   color: Color(0xFFC0392B),
-//                   fontSize: 12.5,
-//                   fontWeight: FontWeight.w600,
-//                   height: 1.35,
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 
 class _OrderSearchDelegate extends SearchDelegate<OrderModel?> {
   final List<OrderModel> orders;

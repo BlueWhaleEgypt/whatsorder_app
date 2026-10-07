@@ -212,6 +212,18 @@ const Map<String, Map<String, String>> kTranslations = {
     'address': 'Address',
     'sector': 'Sector',
     'sector_name': 'Sector Name',
+    'files': 'Files',
+    'security': 'Security',
+    'branches': 'Branches',
+    'change_phone': 'Change Phone',
+    'manage_files_description':
+        'Manage your verification and business documents',
+    'manage_user_info_description': 'Manage your personal information',
+    'update_the_phone_number':
+        'Update the phone number associated with your account',
+    'manage_location': 'Manage your service location and coverage',
+    'manage_security': 'Manage your security settings',
+    'branches_description': 'Branches and sectors available for your account',
     //sms
     'sms_messages': 'SMS Messages',
 
@@ -339,7 +351,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'Reset_Password': 'إعادة تعيين كلمة المرور',
 
     // Orders / home
-    'your_order': 'طلبك',
+    'your_order': 'طلباتك',
     'order_id_label': 'رقم الطلب',
     'date_label': 'التاريخ',
     'edit_label': 'تعديل',
@@ -418,6 +430,17 @@ const Map<String, Map<String, String>> kTranslations = {
     'address': 'العنوان',
     'sector': 'القطاع',
     'sector_name': 'اسم القطاع',
+    'files': 'الملفات',
+    'security': 'الأمان',
+    'branches': 'الفروع',
+    'change_phone': 'تغيير رقم الهاتف',
+    'manage_files_description': 'إدارة المستندات الخاصة بك',
+    'manage_user_info_description': 'إدارة معلوماتك الشخصية',
+    'update_the_phone_number': 'تحديث رقم الهاتف المرتبط بحسابك',
+    'manage_location': 'إدارة موقع الخدمة ونطاق التغطية',
+    'manage_security': 'إدارة الأمان',
+    'branches_description': 'الفروع والقطاعات المتاحة لحسابك',
+
     //sms
     'sms_messages': 'رسائل SMS',
 

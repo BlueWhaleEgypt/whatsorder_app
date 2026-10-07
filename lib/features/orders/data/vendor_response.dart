@@ -49,19 +49,21 @@ class VendorResponse extends Equatable implements BaseRepository {
       final response = await DioHelper.getData(
         url: "${EndPoints.baseUrl}${EndPoints.epGetVendorById}/$vendorId",
       );
-        logger.w("RAW VENDOR RESPONSE => ${response.data}");
+      logger.w("RAW VENDOR RESPONSE => ${response.data}");
 
       if (response.statusCode == 200) {
         final vendorResponse = VendorResponse.fromJson(response.data);
-        logger.w("RAW VENDOR RESPONSE => ${response.data}");
+        // logger.w("RAW VENDOR RESPONSE => ${response.data}");
 
         final vendor = VendorResponse.fromJson(response.data);
+        await CacheHelper.saveDataSharedPreference(
+          key: CacheKeys.firstName,
+          value: vendor.vendor?.firstName ?? '',
+        ); // logger.w("PARSED VENDOR ACTIVATION => ${vendor.vendor?.activation}");
 
-        logger.w("PARSED VENDOR ACTIVATION => ${vendor.vendor?.activation}");
-
-        logger.w(
-          "PARSED VENDOR VERIFICATION => ${vendor.vendor?.verificationStatus}",
-        );
+        // logger.w(
+        //   "PARSED VENDOR VERIFICATION => ${vendor.vendor?.verificationStatus}",
+        // );
 
         return Right(vendorResponse);
       }

@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 */
 class AppColors {
   static const Color primaryGreen = Color(0xFF1E6B3E);
+  static const Color primaryGreenShade = Color(0xFF1A4D32);
+  static const Color primaryGreenTint = Color(0xFF15803D);
   static const Color primaryGreenDark = Color(0xFF15502E);
   static const Color primaryGreenLight = Color(0xFF3E9161);
   static const Color mapGreenLight = Color(0xFFF0FDF4);

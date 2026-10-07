@@ -13,6 +13,7 @@ class CacheKeys {
   static const String accessToken = "accessToken";
   static const String refreshToken = "refreshToken";
   static const String userId = "userId";
+  static const String firstName = "firstName";
   static const String userModel = "userModel";
   static const String userName = "userName";
   static const String userPhone = "userPhone";

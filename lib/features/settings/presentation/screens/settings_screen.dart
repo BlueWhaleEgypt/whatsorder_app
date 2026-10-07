@@ -2,12 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:whats_order/core/cache/cache_helper.dart';
 import 'package:whats_order/core/cache/cache_keys.dart';
+import 'package:whats_order/core/constants/app_assets.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/localization/locale_cubit.dart';
-import 'package:whats_order/features/auth/sign_in/data/user_model.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_counter.dart';
 import 'package:whats_order/features/settings/presentation/screens/terms_conditions_screen.dart';
 import '../../../../core/routing/named_routes.dart';
@@ -141,12 +142,6 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // Future<void> openWebsite() async {
-  //   final uri = Uri.parse("https://whatsorder.shop/ar/terms-conditions");
-
-  //   await launchUrl(uri, mode: LaunchMode.externalApplication);
-  // }
-
   Future<void> openWhatsApp() async {
     const phone = "19296190855";
     const message = "مرحبًا، أحتاج مساعدة من خدمة عملاء WhatsOrder.";
@@ -170,12 +165,11 @@ class SettingsScreen extends StatelessWidget {
 class _ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final user = UserModel.fromJson(
-      jsonDecode(
-        CacheHelper.getDataFromSharedPreference(key: CacheKeys.userModel) ??
-            '{}',
-      ),
+
+    final user = CacheHelper.getDataFromSharedPreference(
+      key: CacheKeys.firstName,
     );
+
     return GestureDetector(
       onTap: () => Navigator.pushNamed(context, NamedRoutes.profile),
       child: Container(
@@ -187,10 +181,23 @@ class _ProfileHeader extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const CircleAvatar(
-              radius: 26,
-              backgroundColor: AppColors.primaryGreen,
-              child: Icon(Icons.person, color: Colors.white, size: 26),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: AppColors.primaryGreen,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: SvgPicture.asset(
+                  AppAssets.person,
+                  width: 30,
+                  height: 30,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -198,7 +205,7 @@ class _ProfileHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${user.firstName ?? ''} ${user.lastName ?? ''}',
+                    '${user ?? ''}',
                     style: AppTextStyles.cardTitle15,
                   ),
                   const SizedBox(height: 2),

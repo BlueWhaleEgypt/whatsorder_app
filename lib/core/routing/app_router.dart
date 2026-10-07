@@ -8,8 +8,9 @@ import 'package:whats_order/features/orders/notification/presentation/bloc/notif
 import 'package:whats_order/features/orders/notification/presentation/screens/notification_screen.dart';
 import 'package:whats_order/features/orders/notification/presentation/screens/sms_messages_screen.dart';
 import 'package:whats_order/features/orders/presentation/bloc/orders_bloc.dart';
+import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
 import 'package:whats_order/features/orders/presentation/screens/order_details_screen.dart';
-import 'package:whats_order/features/settings/presentation/profile_screen.dart';
+import 'package:whats_order/features/settings/presentation/screens/profile_screen.dart';
 
 import 'package:whats_order/injection/injection_container.dart';
 import '../../features/auth/sign_in/presentation/screens/sign_in_screen.dart';
@@ -92,7 +93,13 @@ class AppRouter {
           ),
         );
       case NamedRoutes.profile:
-        return MaterialPageRoute(builder: (_) => const ProfileScreen());
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => sl<VendorBloc>(),
+            child: const ProfileScreen(),
+          ),
+        );
+      // return MaterialPageRoute(builder: (_) =>  ProfileScreen());
       case NamedRoutes.notification:
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
