@@ -8,6 +8,7 @@ import 'package:whats_order/features/orders/notification/data/PressNotificationR
 import 'package:whats_order/features/orders/notification/data/notification_response.dart';
 import 'package:whats_order/features/orders/notification/data/press_sms_response.dart';
 import 'package:whats_order/features/orders/notification/data/sms_messages_response.dart';
+import 'package:whats_order/features/settings/data/branches_response.dart';
 import 'package:whats_order/features/wallet/data/transaction_response.dart';
 import 'package:whats_order/features/wallet/data/wallet_response.dart';
 import '../core/error/failures.dart';
@@ -58,7 +59,7 @@ abstract class BaseRepository {
       return const PressNotificationResponse();
     if (responseType == 'PressSmsResponse') return const PressSmsResponse();
         if (responseType == 'VendorResponse') return const VendorResponse();
-
+    if (responseType == 'BranchesResponse') return const BranchesResponse();
     // Add new feature responses above this line, e.g.:
     // if (responseType == 'WalletResponse') return const WalletResponse();
 

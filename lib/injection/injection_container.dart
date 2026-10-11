@@ -5,6 +5,7 @@ import 'package:whats_order/core/localization/locale_cubit.dart';
 import 'package:whats_order/features/auth/otp/presentation/bloc/otp_bloc.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_bloc.dart';
 import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
+import 'package:whats_order/features/settings/presentation/bloc/branches_bloc.dart';
 import 'package:whats_order/features/wallet/presentation/bloc/transaction_bloc.dart';
 import 'package:whats_order/features/wallet/presentation/bloc/wallet_bloc.dart';
 import '../core/network/network_info.dart';
@@ -36,6 +37,7 @@ Future<void> init() async {
   sl.registerFactory(() => WalletBloc(sl()));
   sl.registerFactory(() => TransactionBloc(sl()));
   sl.registerFactory(() => NotificationBloc(sl()));
+  sl.registerFactory(() => BranchesBloc(sl()));
   // Add every new feature's Bloc here, e.g.:
   // sl.registerFactory(() => WalletBloc(sl()));
 

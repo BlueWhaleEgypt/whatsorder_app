@@ -133,7 +133,6 @@ class DioHelper {
     /// auto-inject the correct multipart boundary.
     FormData? formDataOverride,
   }) async {
-    logger.i("$url");
 
     if (formDataOverride != null) {
       // For multipart uploads let Dio manage Content-Type (boundary header).

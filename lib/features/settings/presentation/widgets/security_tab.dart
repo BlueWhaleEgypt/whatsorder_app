@@ -11,6 +11,7 @@ class SecurityTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isVerified = vendor.verificationStatus == 'Verified';
+    final isActive = vendor.activation == true;
 
     final phoneVerified = vendor.verifiedPhone == true;
 
@@ -30,18 +31,24 @@ class SecurityTab extends StatelessWidget {
 
           _securityTile(
             icon: Icons.lock_outline_rounded,
+            trailingIcon: Icons.chevron_right_rounded,
             title: 'Change Password',
             subtitle: 'Update your account password',
             onTap: () {},
           ),
 
           _securityTile(
-            icon: Icons.verified_user_outlined,
+            icon: Icons.verified,
             title: 'Verification Status',
             subtitle: isVerified ? 'Verified' : 'Not verified',
             onTap: () {},
           ),
-
+          _securityTile(
+            icon: Icons.verified_user_outlined,
+            title: 'Activation Status',
+            subtitle: isActive ? 'Active' : 'Inactive',
+            onTap: () {},
+          ),
           _securityTile(
             icon: Icons.phone_android_outlined,
             title: 'Phone Verification',
@@ -64,6 +71,7 @@ class SecurityTab extends StatelessWidget {
     required IconData icon,
     required String title,
     required String subtitle,
+    IconData? trailingIcon,
     required VoidCallback onTap,
   }) {
     return Container(
@@ -90,10 +98,7 @@ class SecurityTab extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           subtitle: Text(subtitle),
-          trailing: const Icon(
-            Icons.chevron_right_rounded,
-            color: AppColors.textGrey,
-          ),
+          trailing: Icon(trailingIcon ?? null, color: AppColors.textGrey),
         ),
       ),
     );

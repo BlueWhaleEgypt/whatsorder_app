@@ -81,127 +81,115 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-Widget _buildTopNavigation() {
-  final tabs = [
-    _ProfileTab(
-      title: context.tr("profile"),
-      icon: Icons.person_outline_rounded,
-    ),
-    _ProfileTab(
-      title: context.tr("change_phone"),
-      icon: Icons.phone_android_outlined,
-    ),
-    _ProfileTab(
-      title: context.tr("location"),
-      icon: Icons.location_on_outlined,
-    ),
-    _ProfileTab(
-      title: context.tr("branches"),
-      icon: Icons.store_outlined,
-    ),
-    _ProfileTab(
-      title: context.tr("files"),
-      icon: Icons.description_outlined,
-    ),
-    _ProfileTab(
-      title: context.tr("security"),
-      icon: Icons.lock_outline_rounded,
-    ),
-  ];
 
-  return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16),
-    width: double.infinity,
-    decoration: BoxDecoration(
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.08),
-          blurRadius: 24,
-          offset: const Offset(0, 8),
-        ),
-      ],
-      color: Colors.white,
-      borderRadius: const BorderRadius.all(
-        Radius.circular(12),
+  Widget _buildTopNavigation() {
+    final tabs = [
+      _ProfileTab(
+        title: context.tr("profile"),
+        icon: Icons.person_outline_rounded,
       ),
-      border: Border.all(
-        color: AppColors.primaryGreen,
+      _ProfileTab(
+        title: context.tr("change_phone"),
+        icon: Icons.phone_android_outlined,
       ),
-    ),
-    child: SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 8,
+      _ProfileTab(
+        title: context.tr("location"),
+        icon: Icons.location_on_outlined,
       ),
-      child: Row(
-        children: List.generate(tabs.length, (index) {
-          final tab = tabs[index];
-          final selected = selectedIndex == index;
+      _ProfileTab(title: context.tr("branches"), icon: Icons.store_outlined),
+      _ProfileTab(title: context.tr("files"), icon: Icons.description_outlined),
+      _ProfileTab(
+        title: context.tr("security"),
+        icon: Icons.lock_outline_rounded,
+      ),
+    ];
 
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: InkWell(
-              onTap: () {
-                setState(() {
-                  selectedIndex = index;
-                });
-              },
-              borderRadius: BorderRadius.circular(24),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: selected
-                      ? const Color(0xFFDFFFF0)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: selected
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(.08),
-                            blurRadius: 5,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      tab.icon,
-                      size: 19,
-                      color: selected
-                          ? AppColors.primaryGreen
-                          : AppColors.textGrey,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      tab.title,
-                      style: TextStyle(
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+        color: Colors.white,
+        borderRadius: const BorderRadius.all(Radius.circular(32)),
+        border: Border.all(color: AppColors.primaryGreen),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          children: List.generate(tabs.length, (index) {
+            final tab = tabs[index];
+            final selected = selectedIndex == index;
+
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    selectedIndex = index;
+                  });
+                },
+                borderRadius: BorderRadius.circular(24),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? const Color(0xFFDFFFF0)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: selected
+                        ? [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(.08),
+                              blurRadius: 5,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        tab.icon,
+                        size: 19,
                         color: selected
                             ? AppColors.primaryGreen
                             : AppColors.textGrey,
-                        fontSize: 13,
-                        fontWeight: selected
-                            ? FontWeight.w700
-                            : FontWeight.w600,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Text(
+                        tab.title,
+                        style: TextStyle(
+                          color: selected
+                              ? AppColors.primaryGreen
+                              : AppColors.textGrey,
+                          fontSize: 13,
+                          fontWeight: selected
+                              ? FontWeight.w700
+                              : FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
 
 class _ProfileTab {

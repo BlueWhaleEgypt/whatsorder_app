@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
-import 'package:whats_order/core/theme/app_colors.dart';
+import 'package:whats_order/core/widgets/app_text_field.dart';
+import 'package:whats_order/core/widgets/gradient_button.dart';
 import 'package:whats_order/features/orders/data/vendor_model.dart';
 
 class ChangePhoneTab extends StatefulWidget {
@@ -43,63 +44,26 @@ class _ChangePhoneTabState extends State<ChangePhoneTab> {
             context.tr("update_the_phone_number"),
             style: const TextStyle(color: Colors.grey, fontSize: 13),
           ),
+          const SizedBox(height: 28),
 
-          const SizedBox(height: 24),
-
-          TextFormField(
-            controller: currentPhoneController,
-            enabled: false,
-            decoration: _decoration(
-              label: 'Current Phone',
-              icon: Icons.phone_outlined,
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          TextFormField(
+          AppTextField(
+            label: context.tr('new_phone'),
+            required: true,
+            hint: context.tr('phone_hint_signin'),
             controller: newPhoneController,
             keyboardType: TextInputType.phone,
-            decoration: _decoration(
-              label: 'New Phone',
-              icon: Icons.phone_android_outlined,
-            ),
           ),
 
           const SizedBox(height: 28),
-
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed: () {
-                // Change phone API later.
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryGreen,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
-                'Change Phone',
-                style: TextStyle(fontWeight: FontWeight.w700),
-              ),
-            ),
+          GradientButton(
+            label: context.tr("change_phone"),
+            // loading: state.isSubmitting,
+            onPressed: () {
+              // Handle form submission
+            },
           ),
         ],
       ),
-    );
-  }
-
-  InputDecoration _decoration({required String label, required IconData icon}) {
-    return InputDecoration(
-      labelText: label,
-      prefixIcon: Icon(icon),
-      filled: true,
-      fillColor: AppColors.surface,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 }

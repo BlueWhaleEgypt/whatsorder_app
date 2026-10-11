@@ -5,6 +5,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/utils/logger.dart';
+import 'package:whats_order/core/widgets/map_picker_field.dart';
 import 'package:whats_order/features/auth/sign_up/presentation/screens/widgets/map_picker_page.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/app_text_field.dart';
@@ -126,7 +127,7 @@ class _LocationStepState extends State<LocationStep> {
             style: const TextStyle(fontSize: 13, color: AppColors.textGrey),
           ),
           const SizedBox(height: 18),
-          _MapPickerField(
+          MapPickerField(
             hasLocation: _lat != null,
             onTap: () async {
               final LatLng? location = await Navigator.push(
@@ -149,18 +150,18 @@ class _LocationStepState extends State<LocationStep> {
 
                 if (placemarks.isNotEmpty) {
                   final place = placemarks.first;
-                  logger.i("""
- _lat = <${location.latitude}>,;
-                _lng = <<${location.longitude}>>;
-Name: ${place.name}
-Street: ${place.street}
-SubLocality: ${place.subLocality}
-Locality: ${place.locality}
-SubAdministrativeArea: ${place.subAdministrativeArea}
-AdministrativeArea: ${place.administrativeArea}
-PostalCode: ${place.postalCode}
-Country: ${place.country}
-""");
+                  //                   logger.i("""
+                  //  _lat = <${location.latitude}>,;
+                  //                 _lng = <<${location.longitude}>>;
+                  // Name: ${place.name}
+                  // Street: ${place.street}
+                  // SubLocality: ${place.subLocality}
+                  // Locality: ${place.locality}
+                  // SubAdministrativeArea: ${place.subAdministrativeArea}
+                  // AdministrativeArea: ${place.administrativeArea}
+                  // PostalCode: ${place.postalCode}
+                  // Country: ${place.country}
+                  // """);
                   setState(() {
                     _city.text = place.locality ?? '';
                     _state.text = place.administrativeArea ?? '';
@@ -169,15 +170,15 @@ Country: ${place.country}
                     // _neighborhood.text = place.subLocality ?? '';
                     // _governorate.text = place.administrativeArea ?? '';
                   });
-                  logger.w("""
-Fields Updated:
-Governorate: ${_governorate.text}
-City: ${_city.text}
-State: ${_state.text}
-Street: ${_street.text}
-Area: ${_area.text}
-Neighborhood: ${_neighborhood.text}
-""");
+                  //                   logger.w("""
+                  // Fields Updated:
+                  // Governorate: ${_governorate.text}
+                  // City: ${_city.text}
+                  // State: ${_state.text}
+                  // Street: ${_street.text}
+                  // Area: ${_area.text}
+                  // Neighborhood: ${_neighborhood.text}
+                  // """);
                 }
               } catch (e) {
                 logger.e(e);
@@ -303,67 +304,6 @@ Neighborhood: ${_neighborhood.text}
 
       _serviceDistance.text = defaults[area]!.toStringAsFixed(0);
     });
-  }
-}
-
-class _MapPickerField extends StatelessWidget {
-  final bool hasLocation;
-  final VoidCallback onTap;
-
-  const _MapPickerField({required this.hasLocation, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          context.tr("location_label"),
-          style: const TextStyle(
-            fontSize: 11.5,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textGrey,
-            letterSpacing: 0.3,
-          ),
-        ),
-        const SizedBox(height: 8),
-        InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
-            decoration: BoxDecoration(
-              color: AppColors.lightGreenBg.withOpacity(0.6),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  hasLocation ? Icons.check_circle : Icons.map_outlined,
-                  size: 18,
-                  color: hasLocation
-                      ? AppColors.primaryGreen
-                      : AppColors.textGrey,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  hasLocation
-                      ? context.tr("location_selected")
-                      : context.tr("choose_on_map"),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: hasLocation
-                        ? AppColors.textDark
-                        : AppColors.textFaint,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }
 

@@ -110,10 +110,12 @@ class _UserInfoStepState extends State<UserInfoStep> {
                   controller: _email,
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty)
+                    if (v == null || v.trim().isEmpty) {
                       return context.tr("email_is_required");
-                    if (!v.contains('@'))
+                    }
+                    if (!v.contains('@')) {
                       return context.tr("enter_a_valid_email");
+                    }
                     return null;
                   },
                 ),

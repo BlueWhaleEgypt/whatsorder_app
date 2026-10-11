@@ -13,4 +13,8 @@ class AppAssets {
   static const String ring = 'assets/icons/ring.svg';
   static const String verified = 'assets/icons/verified.svg';
   static const String chat = 'assets/icons/chat.svg';
+  static const String userVerified = 'assets/icons/user-verified.svg';
+  static const String store = 'assets/icons/store.svg';
+  static const String edit = 'assets/icons/edit.svg';
+  static const String delete = 'assets/icons/delete.svg';
 }

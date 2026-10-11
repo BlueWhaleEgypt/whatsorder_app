@@ -73,8 +73,10 @@ class AppTextField extends StatelessWidget {
           decoration: InputDecoration(
             counterText: "",
             hintText: hint,
-            hintStyle:
-                const TextStyle(color: AppColors.textFaint, fontSize: 14),
+            hintStyle: const TextStyle(
+              color: AppColors.textFaint,
+              fontSize: 14,
+            ),
             filled: true,
             fillColor: AppColors.lightGreenBg.withOpacity(0.6),
             suffixIcon: suffixIcon,
@@ -88,11 +90,15 @@ class AppTextField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: AppColors.primaryGreen, width: 1.4),
+              borderSide: const BorderSide(
+                color: AppColors.primaryGreen,
+                width: 1.4,
+              ),
             ),
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 14,
+            ),
           ),
           maxLength: maxLength,
         ),

@@ -50,5 +50,11 @@ class EndPoints {
   static const String epProfile = "profile";
   static const String epUpdateProfile = "profile/update";
 
+  // Branches
+  static const String epAllBranches = '/api/branch/all';
+  static const String epAddBranch = '/api/branch/add';
+  static const String epUpdateBranch = '/api/branch/update';
+  static const String epDeleteBranch = '/api/branch/delete';
+
   // Add more endpoints here as features grow.
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/theme/app_colors.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
+import 'package:whats_order/core/widgets/app_text_field.dart';
+import 'package:whats_order/core/widgets/gradient_button.dart';
 import 'package:whats_order/features/orders/data/vendor_model.dart';
 
 class UserInfoTab extends StatefulWidget {
@@ -91,47 +93,58 @@ class _UserInfoTabState extends State<UserInfoTab> {
           Row(
             children: [
               Expanded(
-                child: _field(
-                  label: 'First Name',
+                child: AppTextField(
+                  label: context.tr("first_name"),
+                  required: true,
+                  hint: context.tr("first_name"),
                   controller: firstNameController,
-                  icon: Icons.person_outline,
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? "Required" : null,
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
-                child: _field(
-                  label: 'Last Name',
+                child: AppTextField(
+                  label: context.tr("last_name"),
+                  hint: context.tr("last_name"),
                   controller: lastNameController,
-                  icon: Icons.person_outline,
                 ),
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
-          _field(
-            label: 'Username',
-            controller: usernameController,
-            icon: Icons.alternate_email_rounded,
-          ),
-
-          const SizedBox(height: 16),
-
-          _field(
-            label: 'Email',
+          // ── Email ──────────────────────────────────────────────
+          AppTextField(
+            label: context.tr("email"),
+            required: true,
+            hint: "you@example.com",
             controller: emailController,
-            icon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) {
+                return context.tr("email_is_required");
+              }
+              if (!v.contains('@')) return context.tr("enter_a_valid_email");
+              return null;
+            },
           ),
-
           const SizedBox(height: 16),
-
-          _field(
-            label: 'Phone',
+          AppTextField(
+            label: context.tr('phone'),
+            required: true,
+            hint: context.tr('phone_hint_signin'),
             controller: phoneController,
-            icon: Icons.phone_outlined,
             keyboardType: TextInputType.phone,
+            maxLength: 11,
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) {
+                return context.tr('phone_required');
+              }
+              if (v.trim().length < 11) {
+                return context.tr('phone_invalid_length');
+              }
+              return null;
+            },
           ),
 
           const SizedBox(height: 16),
@@ -148,18 +161,18 @@ class _UserInfoTabState extends State<UserInfoTab> {
           Row(
             children: [
               Expanded(
-                child: _field(
-                  label: 'City',
+                child: AppTextField(
+                  label: context.tr("city"),
+                  hint: context.tr("city"),
                   controller: cityController,
-                  icon: Icons.location_city_outlined,
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
-                child: _field(
-                  label: 'State',
+                child: AppTextField(
+                  label: context.tr("state"),
+                  hint: context.tr("state"),
                   controller: stateController,
-                  icon: Icons.map_outlined,
                 ),
               ),
             ],
@@ -176,26 +189,12 @@ class _UserInfoTabState extends State<UserInfoTab> {
           ),
 
           const SizedBox(height: 28),
-
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed: () {
-                // Update API later.
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryGreen,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
-                'Save Changes',
-                style: TextStyle(fontWeight: FontWeight.w700),
-              ),
-            ),
+          GradientButton(
+            label: context.tr("save_changes"),
+            // loading: state.isSubmitting,
+            onPressed: () {
+              // Handle form submission
+            },
           ),
         ],
       ),

@@ -10,6 +10,7 @@ import 'package:whats_order/features/orders/notification/presentation/screens/sm
 import 'package:whats_order/features/orders/presentation/bloc/orders_bloc.dart';
 import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
 import 'package:whats_order/features/orders/presentation/screens/order_details_screen.dart';
+import 'package:whats_order/features/settings/presentation/bloc/branches_bloc.dart';
 import 'package:whats_order/features/settings/presentation/screens/profile_screen.dart';
 
 import 'package:whats_order/injection/injection_container.dart';
@@ -94,11 +95,20 @@ class AppRouter {
         );
       case NamedRoutes.profile:
         return MaterialPageRoute(
-          builder: (_) => BlocProvider(
-            create: (_) => sl<VendorBloc>(),
+          builder: (_) => MultiBlocProvider(
+            providers: [
+              BlocProvider<VendorBloc>(create: (_) => sl<VendorBloc>()),
+              BlocProvider<BranchesBloc>(create: (_) => sl<BranchesBloc>()),
+            ],
             child: const ProfileScreen(),
           ),
         );
+      // return MaterialPageRoute(
+      //   builder: (_) => BlocProvider(
+      //     create: (_) => sl<VendorBloc>(),
+      //     child: const ProfileScreen(),
+      //   ),
+      // );
       // return MaterialPageRoute(builder: (_) =>  ProfileScreen());
       case NamedRoutes.notification:
         return MaterialPageRoute(
