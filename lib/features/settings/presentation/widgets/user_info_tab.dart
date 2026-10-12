@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/theme/app_colors.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/core/widgets/app_text_field.dart';
 import 'package:whats_order/core/widgets/gradient_button.dart';
+import 'package:whats_order/core/widgets/sector_dropdown.dart';
+import 'package:whats_order/features/auth/sign_up/presentation/cubit/onboarding_cubit.dart';
+import 'package:whats_order/features/auth/sign_up/presentation/cubit/onboarding_state.dart';
 import 'package:whats_order/features/orders/data/vendor_model.dart';
 
 class UserInfoTab extends StatefulWidget {
@@ -16,15 +21,14 @@ class UserInfoTab extends StatefulWidget {
 }
 
 class _UserInfoTabState extends State<UserInfoTab> {
+  final formKey = GlobalKey<FormState>();
+
   late final TextEditingController firstNameController;
   late final TextEditingController lastNameController;
-  late final TextEditingController usernameController;
   late final TextEditingController emailController;
-  late final TextEditingController phoneController;
-  late final TextEditingController typeController;
-  late final TextEditingController cityController;
-  late final TextEditingController stateController;
-  late final TextEditingController serviceDistanceController;
+
+  String? _sectorId;
+  bool isEditing = false;
 
   @override
   void initState() {
@@ -38,205 +42,245 @@ class _UserInfoTabState extends State<UserInfoTab> {
       text: widget.vendor.lastName ?? '',
     );
 
-    usernameController = TextEditingController(
-      text: widget.vendor.username ?? '',
-    );
-
     emailController = TextEditingController(text: widget.vendor.email ?? '');
 
-    phoneController = TextEditingController(text: widget.vendor.phone ?? '');
+    final data = context.read<OnboardingCubit>().state.data;
 
-    typeController = TextEditingController(text: widget.vendor.type ?? '');
+    _sectorId = data.sectorId.isEmpty ? null : data.sectorId;
 
-    cityController = TextEditingController(
-      text: widget.vendor.city?.trim() ?? '',
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
 
-    stateController = TextEditingController(
-      text: widget.vendor.state?.trim() ?? '',
-    );
-
-    serviceDistanceController = TextEditingController(
-      text: widget.vendor.serviceDistance?.toString() ?? '',
-    );
+      context.read<OnboardingCubit>().loadSectors();
+    });
   }
 
   @override
   void dispose() {
     firstNameController.dispose();
     lastNameController.dispose();
-    usernameController.dispose();
     emailController.dispose();
-    phoneController.dispose();
-    typeController.dispose();
-    cityController.dispose();
-    stateController.dispose();
-    serviceDistanceController.dispose();
-
     super.dispose();
+  }
+
+  void _toggleEditing() {
+    if (!isEditing) {
+      setState(() => isEditing = true);
+      return;
+    }
+
+    if (!(formKey.currentState?.validate() ?? false)) {
+      return;
+    }
+
+    if (_sectorId == null || _sectorId!.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.tr('sector_is_required'))));
+      return;
+    }
+
+    // TODO: استدعاء Update Profile API لإرسال:
+    // firstNameController.text.trim()
+    // lastNameController.text.trim()
+    // emailController.text.trim()
+    // _sectorId
+    //
+    // اقفل وضع التعديل بعد نجاح الـ API.
+
+    setState(() => isEditing = false);
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.tr("manage_user_info_description"),
+    final sectors = widget.vendor.sectors ?? [];
 
-            style: AppTextStyles.cellMuted13,
-          ),
-          const SizedBox(height: 24),
+    return BlocBuilder<OnboardingCubit, OnboardingState>(
+      builder: (context, state) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Form(
+            key: formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.tr('manage_user_info_description'),
+                  style: AppTextStyles.cellMuted13,
+                ),
 
-          Row(
-            children: [
-              Expanded(
-                child: AppTextField(
-                  label: context.tr("first_name"),
+                const SizedBox(height: 24),
+
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: AppTextField(
+                        label: context.tr('first_name'),
+                        required: true,
+                        hint: context.tr('first_name'),
+                        controller: firstNameController,
+                        enabled: isEditing,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Required';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: AppTextField(
+                        label: context.tr('last_name'),
+                        hint: context.tr('last_name'),
+                        controller: lastNameController,
+                        enabled: isEditing,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                AppTextField(
+                  label: context.tr('email'),
                   required: true,
-                  hint: context.tr("first_name"),
-                  controller: firstNameController,
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? "Required" : null,
+                  hint: 'you@example.com',
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  enabled: isEditing,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return context.tr('email_is_required');
+                    }
+
+                    if (!RegExp(
+                      r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                    ).hasMatch(value.trim())) {
+                      return context.tr('enter_a_valid_email');
+                    }
+
+                    return null;
+                  },
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: AppTextField(
-                  label: context.tr("last_name"),
-                  hint: context.tr("last_name"),
-                  controller: lastNameController,
+
+                const SizedBox(height: 20),
+                if (sectors.isEmpty) _emptyState(),
+
+                ...sectors.map((sector) {
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: AppColors.primaryGreen.withOpacity(
+                            .1,
+                          ),
+                          child: const Icon(
+                            Icons.token_outlined,
+                            color: AppColors.primaryGreen,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                sector.name ?? '-',
+                                style: AppTextStyles.cardTitle15,
+                              ),
+                              if (sector.note != null &&
+                                  sector.note!.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  sector.note!,
+                                  style: AppTextStyles.cellMuted13,
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                if (isEditing) ...[
+                  const SizedBox(height: 20),
+
+                  SectorDropdown(
+                    sectors: state.sectors,
+                    loading: state.sectorsLoading,
+                    error: state.sectorsError,
+                    value: _sectorId,
+                    onChanged: (value) {
+                      setState(() {
+                        _sectorId = value;
+                      });
+                    },
+                    onRetry: () {
+                      context.read<OnboardingCubit>().loadSectors();
+                    },
+                  ),
+                ],
+
+                // SectorDropdown(
+                //   sectors: state.sectors,
+                //   loading: state.sectorsLoading,
+                //   error: state.sectorsError,
+                //   value: _sectorId,
+                //   onChanged: isEditing
+                //       ? (value) {
+                //           setState(() => _sectorId = value);
+                //         }
+                //       : (_) {},
+                //   onRetry: () {
+                //     context.read<OnboardingCubit>().loadSectors();
+                //   },
+                // ),
+                const SizedBox(height: 100),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: GradientButton(
+                    label: context.tr(isEditing ? 'save_changes' : 'edit'),
+                    onPressed: _toggleEditing,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
-          // ── Email ──────────────────────────────────────────────
-          AppTextField(
-            label: context.tr("email"),
-            required: true,
-            hint: "you@example.com",
-            controller: emailController,
-            keyboardType: TextInputType.emailAddress,
-            validator: (v) {
-              if (v == null || v.trim().isEmpty) {
-                return context.tr("email_is_required");
-              }
-              if (!v.contains('@')) return context.tr("enter_a_valid_email");
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          AppTextField(
-            label: context.tr('phone'),
-            required: true,
-            hint: context.tr('phone_hint_signin'),
-            controller: phoneController,
-            keyboardType: TextInputType.phone,
-            maxLength: 11,
-            validator: (v) {
-              if (v == null || v.trim().isEmpty) {
-                return context.tr('phone_required');
-              }
-              if (v.trim().length < 11) {
-                return context.tr('phone_invalid_length');
-              }
-              return null;
-            },
-          ),
-
-          const SizedBox(height: 16),
-
-          _field(
-            label: 'Account Type',
-            controller: typeController,
-            icon: Icons.badge_outlined,
-            enabled: false,
-          ),
-
-          const SizedBox(height: 16),
-
-          Row(
-            children: [
-              Expanded(
-                child: AppTextField(
-                  label: context.tr("city"),
-                  hint: context.tr("city"),
-                  controller: cityController,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: AppTextField(
-                  label: context.tr("state"),
-                  hint: context.tr("state"),
-                  controller: stateController,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          _field(
-            label: 'Service Distance',
-            controller: serviceDistanceController,
-            icon: Icons.social_distance_outlined,
-            keyboardType: TextInputType.number,
-            suffixText: 'm',
-          ),
-
-          const SizedBox(height: 28),
-          GradientButton(
-            label: context.tr("save_changes"),
-            // loading: state.isSubmitting,
-            onPressed: () {
-              // Handle form submission
-            },
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
+}
 
-  Widget _field({
-    required String label,
-    required TextEditingController controller,
-    required IconData icon,
-    bool enabled = true,
-    TextInputType? keyboardType,
-    String? suffixText,
-  }) {
-    return TextFormField(
-      controller: controller,
-      enabled: enabled,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, size: 20),
-        suffixText: suffixText,
-        filled: true,
-        fillColor: enabled
-            ? AppColors.surface
-            : AppColors.surface.withOpacity(.6),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.border),
+Widget _emptyState() {
+  return Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(30),
+    decoration: BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: AppColors.border),
+    ),
+    child: const Column(
+      children: [
+        Icon(Icons.store_outlined, size: 42, color: AppColors.textGrey),
+        SizedBox(height: 12),
+        Text(
+          'No sectors available',
+          style: TextStyle(color: AppColors.textGrey),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.primaryGreen,
-            width: 1.5,
-          ),
-        ),
-      ),
-    );
-  }
+      ],
+    ),
+  );
 }

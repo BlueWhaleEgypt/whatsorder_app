@@ -54,7 +54,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.search),
+                icon: SvgPicture.asset(
+                  AppAssets.search,
+                  width: 22,
+                  height: 22,
+
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.primaryGreenTint,
+                    BlendMode.srcIn,
+                  ),
+                ),
                 onPressed: state is LoadedOrdersState
                     ? () {
                         showSearch(
@@ -212,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          const SizedBox(width: 16), // بعد عن حافة الشاشة
+          const SizedBox(width: 16),
         ],
       ),
       body: SafeArea(
@@ -238,7 +247,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     children: [
                       _WelcomeCard(),
-                      //const _InactiveAccountBanner(),
                       BlocBuilder<VendorBloc, VendorState>(
                         builder: (context, state) {
                           if (state is VendorLoaded) {

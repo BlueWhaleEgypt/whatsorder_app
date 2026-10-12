@@ -6,12 +6,15 @@ import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
 import 'package:whats_order/features/orders/presentation/bloc/vendor_event.dart';
 import 'package:whats_order/features/orders/presentation/bloc/vendor_state.dart';
+import 'package:whats_order/features/settings/presentation/bloc/branches_bloc.dart';
+import 'package:whats_order/features/settings/presentation/bloc/change_phone_bloc.dart';
 import 'package:whats_order/features/settings/presentation/widgets/branches_tab.dart';
 import 'package:whats_order/features/settings/presentation/widgets/change_phone_tab.dart';
 import 'package:whats_order/features/settings/presentation/widgets/files_tab.dart';
 import 'package:whats_order/features/settings/presentation/widgets/location_tab.dart';
 import 'package:whats_order/features/settings/presentation/widgets/security_tab.dart';
 import 'package:whats_order/features/settings/presentation/widgets/user_info_tab.dart';
+import 'package:whats_order/injection/injection_container.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -64,9 +67,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     index: selectedIndex,
                     children: [
                       UserInfoTab(vendor: vendor),
-                      ChangePhoneTab(vendor: vendor),
+                      BlocProvider(
+                        create: (_) => sl<ChangePhoneBloc>(),
+                        child: ChangePhoneTab(vendor: vendor),
+                      ),
+
+                      // ChangePhoneTab(vendor: vendor),
                       LocationTab(vendor: vendor),
-                      BranchesTab(vendor: vendor),
+                      BlocProvider(
+                        create: (_) => sl<BranchesBloc>(),
+                        child: BranchesTab(vendor: vendor),
+                      ),
                       FilesTab(vendor: vendor),
                       SecurityTab(vendor: vendor),
                     ],

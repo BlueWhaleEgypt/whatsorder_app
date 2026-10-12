@@ -14,15 +14,13 @@ import 'package:whats_order/core/widgets/map_picker_field.dart';
 import 'package:whats_order/features/auth/sign_in/data/user_model.dart';
 import 'package:whats_order/features/auth/sign_up/presentation/screens/widgets/map_picker_page.dart';
 import 'package:whats_order/features/orders/data/vendor_model.dart';
-import 'package:whats_order/features/settings/data/branch_model.dart';
+import 'package:whats_order/features/settings/data/branch/branch_model.dart';
 import 'package:whats_order/features/settings/presentation/bloc/branches_bloc.dart';
 import 'package:whats_order/features/settings/presentation/bloc/branches_event.dart';
 import 'package:whats_order/features/settings/presentation/bloc/branches_state.dart';
 
 import '../../../../core/utils/logger.dart';
-// import '.../map_picker_field.dart';   // MapPickerField
-// import '.../map_picker_page.dart';    // MapPickerPage
-// import '.../logger.dart';             // logger
+
 
 class BranchesTab extends StatefulWidget {
   final VendorModel vendor;
@@ -180,7 +178,7 @@ class _BranchesTabState extends State<BranchesTab> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    AppColors.primaryGreen.withOpacity(.07),
+                    AppColors.primaryGreenTint.withOpacity(.2),
                     AppColors.surface,
                   ],
                 ),
@@ -191,13 +189,13 @@ class _BranchesTabState extends State<BranchesTab> {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: AppColors.primaryGreen.withOpacity(.1),
+                      color: AppColors.border,
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: SvgPicture.asset(
                       AppAssets.store,
-                      width: 14,
-                      height: 14,
+                      width: 12,
+                      height: 12,
                       colorFilter: const ColorFilter.mode(
                         AppColors.primaryGreenTint,
                         BlendMode.srcIn,
@@ -212,7 +210,13 @@ class _BranchesTabState extends State<BranchesTab> {
                         Text(title, style: AppTextStyles.cardTitle15),
                         if (showSubtitle) ...[
                           const SizedBox(height: 3),
-                          Text(branch.nameEn, style: AppTextStyles.cellMuted13),
+                          Text(
+                            branch.nameEn,
+                            style: AppTextStyles.sectionLabel13.copyWith(
+                              color: Colors.grey.shade600,
+                              fontSize: 14,
+                            ),
+                          ),
                         ],
                       ],
                     ),

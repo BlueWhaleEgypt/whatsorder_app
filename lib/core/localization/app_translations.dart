@@ -222,6 +222,10 @@ const Map<String, Map<String, String>> kTranslations = {
         'Update the phone number associated with your account',
     'manage_location': 'Manage your service location and coverage',
     'manage_security': 'Manage your security settings',
+    'save_changes': 'Save Changes',
+    'new_phone': 'New Phone Number',
+    'current_phone': 'Current Phone Number',
+    'change_password': 'Change Password',
 
     //branches
     "branches": "Branches",
@@ -460,7 +464,9 @@ const Map<String, Map<String, String>> kTranslations = {
     'update_the_phone_number': 'تحديث رقم الهاتف المرتبط بحسابك',
     'manage_location': 'إدارة موقع الخدمة ونطاق التغطية',
     'manage_security': 'إدارة الأمان',
- //branches
+    'new_phone': 'رقم الهاتف الجديد',
+    'current_phone': 'رقم الهاتف الحالي',
+    //branches
     "branches": "الفروع",
     "branches_description": "إدارة الفروع المسجلة الخاصة بك",
     "add_branch": "إضافة فرع",
@@ -481,9 +487,9 @@ const Map<String, Map<String, String>> kTranslations = {
     "confirm_delete_branch": "هل أنت متأكد أنك تريد الحذف",
     "branch_added_successfully": "تم إضافة الفرع بنجاح",
     "branch_updated_successfully": "تم تحديث الفرع بنجاح",
-    "branch_deleted_successfully": "تم حذف الفرع بنجاح", 
-
-
+    "branch_deleted_successfully": "تم حذف الفرع بنجاح",
+    'save_changes': 'حفظ التغييرات',
+    'change_password': 'تغير كلمة المرور',
     //sms
     'sms_messages': 'رسائل SMS',
 

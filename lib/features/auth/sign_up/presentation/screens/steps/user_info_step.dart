@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
+import 'package:whats_order/core/widgets/sector_dropdown.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/app_text_field.dart';
 import '../../../../../../core/widgets/gradient_button.dart';
@@ -122,7 +123,7 @@ class _UserInfoStepState extends State<UserInfoStep> {
                 const SizedBox(height: 16),
 
                 // ── Sector dropdown ────────────────────────────────────
-                _SectorDropdown(
+                SectorDropdown(
                   sectors: state.sectors,
                   loading: state.sectorsLoading,
                   error: state.sectorsError,
@@ -163,136 +164,4 @@ class _UserInfoStepState extends State<UserInfoStep> {
   }
 }
 
-// ── Sector Dropdown Widget ─────────────────────────────────────────────────
 
-class _SectorDropdown extends StatelessWidget {
-  final List sectors;
-  final bool loading;
-  final String? error;
-  final String? value;
-  final ValueChanged<String?> onChanged;
-  final VoidCallback onRetry;
-
-  const _SectorDropdown({
-    required this.sectors,
-    required this.loading,
-    required this.error,
-    required this.value,
-    required this.onChanged,
-    required this.onRetry,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        RichText(
-          text: TextSpan(
-            text: context.tr("your_sector"),
-            style: const TextStyle(
-              fontFamily: "Cairo",
-              fontSize: 11.5,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textGrey,
-              letterSpacing: 0.3,
-            ),
-            children: const [
-              TextSpan(
-                text: ' *',
-                style: TextStyle(color: AppColors.danger),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        if (loading)
-          Container(
-            height: 52,
-            decoration: BoxDecoration(
-              color: AppColors.lightGreenBg.withOpacity(0.6),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Center(
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.primaryGreen,
-                ),
-              ),
-            ),
-          )
-        else if (error != null)
-          GestureDetector(
-            onTap: onRetry,
-            child: Container(
-              height: 52,
-              decoration: BoxDecoration(
-                color: AppColors.danger.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.danger.withOpacity(0.3)),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: Row(
-                children: [
-                  const Icon(Icons.refresh, color: AppColors.danger, size: 18),
-                  const SizedBox(width: 8),
-                  Text(
-                    "Failed to load sectors — tap to retry",
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.danger.withOpacity(0.8),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          )
-        else
-          DropdownButtonFormField<String>(
-            value: value,
-            icon: const Icon(Icons.keyboard_arrow_down_rounded),
-            isExpanded: true,
-            items: sectors
-                .map(
-                  (s) => DropdownMenuItem<String>(
-                    value: s.id,
-                    child: Text(s.name, overflow: TextOverflow.ellipsis),
-                  ),
-                )
-                .toList(),
-            onChanged: onChanged,
-            hint: Text(
-              context.tr("select_your_sector"),
-              style: const TextStyle(fontSize: 13, fontFamily: "Cairo"),
-            ),
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: AppColors.lightGreenBg.withOpacity(0.6),
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 14,
-                horizontal: 14,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: AppColors.primaryGreen,
-                  width: 1.4,
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}

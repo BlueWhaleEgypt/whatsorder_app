@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:whats_order/base/base_repository.dart';
@@ -37,9 +38,17 @@ class SendOtpResponse extends Equatable implements BaseRepository {
       }
 
       return Left(ServerFailure("Error ${response.statusCode}"));
-    } catch (e) {
-      logger.e(e);
-      return Left(ServerFailure(e.toString()));
+    } on DioException catch (e) {
+      logger.e('OTP URL: ${e.requestOptions.uri}');
+      logger.e('OTP METHOD: ${e.requestOptions.method}');
+      logger.e('OTP STATUS: ${e.response?.statusCode}');
+      logger.e('OTP RESPONSE: ${e.response?.data}');
+
+      return Left(
+        ServerFailure(
+          e.response?.data?.toString() ?? e.message ?? 'Request failed',
+        ),
+      );
     }
   }
 

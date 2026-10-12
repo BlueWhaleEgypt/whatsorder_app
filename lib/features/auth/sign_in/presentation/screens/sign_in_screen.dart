@@ -153,11 +153,11 @@ class _SignInScreenState extends State<SignInScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
-                      PasswordField( 
+                      PasswordField(
                         label: context.tr('password'),
                         hint: context.tr('password_hint'),
                         controller: _passwordController,
-                      
+
                         validator: (v) => (v == null || v.isEmpty)
                             ? context.tr('password_required')
                             : null,
@@ -330,7 +330,7 @@ class _WelcomeHero extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppColors.primaryGreenLight, AppColors.primaryGreenDark],
+          colors: [AppColors.primaryGreenShade, AppColors.primaryGreenTint],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

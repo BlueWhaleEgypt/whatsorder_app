@@ -17,4 +17,5 @@ class AppAssets {
   static const String store = 'assets/icons/store.svg';
   static const String edit = 'assets/icons/edit.svg';
   static const String delete = 'assets/icons/delete.svg';
+  static const String search = 'assets/icons/search.svg';
 }

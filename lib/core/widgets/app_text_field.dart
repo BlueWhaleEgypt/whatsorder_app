@@ -21,6 +21,7 @@ class AppTextField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String>? onChanged;
   final int? maxLength;
+  final bool enabled;
 
   const AppTextField({
     super.key,
@@ -35,6 +36,7 @@ class AppTextField extends StatelessWidget {
     this.inputFormatters,
     this.onChanged,
     this.maxLength,
+    this.enabled = true,
   });
 
   @override
@@ -69,6 +71,7 @@ class AppTextField extends StatelessWidget {
           obscureText: obscureText,
           validator: validator,
           onChanged: onChanged,
+          enabled: enabled,
           style: const TextStyle(fontSize: 14, color: AppColors.textDark),
           decoration: InputDecoration(
             counterText: "",

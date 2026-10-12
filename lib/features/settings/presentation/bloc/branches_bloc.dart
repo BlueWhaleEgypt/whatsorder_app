@@ -141,10 +141,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whats_order/base/base_repository.dart';
 import 'package:whats_order/core/network/network_info.dart';
-import 'package:whats_order/features/settings/data/branch_request.dart';
+import 'package:whats_order/features/settings/data/branch/branch_request.dart';
 
-import '../../data/branch_model.dart';
-import '../../data/branches_response.dart';
+import '../../data/branch/branch_model.dart';
+import '../../data/branch/branches_response.dart';
 import 'branches_event.dart';
 import 'branches_state.dart';
 

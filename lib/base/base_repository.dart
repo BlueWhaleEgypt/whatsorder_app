@@ -8,7 +8,9 @@ import 'package:whats_order/features/orders/notification/data/PressNotificationR
 import 'package:whats_order/features/orders/notification/data/notification_response.dart';
 import 'package:whats_order/features/orders/notification/data/press_sms_response.dart';
 import 'package:whats_order/features/orders/notification/data/sms_messages_response.dart';
-import 'package:whats_order/features/settings/data/branches_response.dart';
+import 'package:whats_order/features/settings/data/branch/branches_response.dart';
+import 'package:whats_order/features/settings/data/password/change_password_response.dart';
+import 'package:whats_order/features/settings/data/phone/change_phone_response.dart';
 import 'package:whats_order/features/wallet/data/transaction_response.dart';
 import 'package:whats_order/features/wallet/data/wallet_response.dart';
 import '../core/error/failures.dart';
@@ -58,8 +60,12 @@ abstract class BaseRepository {
     if (responseType == 'PressNotificationResponse')
       return const PressNotificationResponse();
     if (responseType == 'PressSmsResponse') return const PressSmsResponse();
-        if (responseType == 'VendorResponse') return const VendorResponse();
+    if (responseType == 'VendorResponse') return const VendorResponse();
     if (responseType == 'BranchesResponse') return const BranchesResponse();
+    if (responseType == 'ChangePhoneResponse')
+      return const ChangePhoneResponse();
+    if (responseType == 'ChangePasswordResponse')
+      return const ChangePasswordResponse();
     // Add new feature responses above this line, e.g.:
     // if (responseType == 'WalletResponse') return const WalletResponse();
 

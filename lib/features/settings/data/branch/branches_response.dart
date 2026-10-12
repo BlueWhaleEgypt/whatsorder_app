@@ -1,13 +1,13 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:whats_order/features/settings/data/branch_action.dart';
-import 'package:whats_order/features/settings/data/branch_request.dart';
+import 'package:whats_order/features/settings/data/branch/branch_action.dart';
+import 'package:whats_order/features/settings/data/branch/branch_request.dart';
 
-import '../../../base/base_repository.dart';
-import '../../../core/error/failures.dart';
-import '../../../core/network/dio_helper.dart';
-import '../../../core/network/end_points.dart';
-import '../../../core/utils/logger.dart';
+import '../../../../base/base_repository.dart';
+import '../../../../core/error/failures.dart';
+import '../../../../core/network/dio_helper.dart';
+import '../../../../core/network/end_points.dart';
+import '../../../../core/utils/logger.dart';
 import 'branch_model.dart';
 
 class BranchesResponse implements BaseRepository {

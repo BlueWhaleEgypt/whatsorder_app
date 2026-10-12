@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whats_order/features/auth/otp/presentation/bloc/otp_bloc.dart';
 import 'package:whats_order/features/auth/otp/presentation/screens/forgot_password_screen.dart';
 import 'package:whats_order/features/auth/otp/presentation/screens/verify_otp_screen.dart';
+import 'package:whats_order/features/auth/sign_up/presentation/cubit/onboarding_cubit.dart';
 import 'package:whats_order/features/auth/sign_up/presentation/screens/onboarding_screen.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_bloc.dart';
 import 'package:whats_order/features/orders/notification/presentation/screens/notification_screen.dart';
@@ -98,18 +99,14 @@ class AppRouter {
           builder: (_) => MultiBlocProvider(
             providers: [
               BlocProvider<VendorBloc>(create: (_) => sl<VendorBloc>()),
-              BlocProvider<BranchesBloc>(create: (_) => sl<BranchesBloc>()),
+              BlocProvider<OnboardingCubit>(
+                create: (_) => sl<OnboardingCubit>(),
+              ),
             ],
             child: const ProfileScreen(),
           ),
         );
-      // return MaterialPageRoute(
-      //   builder: (_) => BlocProvider(
-      //     create: (_) => sl<VendorBloc>(),
-      //     child: const ProfileScreen(),
-      //   ),
-      // );
-      // return MaterialPageRoute(builder: (_) =>  ProfileScreen());
+
       case NamedRoutes.notification:
         return MaterialPageRoute(
           builder: (_) => BlocProvider(

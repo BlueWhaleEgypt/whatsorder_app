@@ -1,5 +1,5 @@
-import 'package:whats_order/features/settings/data/branch_action.dart';
-import 'package:whats_order/features/settings/data/branch_model.dart';
+import 'package:whats_order/features/settings/data/branch/branch_action.dart';
+import 'package:whats_order/features/settings/data/branch/branch_model.dart';
 
 class BranchRequest {
   final BranchAction action;

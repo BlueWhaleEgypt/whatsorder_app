@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pinput/pinput.dart';
+import 'package:whats_order/core/cache/cache_helper.dart';
+import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/routing/named_routes.dart';
 import 'package:whats_order/features/auth/otp/presentation/bloc/otp_bloc.dart';
 import 'package:whats_order/features/auth/otp/presentation/bloc/otp_event.dart';
@@ -29,11 +31,26 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
     return BlocConsumer<OtpBloc, OtpState>(
       listener: (context, state) {
         if (state is VerifiedOtpState) {
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            NamedRoutes.signin,
-            (_) => false,
+          final token = CacheHelper.getDataFromSharedPreference(
+            key: CacheKeys.accessToken,
           );
+
+          if (token != null && token.toString().isNotEmpty) {
+            Navigator.of(
+              context,
+            ).pushNamedAndRemoveUntil(NamedRoutes.home, (r) => false);
+          } else {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              NamedRoutes.signin,
+              (_) => false,
+            );
+          }
+          // Navigator.pushNamedAndRemoveUntil(
+          //   context,
+          //   NamedRoutes.signin,
+          //   (_) => false,
+          // );
         }
 
         if (state is ErrorOtpState) {
