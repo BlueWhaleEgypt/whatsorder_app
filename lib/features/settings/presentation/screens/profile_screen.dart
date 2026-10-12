@@ -12,6 +12,7 @@ import 'package:whats_order/features/settings/presentation/widgets/branches_tab.
 import 'package:whats_order/features/settings/presentation/widgets/change_phone_tab.dart';
 import 'package:whats_order/features/settings/presentation/widgets/files_tab.dart';
 import 'package:whats_order/features/settings/presentation/widgets/location_tab.dart';
+import 'package:whats_order/features/settings/presentation/widgets/sectores_tap.dart';
 import 'package:whats_order/features/settings/presentation/widgets/security_tab.dart';
 import 'package:whats_order/features/settings/presentation/widgets/user_info_tab.dart';
 import 'package:whats_order/injection/injection_container.dart';
@@ -66,19 +67,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: IndexedStack(
                     index: selectedIndex,
                     children: [
+                      // info tap
                       UserInfoTab(vendor: vendor),
+                      // sectors tap
+                      SectorsTab(vendor: vendor),
+
+                      // change phone tap
                       BlocProvider(
                         create: (_) => sl<ChangePhoneBloc>(),
                         child: ChangePhoneTab(vendor: vendor),
                       ),
-
-                      // ChangePhoneTab(vendor: vendor),
+                      // location tap
                       LocationTab(vendor: vendor),
+                      // branch tap
                       BlocProvider(
                         create: (_) => sl<BranchesBloc>(),
                         child: BranchesTab(vendor: vendor),
                       ),
+                      // files tap
                       FilesTab(vendor: vendor),
+                      // security tap
                       SecurityTab(vendor: vendor),
                     ],
                   ),
@@ -95,6 +103,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildTopNavigation() {
     final tabs = [
+      _ProfileTab(
+        title: context.tr("profile"),
+        icon: Icons.person_outline_rounded,
+      ),
+      _ProfileTab(title: context.tr("sector"), icon: Icons.token_outlined),
       _ProfileTab(
         title: context.tr("profile"),
         icon: Icons.person_outline_rounded,

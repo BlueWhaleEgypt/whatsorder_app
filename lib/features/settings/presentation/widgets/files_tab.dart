@@ -53,17 +53,7 @@ class FilesTab extends StatelessWidget {
     required IconData icon,
   }) {
     final hasFile = fileName != null && fileName.trim().isNotEmpty;
-
-    /*
-     * IMPORTANT:
-     * Replace this with your real files endpoint.
-     *
-     * Example:
-     * https://ain.utes.ie/uploads/$fileName
-     */
-    // final imageUrl = hasFile
-    //     ? 'YOUR_FILES_BASE_URL/$fileName'
-    //     : null;
+    
     final imageUrl = hasFile ? '${EndPoints.baseUrl}/uploads/$fileName' : null;
     return Container(
       margin: const EdgeInsets.only(bottom: 18),
