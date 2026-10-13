@@ -7,7 +7,7 @@ import 'package:whats_order/core/widgets/app_text_field.dart';
 import 'package:whats_order/core/widgets/gradient_button.dart';
 import 'package:whats_order/features/orders/data/vendor_model.dart';
 import 'package:whats_order/features/settings/presentation/bloc/change_phone_bloc.dart';
-import 'package:whats_order/features/settings/presentation/bloc/change_phone_event.dart';
+import 'package:whats_order/features/settings/presentation/bloc/event/change_phone_event.dart';
 import 'package:whats_order/features/settings/presentation/bloc/change_phone_state.dart';
 
 class ChangePhoneTab extends StatefulWidget {

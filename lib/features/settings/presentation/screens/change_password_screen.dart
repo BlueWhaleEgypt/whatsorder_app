@@ -5,7 +5,7 @@ import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/core/widgets/gradient_button.dart';
 import 'package:whats_order/core/widgets/password_field.dart';
 import 'package:whats_order/features/settings/presentation/bloc/change_password_bloc.dart';
-import 'package:whats_order/features/settings/presentation/bloc/change_password_event.dart';
+import 'package:whats_order/features/settings/presentation/bloc/event/change_password_event.dart';
 import 'package:whats_order/features/settings/presentation/bloc/change_password_state.dart';
 
 class ChangePasswordScreen extends StatefulWidget {

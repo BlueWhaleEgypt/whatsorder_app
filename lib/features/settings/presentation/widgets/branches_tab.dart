@@ -13,19 +13,17 @@ import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/core/widgets/map_picker_field.dart';
 import 'package:whats_order/features/auth/sign_in/data/user_model.dart';
 import 'package:whats_order/features/auth/sign_up/presentation/screens/widgets/map_picker_page.dart';
-import 'package:whats_order/features/orders/data/vendor_model.dart';
 import 'package:whats_order/features/settings/data/branch/branch_model.dart';
 import 'package:whats_order/features/settings/presentation/bloc/branches_bloc.dart';
-import 'package:whats_order/features/settings/presentation/bloc/branches_event.dart';
-import 'package:whats_order/features/settings/presentation/bloc/branches_state.dart';
+import 'package:whats_order/features/settings/presentation/bloc/event/branches_event.dart';
+import 'package:whats_order/features/settings/presentation/bloc/states/branches_state.dart';
 
 import '../../../../core/utils/logger.dart';
 
-
 class BranchesTab extends StatefulWidget {
-  final VendorModel vendor;
+  // final VendorModel vendor;
 
-  const BranchesTab({super.key, required this.vendor});
+  const BranchesTab({super.key});
 
   @override
   State<BranchesTab> createState() => _BranchesTabState();
@@ -65,80 +63,85 @@ class _BranchesTabState extends State<BranchesTab> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.tr('branches_description'),
-            style: const TextStyle(color: Colors.grey, fontSize: 13),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  context.tr('branches'),
-                  style: AppTextStyles.cardTitle15,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(context.tr("profile"), style: AppTextStyles.heading18),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.tr('branches_description'),
+              style: const TextStyle(color: Colors.grey, fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    context.tr('branches'),
+                    style: AppTextStyles.cardTitle15,
+                  ),
                 ),
-              ),
-              FilledButton.icon(
-                onPressed: _userId.isEmpty ? null : () => _showBranchForm(),
-                icon: const Icon(Icons.add, size: 18),
-                label: Text(context.tr('add_branch')),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primaryGreen,
+                FilledButton.icon(
+                  onPressed: _userId.isEmpty ? null : () => _showBranchForm(),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: Text(context.tr('add_branch')),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primaryGreen,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          BlocConsumer<BranchesBloc, BranchesState>(
-            listener: (context, state) {
-              if (state is BranchesActionSuccessState) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(context.tr(state.message))),
+              ],
+            ),
+            const SizedBox(height: 12),
+            BlocConsumer<BranchesBloc, BranchesState>(
+              listener: (context, state) {
+                if (state is BranchesActionSuccessState) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(context.tr(state.message))),
+                  );
+                } else if (state is BranchesErrorState) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(state.message)));
+                }
+              },
+              builder: (context, state) {
+                if (state is BranchesLoadingState ||
+                    state is BranchesInitialState) {
+                  return const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                final branches = switch (state) {
+                  BranchesLoadedState s => s.branches,
+                  BranchesActionLoadingState s => s.branches,
+                  BranchesActionSuccessState s => s.branches,
+                  BranchesErrorState s => s.branches,
+                  _ => <BranchModel>[],
+                };
+
+                if (branches.isEmpty && state is! BranchesActionLoadingState) {
+                  return _emptyState(context);
+                }
+
+                return Column(
+                  children: [
+                    if (state is BranchesActionLoadingState)
+                      const LinearProgressIndicator(
+                        color: AppColors.primaryGreen,
+                      ),
+                    ...branches.map((branch) => _branchCard(context, branch)),
+                  ],
                 );
-              } else if (state is BranchesErrorState) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(state.message)));
-              }
-            },
-            builder: (context, state) {
-              if (state is BranchesLoadingState ||
-                  state is BranchesInitialState) {
-                return const Padding(
-                  padding: EdgeInsets.all(32),
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              }
-
-              final branches = switch (state) {
-                BranchesLoadedState s => s.branches,
-                BranchesActionLoadingState s => s.branches,
-                BranchesActionSuccessState s => s.branches,
-                BranchesErrorState s => s.branches,
-                _ => <BranchModel>[],
-              };
-
-              if (branches.isEmpty && state is! BranchesActionLoadingState) {
-                return _emptyState(context);
-              }
-
-              return Column(
-                children: [
-                  if (state is BranchesActionLoadingState)
-                    const LinearProgressIndicator(
-                      color: AppColors.primaryGreen,
-                    ),
-                  ...branches.map((branch) => _branchCard(context, branch)),
-                ],
-              );
-            },
-          ),
-        ],
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

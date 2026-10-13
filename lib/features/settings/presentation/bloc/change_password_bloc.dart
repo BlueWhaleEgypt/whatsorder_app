@@ -3,7 +3,7 @@ import 'package:whats_order/base/base_repository.dart';
 import 'package:whats_order/core/network/network_info.dart';
 import 'package:whats_order/features/settings/data/password/change_password_response.dart';
 
-import 'change_password_event.dart';
+import 'event/change_password_event.dart';
 import 'change_password_state.dart';
 
 class ChangePasswordBloc

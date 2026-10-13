@@ -11,6 +11,7 @@ import 'package:whats_order/features/orders/notification/data/sms_messages_respo
 import 'package:whats_order/features/settings/data/branch/branches_response.dart';
 import 'package:whats_order/features/settings/data/password/change_password_response.dart';
 import 'package:whats_order/features/settings/data/phone/change_phone_response.dart';
+import 'package:whats_order/features/settings/data/sector/sector_tap_response.dart';
 import 'package:whats_order/features/wallet/data/transaction_response.dart';
 import 'package:whats_order/features/wallet/data/wallet_response.dart';
 import '../core/error/failures.dart';
@@ -66,6 +67,8 @@ abstract class BaseRepository {
       return const ChangePhoneResponse();
     if (responseType == 'ChangePasswordResponse')
       return const ChangePasswordResponse();
+          if (responseType == 'SectorTapResponse')
+      return const SectorTapResponse();
     // Add new feature responses above this line, e.g.:
     // if (responseType == 'WalletResponse') return const WalletResponse();
 

@@ -22,4 +22,6 @@ class NamedRoutes {
   static const String profile = "/profile";
   static const String notification = "/notification";
   static const String smsMessages = "/sms_messages";
+  static const String branches = '/branches';
+  static const String sectors = '/sectors';
 }

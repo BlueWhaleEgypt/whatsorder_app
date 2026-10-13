@@ -4,7 +4,7 @@ import 'package:whats_order/core/network/network_info.dart';
 import 'package:whats_order/core/utils/logger.dart';
 import 'package:whats_order/features/settings/data/phone/change_phone_response.dart';
 
-import 'change_phone_event.dart';
+import 'event/change_phone_event.dart';
 import 'change_phone_state.dart';
 
 class ChangePhoneBloc extends Bloc<ChangePhoneEvent, ChangePhoneState> {

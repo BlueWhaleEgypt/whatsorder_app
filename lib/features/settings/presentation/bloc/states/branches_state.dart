@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../data/branch/branch_model.dart';
+import '../../../data/branch/branch_model.dart';
 
 abstract class BranchesState extends Equatable {
   const BranchesState();

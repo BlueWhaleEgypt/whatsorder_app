@@ -47,6 +47,13 @@ class SettingsScreen extends StatelessWidget {
             _SettingsGroup(
               children: [
                 _SettingsTile(
+                  icon: Icons.store,
+                  label: context.tr('branches'),
+                  onTap: () =>
+                      Navigator.pushNamed(context, NamedRoutes.branches),
+                ),
+
+                _SettingsTile(
                   icon: Icons.language_outlined,
                   label: context.tr('language'),
                   trailing: context.tr('language_label'),
@@ -163,7 +170,6 @@ class SettingsScreen extends StatelessWidget {
 class _ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
     final user = CacheHelper.getDataFromSharedPreference(
       key: CacheKeys.firstName,
     );
@@ -202,10 +208,7 @@ class _ProfileHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '${user ?? ''}',
-                    style: AppTextStyles.cardTitle15,
-                  ),
+                  Text('${user ?? ''}', style: AppTextStyles.cardTitle15),
                   const SizedBox(height: 2),
                   Text(
                     context.tr("edit_profile"),

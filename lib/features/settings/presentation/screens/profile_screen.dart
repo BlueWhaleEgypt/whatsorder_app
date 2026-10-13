@@ -6,9 +6,8 @@ import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
 import 'package:whats_order/features/orders/presentation/bloc/vendor_event.dart';
 import 'package:whats_order/features/orders/presentation/bloc/vendor_state.dart';
-import 'package:whats_order/features/settings/presentation/bloc/branches_bloc.dart';
 import 'package:whats_order/features/settings/presentation/bloc/change_phone_bloc.dart';
-import 'package:whats_order/features/settings/presentation/widgets/branches_tab.dart';
+import 'package:whats_order/features/settings/presentation/bloc/sectors_bloc.dart';
 import 'package:whats_order/features/settings/presentation/widgets/change_phone_tab.dart';
 import 'package:whats_order/features/settings/presentation/widgets/files_tab.dart';
 import 'package:whats_order/features/settings/presentation/widgets/location_tab.dart';
@@ -69,23 +68,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       // info tap
                       UserInfoTab(vendor: vendor),
-                      // sectors tap
-                      SectorsTab(vendor: vendor),
 
+                      // files tap
+                      FilesTab(vendor: vendor),
+                      // location tap
+                      LocationTab(vendor: vendor),
+                      // sectors tap
+                      BlocProvider(
+                        create: (_) => sl<SectorsBloc>(),
+                        child: SectorsTab(vendor: vendor),
+                      ),
                       // change phone tap
                       BlocProvider(
                         create: (_) => sl<ChangePhoneBloc>(),
                         child: ChangePhoneTab(vendor: vendor),
                       ),
-                      // location tap
-                      LocationTab(vendor: vendor),
-                      // branch tap
-                      BlocProvider(
-                        create: (_) => sl<BranchesBloc>(),
-                        child: BranchesTab(vendor: vendor),
-                      ),
-                      // files tap
-                      FilesTab(vendor: vendor),
+
                       // security tap
                       SecurityTab(vendor: vendor),
                     ],
@@ -107,21 +105,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: context.tr("profile"),
         icon: Icons.person_outline_rounded,
       ),
-      _ProfileTab(title: context.tr("sector"), icon: Icons.token_outlined),
-      _ProfileTab(
-        title: context.tr("profile"),
-        icon: Icons.person_outline_rounded,
-      ),
-      _ProfileTab(
-        title: context.tr("change_phone"),
-        icon: Icons.phone_android_outlined,
-      ),
+      _ProfileTab(title: context.tr("files"), icon: Icons.description_outlined),
       _ProfileTab(
         title: context.tr("location"),
         icon: Icons.location_on_outlined,
       ),
-      _ProfileTab(title: context.tr("branches"), icon: Icons.store_outlined),
-      _ProfileTab(title: context.tr("files"), icon: Icons.description_outlined),
+      _ProfileTab(title: context.tr("sector"), icon: Icons.token_outlined),
+      _ProfileTab(
+        title: context.tr("change_phone"),
+        icon: Icons.phone_android_outlined,
+      ),
+
       _ProfileTab(
         title: context.tr("security"),
         icon: Icons.lock_outline_rounded,

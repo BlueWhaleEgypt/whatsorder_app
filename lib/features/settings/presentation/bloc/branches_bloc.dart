@@ -145,8 +145,8 @@ import 'package:whats_order/features/settings/data/branch/branch_request.dart';
 
 import '../../data/branch/branch_model.dart';
 import '../../data/branch/branches_response.dart';
-import 'branches_event.dart';
-import 'branches_state.dart';
+import 'event/branches_event.dart';
+import 'states/branches_state.dart';
 
 class BranchesBloc extends Bloc<BranchesEvent, BranchesState> {
   final NetworkInfo networkInfo;
