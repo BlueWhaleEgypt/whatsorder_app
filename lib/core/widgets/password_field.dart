@@ -10,14 +10,14 @@ import 'app_text_field.dart';
 
 class PasswordField extends StatefulWidget {
   final String label;
-  final String hint;
+  final String? hint;
   final TextEditingController? controller;
   final String? Function(String?)? validator;
 
   const PasswordField({
     super.key,
     required this.label,
-    this.hint = "Min. 8 characters",
+    this.hint,
     this.controller,
     this.validator,
   });

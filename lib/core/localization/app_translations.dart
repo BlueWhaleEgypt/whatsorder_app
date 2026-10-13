@@ -516,6 +516,11 @@ const Map<String, Map<String, String>> kTranslations = {
     "phone_verification": "التحقق من رقم الهاتف",
     "phone_number_missing": "رقم الهاتف غير موجود",
     "delete_sector_confirmation": "هل أنت متأكد أنك تريد حذف القطاع",
+    "old_password": "كلمة المرور الحالية",
+    "new_password": "كلمة المرور الجديدة",
+    "confirm_new_password": "تأكيد كلمة المرور الجديدة",
+    "field_required": "هذا الحقل مطلوب",
+    "save_new_password": "حفظ كلمة المرور الجديدة",
 
     //sms
     'sms_messages': 'رسائل SMS',

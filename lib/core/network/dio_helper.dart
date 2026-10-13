@@ -30,10 +30,7 @@ class DioHelper {
 
   static init() {
     dio = Dio(
-      BaseOptions(
-        baseUrl: EndPoints.baseUrl,
-        receiveDataWhenStatusError: true,
-      ),
+      BaseOptions(baseUrl: EndPoints.baseUrl, receiveDataWhenStatusError: true),
     );
 
     // Add 401 interceptor once here
@@ -74,9 +71,7 @@ class DioHelper {
       ),
     };
     dio.options.headers['Authorization'] =
-        'Bearer ${token ?? CacheHelper.getDataFromSharedPreference(
-              key: CacheKeys.accessToken,
-            )}';
+        'Bearer ${token ?? CacheHelper.getDataFromSharedPreference(key: CacheKeys.accessToken)}';
 
     return await dio.download(
       url,
@@ -94,13 +89,40 @@ class DioHelper {
     dio.options.headers = {
       'Accept': 'application/json',
       'Authorization':
-          "Bearer ${token ?? CacheHelper.getDataFromSharedPreference(
-                key: CacheKeys.accessToken,
-              )}",
+          "Bearer ${token ?? CacheHelper.getDataFromSharedPreference(key: CacheKeys.accessToken)}",
     };
-    return await dio.delete(
+    return await dio.delete(url, queryParameters: query);
+  }
+
+  static Future<Response> putData({
+    required String url,
+    Map<String, dynamic>? query,
+    Map<String, dynamic>? body,
+    bool isForm = false,
+    String? token,
+    FormData? formDataOverride,
+  }) async {
+    if (formDataOverride != null) {
+      dio.options.headers = {
+        'Accept': 'application/json',
+        'Authorization':
+            "Bearer ${token ?? CacheHelper.getDataFromSharedPreference(key: CacheKeys.accessToken)}",
+      };
+
+      return await dio.put(url, queryParameters: query, data: formDataOverride);
+    }
+
+    dio.options.headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization':
+          "Bearer ${token ?? CacheHelper.getDataFromSharedPreference(key: CacheKeys.accessToken)}",
+    };
+
+    return await dio.put(
       url,
       queryParameters: query,
+      data: body != null && isForm ? FormData.fromMap(body) : body,
     );
   }
 
@@ -114,9 +136,7 @@ class DioHelper {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
       'Authorization':
-          "Bearer ${token ?? CacheHelper.getDataFromSharedPreference(
-                key: CacheKeys.accessToken,
-              )}",
+          "Bearer ${token ?? CacheHelper.getDataFromSharedPreference(key: CacheKeys.accessToken)}",
     };
     return await dio.get(url, queryParameters: query);
   }
@@ -133,27 +153,25 @@ class DioHelper {
     /// auto-inject the correct multipart boundary.
     FormData? formDataOverride,
   }) async {
-
     if (formDataOverride != null) {
       // For multipart uploads let Dio manage Content-Type (boundary header).
       dio.options.headers = {
         'Accept': 'application/json',
         'Authorization':
-            "Bearer ${token ?? CacheHelper.getDataFromSharedPreference(
-                  key: CacheKeys.accessToken,
-                )}",
+            "Bearer ${token ?? CacheHelper.getDataFromSharedPreference(key: CacheKeys.accessToken)}",
       };
-      return await dio.post(url,
-          queryParameters: query, data: formDataOverride);
+      return await dio.post(
+        url,
+        queryParameters: query,
+        data: formDataOverride,
+      );
     }
 
     dio.options.headers = {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
       'Authorization':
-          "Bearer ${token ?? CacheHelper.getDataFromSharedPreference(
-                key: CacheKeys.accessToken,
-              )}",
+          "Bearer ${token ?? CacheHelper.getDataFromSharedPreference(key: CacheKeys.accessToken)}",
     };
     return await dio.post(
       url,

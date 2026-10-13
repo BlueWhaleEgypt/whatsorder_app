@@ -26,6 +26,10 @@ class VendorModel extends Equatable {
   final List<String>? rolesStr;
   final List<String>? privilegesStr;
   final String? city;
+  final String? street;
+  final String? building;
+  final String? area;
+  final String? neighborhood;
   final String? state;
   final bool? servingTheEntireGovernorate;
   final bool? servingTheEntireArea;
@@ -67,6 +71,10 @@ class VendorModel extends Equatable {
     this.rolesStr,
     this.privilegesStr,
     this.city,
+    this.street,
+    this.building,
+    this.area,
+    this.neighborhood,
     this.state,
     this.servingTheEntireGovernorate,
     this.servingTheEntireArea,
@@ -94,43 +102,43 @@ class VendorModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        username,
-        phone,
-        email,
-        firstName,
-        lastName,
-        verifiedPhone,
-        type,
-        serviceDistance,
-        chatId,
-        latitude,
-        longitude,
-        createdDate,
-        activation,
-        usedReferralNumber,
-        rolesStr,
-        privilegesStr,
-        city,
-        state,
-        servingTheEntireGovernorate,
-        servingTheEntireArea,
-        availableInAllRegions,
-        faceIdCard,
-        backIdCard,
-        commercialRegister,
-        sectors,
-        rate,
-        averageRate,
-        availForOrders,
-        activationDate,
-        verificationStatus,
-        whatsappNotificationsEnabled,
-        freeWhatsappMessagesUsed,
-        trialDays,
-        firstLogin,
-        readLicense,
-      ];
+    id,
+    username,
+    phone,
+    email,
+    firstName,
+    lastName,
+    verifiedPhone,
+    type,
+    serviceDistance,
+    chatId,
+    latitude,
+    longitude,
+    createdDate,
+    activation,
+    usedReferralNumber,
+    rolesStr,
+    privilegesStr,
+    city,
+    state,
+    servingTheEntireGovernorate,
+    servingTheEntireArea,
+    availableInAllRegions,
+    faceIdCard,
+    backIdCard,
+    commercialRegister,
+    sectors,
+    rate,
+    averageRate,
+    availForOrders,
+    activationDate,
+    verificationStatus,
+    whatsappNotificationsEnabled,
+    freeWhatsappMessagesUsed,
+    trialDays,
+    firstLogin,
+    readLicense,
+  ];
 }
 
 @JsonSerializable()
@@ -155,11 +163,5 @@ class VendorSectorModel extends Equatable {
   Map<String, dynamic> toJson() => _$VendorSectorModelToJson(this);
 
   @override
-  List<Object?> get props => [
-        id,
-        name,
-        note,
-        cost,
-        view,
-      ];
+  List<Object?> get props => [id, name, note, cost, view];
 }

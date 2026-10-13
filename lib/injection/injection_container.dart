@@ -10,6 +10,7 @@ import 'package:whats_order/features/settings/presentation/bloc/branches_bloc.da
 import 'package:whats_order/features/settings/presentation/bloc/change_password_bloc.dart';
 import 'package:whats_order/features/settings/presentation/bloc/change_phone_bloc.dart';
 import 'package:whats_order/features/settings/presentation/bloc/sectors_bloc.dart';
+import 'package:whats_order/features/settings/presentation/bloc/update_profile_bloc.dart';
 import 'package:whats_order/features/wallet/presentation/bloc/transaction_bloc.dart';
 import 'package:whats_order/features/wallet/presentation/bloc/wallet_bloc.dart';
 import '../core/network/network_info.dart';
@@ -47,6 +48,7 @@ Future<void> init() async {
   sl.registerFactory(() => ChangePasswordBloc(sl()));
   sl.registerFactory(() => ChangePhoneBloc(sl()));
   sl.registerFactory(() => SectorsBloc(sl()));
+  sl.registerFactory(() => UpdateProfileBloc(sl()));
 
   // Add every new feature's Bloc here, e.g.:
   // sl.registerFactory(() => WalletBloc(sl()));

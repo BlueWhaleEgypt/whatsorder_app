@@ -8,6 +8,7 @@ import 'package:whats_order/features/orders/presentation/bloc/vendor_event.dart'
 import 'package:whats_order/features/orders/presentation/bloc/vendor_state.dart';
 import 'package:whats_order/features/settings/presentation/bloc/change_phone_bloc.dart';
 import 'package:whats_order/features/settings/presentation/bloc/sectors_bloc.dart';
+import 'package:whats_order/features/settings/presentation/bloc/update_profile_bloc.dart';
 import 'package:whats_order/features/settings/presentation/widgets/change_phone_tab.dart';
 import 'package:whats_order/features/settings/presentation/widgets/files_tab.dart';
 import 'package:whats_order/features/settings/presentation/widgets/location_tab.dart';
@@ -66,13 +67,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: IndexedStack(
                     index: selectedIndex,
                     children: [
-                      // info tap
-                      UserInfoTab(vendor: vendor),
+                      // Info tab
+                      BlocProvider(
+                        create: (_) => sl<UpdateProfileBloc>(),
+                        child: UserInfoTab(vendor: vendor),
+                      ),
 
-                      // files tap
-                      FilesTab(vendor: vendor),
-                      // location tap
-                      LocationTab(vendor: vendor),
+                      // Files tab
+                      BlocProvider(
+                        create: (_) => sl<UpdateProfileBloc>(),
+                        child: FilesTab(vendor: vendor),
+                      ),
+
+                      // Location tab
+                      BlocProvider(
+                        create: (_) => sl<UpdateProfileBloc>(),
+                        child: LocationTab(vendor: vendor),
+                      ),
+                      // // info tap
+                      // UserInfoTab(vendor: vendor),
+
+                      // // files tap
+                      // FilesTab(vendor: vendor),
+                      // // location tap
+                      // LocationTab(vendor: vendor),
                       // sectors tap
                       BlocProvider(
                         create: (_) => sl<SectorsBloc>(),

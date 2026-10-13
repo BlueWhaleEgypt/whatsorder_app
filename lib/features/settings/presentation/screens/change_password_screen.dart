@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
+import 'package:whats_order/core/utils/logger.dart';
 import 'package:whats_order/core/widgets/gradient_button.dart';
 import 'package:whats_order/core/widgets/password_field.dart';
 import 'package:whats_order/features/settings/presentation/bloc/change_password_bloc.dart';
@@ -20,11 +21,13 @@ class ChangePasswordScreen extends StatefulWidget {
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  final _oldPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
+    _oldPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -54,7 +57,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              context.tr("change_password"),
+              context.tr('change_password'),
               style: AppTextStyles.heading18,
             ),
           ),
@@ -65,32 +68,59 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 padding: const EdgeInsets.all(20),
                 children: [
                   const SizedBox(height: 24),
+
+                  // Old password
                   PasswordField(
-                    label: context.tr("password"),
-                    controller: _newPasswordController,
-                    validator: (v) => (v == null || v.length < 8)
-                        ? context.tr("minimum_8_characters")
-                        : null,
+                    label: context.tr('old_password'),
+                    controller: _oldPasswordController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return context.tr('field_required');
+                      }
+                      return null;
+                    },
                   ),
-                  PasswordField(
-                    label: context.tr("password"),
-                    controller: _newPasswordController,
-                    validator: (v) => (v == null || v.length < 8)
-                        ? context.tr("minimum_8_characters")
-                        : null,
-                  ),
+
                   const SizedBox(height: 16),
+
+                  // New password
                   PasswordField(
-                    label: context.tr("confirm_password"),
-                    controller: _confirmPasswordController,
-                    validator: (v) => (v != _newPasswordController.text)
-                        ? context.tr("passwords_dont_match")
-                        : null,
+                    label: context.tr('new_password'),
+                    controller: _newPasswordController,
+                    hint: context.tr('minimum_8_characters'),
+                    validator: (value) {
+                      if (value == null || value.length < 8) {
+                        return context.tr('minimum_8_characters');
+                      }
+                      return null;
+                    },
                   ),
+
+                  const SizedBox(height: 16),
+
+                  // Confirm new password
+                  PasswordField(
+                    label: context.tr('confirm_password'),
+                    controller: _confirmPasswordController,
+                    hint: context.tr('minimum_8_characters'),
+
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return context.tr('field_required');
+                      }
+
+                      if (value != _newPasswordController.text) {
+                        return context.tr('passwords_dont_match');
+                      }
+
+                      return null;
+                    },
+                  ),
+
                   const SizedBox(height: 28),
 
                   GradientButton(
-                    label: 'Save New Password',
+                    label: context.tr('save_new_password'),
                     loading: isLoading,
                     onPressed: isLoading
                         ? null
@@ -98,11 +128,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                             if (!_formKey.currentState!.validate()) {
                               return;
                             }
+                            logger.i(widget.userId);
+                            logger.i(_oldPasswordController.text);
+                            logger.i(_newPasswordController.text);
 
                             context.read<ChangePasswordBloc>().add(
                               SubmitChangePasswordEvent(
                                 userId: widget.userId,
-                                plainPassword: "",
+                                plainPassword: _oldPasswordController.text,
                                 newPassword: _newPasswordController.text,
                               ),
                             );

@@ -2,6 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:whats_order/base/base_repository.dart';
+import 'package:whats_order/core/cache/cache_helper.dart';
+import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/error/failures.dart';
 
 import 'package:whats_order/core/network/dio_helper.dart';
@@ -24,17 +26,20 @@ class ChangePasswordResponse extends Equatable implements BaseRepository {
   @override
   Future<Either<Failure, BaseRepository>> getData(dynamic request) async {
     try {
+      final body = {
+        'plainPassword': request['plainPassword'],
+        'newPassword': request['newPassword'],
+        'userId': request['userId'],
+      };
+      logger.w(body);
       final response = await DioHelper.postData(
         url: '${EndPoints.baseUrl}${EndPoints.epSaveNewPassword}',
-        body: {
-          'plainPassword': request['plainPassword'],
-          'newPassword': request['newPassword'],
-          'userId': request['userId'],
-        },
+        body: body,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
+        await CacheHelper.removeData(key: CacheKeys.rememberMe);
         logger.i(data);
         return Right(
           ChangePasswordResponse(
