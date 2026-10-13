@@ -226,6 +226,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'new_phone': 'New Phone Number',
     'current_phone': 'Current Phone Number',
     'change_password': 'Change Password',
+    'mange_passoword': 'Update your account password',
 
     //branches
     "branches": "Branches",
@@ -249,6 +250,18 @@ const Map<String, Map<String, String>> kTranslations = {
     "branch_added_successfully": "Branch added successfully",
     "branch_updated_successfully": "Branch updated successfully",
     "branch_deleted_successfully": "Branch deleted successfully",
+    "verification_status": "Verification Status",
+    "verified": "Verified",
+    "not_verified": "Not verified",
+    "activation_status": "Activation Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "whatsapp_notifications": "WhatsApp Notifications",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "phone_verification": "Phone Verification",
+    "phone_number_missing": "Phone number is missing",
+    "delete_sector_confirmation": "Are you sure you want to delete",
 
     //sms
     'sms_messages': 'SMS Messages',
@@ -490,6 +503,20 @@ const Map<String, Map<String, String>> kTranslations = {
     "branch_deleted_successfully": "تم حذف الفرع بنجاح",
     'save_changes': 'حفظ التغييرات',
     'change_password': 'تغير كلمة المرور',
+    'mange_password': 'حدث كلمة مرود حسابك',
+    "verification_status": "حالة التحقق",
+    "verified": "تم التحقق",
+    "not_verified": "لم يتم التحقق",
+    "activation_status": "حالة التفعيل",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "whatsapp_notifications": "إشعارات واتساب",
+    "enabled": "مفعّلة",
+    "disabled": "معطّلة",
+    "phone_verification": "التحقق من رقم الهاتف",
+    "phone_number_missing": "رقم الهاتف غير موجود",
+    "delete_sector_confirmation": "هل أنت متأكد أنك تريد حذف القطاع",
+
     //sms
     'sms_messages': 'رسائل SMS',
 

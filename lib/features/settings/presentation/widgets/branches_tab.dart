@@ -191,14 +191,15 @@ class _BranchesTabState extends State<BranchesTab> {
                   Container(
                     width: 52,
                     height: 52,
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: AppColors.border,
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: SvgPicture.asset(
-                      AppAssets.store,
-                      width: 12,
-                      height: 12,
+                      AppAssets.stor,
+                      width: 8,
+                      height: 8,
                       colorFilter: const ColorFilter.mode(
                         AppColors.primaryGreenTint,
                         BlendMode.srcIn,

@@ -47,14 +47,30 @@ class SettingsScreen extends StatelessWidget {
             _SettingsGroup(
               children: [
                 _SettingsTile(
-                  icon: Icons.store,
+                  icon: SvgPicture.asset(
+                    AppAssets.stor,
+                    width: 20,
+                    height: 20,
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.primaryGreen,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                   label: context.tr('branches'),
                   onTap: () =>
                       Navigator.pushNamed(context, NamedRoutes.branches),
                 ),
 
                 _SettingsTile(
-                  icon: Icons.language_outlined,
+                  icon: SvgPicture.asset(
+                    AppAssets.lang,
+                    width: 20,
+                    height: 20,
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.primaryGreen,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                   label: context.tr('language'),
                   trailing: context.tr('language_label'),
                   onTap: () => _showLanguageDialog(context),
@@ -64,7 +80,15 @@ class SettingsScreen extends StatelessWidget {
                   valueListenable: NotificationCounter.notificationCount,
                   builder: (context, count, child) {
                     return _SettingsTile(
-                      icon: Icons.notifications_none_rounded,
+                      icon: SvgPicture.asset(
+                        AppAssets.ring,
+                        width: 20,
+                        height: 20,
+                        colorFilter: const ColorFilter.mode(
+                          AppColors.primaryGreen,
+                          BlendMode.srcIn,
+                        ),
+                      ),
                       label: context.tr('notifications'),
                       onTap: () => Navigator.pushNamed(
                         context,
@@ -86,7 +110,15 @@ class SettingsScreen extends StatelessWidget {
             _SettingsGroup(
               children: [
                 _SettingsTile(
-                  icon: Icons.lock_outline,
+                  icon: SvgPicture.asset(
+                    AppAssets.paper,
+                    width: 20,
+                    height: 20,
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.primaryGreen,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                   label: context.tr('terms_conditions'),
                   onTap: () {
                     Navigator.push(
@@ -98,12 +130,28 @@ class SettingsScreen extends StatelessWidget {
                   },
                 ),
                 _SettingsTile(
-                  icon: Icons.help_outline,
+                  icon: SvgPicture.asset(
+                    AppAssets.help,
+                    width: 20,
+                    height: 20,
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.primaryGreen,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                   label: context.tr('help_center'),
                   onTap: openWhatsApp,
                 ),
                 _SettingsTile(
-                  icon: Icons.logout,
+                  icon: SvgPicture.asset(
+                    AppAssets.logout,
+                    width: 20,
+                    height: 20,
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.danger,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                   label: context.tr('logout'),
                   iconColor: AppColors.danger,
                   labelColor: AppColors.danger,
@@ -256,7 +304,8 @@ class _SettingsGroup extends StatelessWidget {
 }
 
 class _SettingsTile extends StatelessWidget {
-  final IconData icon;
+  // final IconData icon;
+  final Widget icon;
   final String label;
   final String? trailing;
   final Color? iconColor;
@@ -276,7 +325,7 @@ class _SettingsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: onTap ?? () {},
-      leading: Icon(icon, size: 20, color: iconColor ?? AppColors.textGrey),
+      leading: icon,
       title: Text(
         label,
         style: AppTextStyles.cellText13.copyWith(
@@ -289,7 +338,7 @@ class _SettingsTile extends StatelessWidget {
           : const Icon(
               Icons.chevron_right,
               size: 18,
-              color: AppColors.textFaint,
+              color: AppColors.textGrey,
             ),
     );
   }

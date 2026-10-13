@@ -100,24 +100,127 @@ class _SectorsTabState extends State<SectorsTab> {
   }) async {
     final confirmed = await showDialog<bool>(
       context: context,
+      barrierDismissible: true,
       builder: (dialogContext) {
         return AlertDialog(
+          backgroundColor: AppColors.surface,
+          elevation: 0,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(24),
+            side: const BorderSide(color: AppColors.border),
           ),
-          title: const Text('Delete sector'),
-          content: Text('Are you sure you want to delete "$sectorName"?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Delete'),
-            ),
-          ],
+          contentPadding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Delete icon
+              Container(
+                width: 64,
+                height: 64,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.danger.withValues(alpha: 0.10),
+                  shape: BoxShape.circle,
+                ),
+                child: SvgPicture.asset(
+                  AppAssets.delete,
+                  width: 18,
+                  height: 18,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.danger,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              Text(
+                context.tr('delete_sector_confirmation'),
+                textAlign: TextAlign.center,
+                style: AppTextStyles.cellMuted13.copyWith(
+                  fontSize: 14,
+                  height: 1.6,
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Sector name
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        sectorName,
+                        style: AppTextStyles.cellText13.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Actions
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(dialogContext, false),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.textDark,
+                        side: const BorderSide(color: AppColors.border),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(context.tr('cancel')),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => Navigator.pop(dialogContext, true),
+                      icon: SvgPicture.asset(
+                        AppAssets.delete,
+                        width: 18,
+                        height: 18,
+                        colorFilter: const ColorFilter.mode(
+                          AppColors.editIconBg,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      label: Text(context.tr('delete')),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.danger,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         );
       },
     );
@@ -129,7 +232,7 @@ class _SectorsTabState extends State<SectorsTab> {
     if (userId.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('User ID is missing')));
+      ).showSnackBar(SnackBar(content: Text(context.tr('user_id_missing'))));
       return;
     }
 
@@ -269,8 +372,8 @@ class _SectorsTabState extends State<SectorsTab> {
                               tooltip: 'Delete sector',
                               icon: SvgPicture.asset(
                                 AppAssets.delete,
-                                width: 18,
-                                height: 18,
+                                width: 20,
+                                height: 20,
                                 colorFilter: const ColorFilter.mode(
                                   AppColors.danger,
                                   BlendMode.srcIn,

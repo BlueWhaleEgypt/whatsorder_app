@@ -24,7 +24,7 @@ class SectorsBloc extends Bloc<SectorsEvent, SectorsState> {
       userId: event.userId,
       sectorId: event.sectorId,
       action: 'add',
-      successMessage: 'sector_added_successfully',
+      successMessage: 'sector added successfully',
     );
   }
 
@@ -37,7 +37,7 @@ class SectorsBloc extends Bloc<SectorsEvent, SectorsState> {
       userId: event.userId,
       sectorId: event.sectorId,
       action: 'delete',
-      successMessage: 'sector_removed_successfully',
+      successMessage: 'sector removed successfully',
     );
   }
 

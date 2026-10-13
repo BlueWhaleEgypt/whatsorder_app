@@ -58,8 +58,8 @@ class SecurityTab extends StatelessWidget {
                 _securityTile(
                   icon: Icons.lock_outline_rounded,
                   trailingIcon: Icons.chevron_right_rounded,
-                  title: 'Change Password',
-                  subtitle: 'Update your account password',
+                  title: context.tr('change_password'),
+                  subtitle: context.tr('mange_password'),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -76,8 +76,10 @@ class SecurityTab extends StatelessWidget {
                 ),
                 _securityTile(
                   icon: Icons.phone_android_outlined,
-                  title: 'Phone Verification',
-                  subtitle: phoneVerified ? 'Verified' : 'Not verified',
+                  title: context.tr('phone_verification'),
+                  subtitle: phoneVerified
+                      ? context.tr('verified')
+                      : context.tr('not_verified'),
                   trailingIcon: phoneVerified
                       ? null
                       : Icons.chevron_right_rounded,
@@ -89,8 +91,10 @@ class SecurityTab extends StatelessWidget {
 
                           if (phone.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Phone number is missing'),
+                              SnackBar(
+                                content: Text(
+                                  context.tr('phone_number_missing'),
+                                ),
                               ),
                             );
                             return;
@@ -102,22 +106,28 @@ class SecurityTab extends StatelessWidget {
 
                 _securityTile(
                   icon: Icons.verified,
-                  title: 'Verification Status',
-                  subtitle: isVerified ? 'Verified' : 'Not verified',
+                  title: context.tr('verification_status'),
+                  subtitle: isVerified
+                      ? context.tr('verified')
+                      : context.tr('not_verified'),
                   onTap: () {},
                 ),
 
                 _securityTile(
                   icon: Icons.verified_user_outlined,
-                  title: 'Activation Status',
-                  subtitle: isActive ? 'Active' : 'Inactive',
+                  title: context.tr('activation_status'),
+                  subtitle: isActive
+                      ? context.tr('active')
+                      : context.tr('inactive'),
                   onTap: () {},
                 ),
 
                 _securityTile(
                   icon: Icons.notifications_active_outlined,
-                  title: 'WhatsApp Notifications',
-                  subtitle: whatsappEnabled ? 'Enabled' : 'Disabled',
+                  title: context.tr('whatsapp_notifications'),
+                  subtitle: whatsappEnabled
+                      ? context.tr('enabled')
+                      : context.tr('disabled'),
                   onTap: () {},
                 ),
               ],
