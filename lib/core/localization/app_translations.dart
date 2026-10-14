@@ -136,7 +136,8 @@ const Map<String, Map<String, String>> kTranslations = {
     "fp_step_otp": "Verify",
     "fp_step_password": "Password",
     "fp_phone_title": "Reset your password",
-    "fp_phone_desc": "Enter the phone number linked to your account and we will send you a verification code.",
+    "fp_phone_desc":
+        "Enter the phone number linked to your account and we will send you a verification code.",
     "fp_otp_title": "Verify your phone",
     "fp_otp_desc": "Enter the 6-digit code we sent to",
     "fp_password_title": "Create a new password",
@@ -298,6 +299,8 @@ const Map<String, Map<String, String>> kTranslations = {
     "phone_number_missing": "Phone number is missing",
     "delete_sector_confirmation": "Are you sure you want to delete",
     "delete_sector": "Delete Sector",
+    "branch_saved_refresh_failed":
+        "Your change was saved, but the branch list could not be refreshed.",
     "user_id_missing": "User ID is missing",
     "something_went_wrong": "Something went wrong. Please try again.",
     "invalid_request": "Invalid request. Please check your data and try again.",
@@ -600,6 +603,8 @@ const Map<String, Map<String, String>> kTranslations = {
     "phone_number_missing": "رقم الهاتف غير موجود",
     "delete_sector_confirmation": "هل أنت متأكد أنك تريد حذف القطاع",
     "delete_sector": "حذف قطاع",
+    "branch_saved_refresh_failed":
+        "تم حفظ التغيير، لكن تعذر تحديث قائمة الفروع.",
     "user_id_missing": "معرّف المستخدم غير موجود",
     "something_went_wrong": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
     "invalid_request":

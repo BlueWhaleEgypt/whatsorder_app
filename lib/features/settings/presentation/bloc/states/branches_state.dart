@@ -43,8 +43,10 @@ class BranchesErrorState extends BranchesState {
     this.branches = const [],
   });
 
+  // Every error is its own event: repeating the same failure (e.g. offline
+  // twice in a row) must still reach the UI, so equality is by identity.
   @override
-  List<Object?> get props => [message, branches];
+  List<Object?> get props => [identityHashCode(this)];
 }
 
 class BranchesActionSuccessState extends BranchesState {

@@ -139,6 +139,7 @@ class _BranchesTabState extends State<BranchesTab> {
                       const LinearProgressIndicator(
                         color: AppColors.primaryGreen,
                       ),
+                    const SizedBox(height: 6),
                     ...branches.map(
                       (branch) => BranchCard(
                         branch: branch,

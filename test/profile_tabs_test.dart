@@ -738,6 +738,20 @@ void main() {
       expect(tester.widget<FilledButton>(add).onPressed, isNotNull);
     });
 
+    testWidgets('offline and refresh-failed messages are friendly', (
+      tester,
+    ) async {
+      await pump(tester, locale: 'ar');
+      bloc.show(const BranchesErrorState('no_internet'));
+      await tester.pumpAndSettle();
+      expect(snackBarText(_ar('no_internet')), findsOneWidget);
+
+      await clearSnackBars(tester);
+      bloc.show(const BranchesErrorState('branch_saved_refresh_failed'));
+      await tester.pumpAndSettle();
+      expect(snackBarText(_ar('branch_saved_refresh_failed')), findsOneWidget);
+    });
+
     testWidgets('errors are sanitised; successes are localized', (
       tester,
     ) async {
