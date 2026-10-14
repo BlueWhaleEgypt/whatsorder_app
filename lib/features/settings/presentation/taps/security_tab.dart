@@ -8,6 +8,7 @@ import 'package:whats_order/features/auth/otp/presentation/bloc/otp_bloc.dart';
 import 'package:whats_order/features/auth/otp/presentation/bloc/otp_event.dart';
 import 'package:whats_order/features/auth/otp/presentation/bloc/otp_state.dart';
 import 'package:whats_order/features/orders/data/vendor_model.dart';
+import 'package:whats_order/features/orders/presentation/screens/account_verification_screen.dart';
 import 'package:whats_order/features/settings/presentation/bloc/change_password_bloc.dart';
 import 'package:whats_order/features/settings/presentation/screens/change_password_screen.dart';
 import 'package:whats_order/injection/injection_container.dart';
@@ -103,14 +104,23 @@ class SecurityTab extends StatelessWidget {
                           context.read<OtpBloc>().add(SendOtpEvent(phone));
                         },
                 ),
-
                 _securityTile(
                   icon: Icons.verified,
                   title: context.tr('verification_status'),
                   subtitle: isVerified
                       ? context.tr('verified')
                       : context.tr('not_verified'),
-                  onTap: () {},
+                  trailingIcon: isVerified ? null : Icons.chevron_right_rounded,
+                  onTap: isVerified
+                      ? null
+                      : () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AccountVerificationScreen(),
+                            ),
+                          );
+                        },
                 ),
 
                 _securityTile(

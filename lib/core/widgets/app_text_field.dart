@@ -22,6 +22,7 @@ class AppTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final int? maxLength;
   final bool enabled;
+  final int maxLines;
 
   const AppTextField({
     super.key,
@@ -37,6 +38,7 @@ class AppTextField extends StatelessWidget {
     this.onChanged,
     this.maxLength,
     this.enabled = true,
+    this.maxLines = 1,
   });
 
   @override
@@ -70,6 +72,7 @@ class AppTextField extends StatelessWidget {
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           obscureText: obscureText,
+          maxLines: maxLines,
           validator: validator,
           onChanged: onChanged,
           enabled: enabled,
@@ -82,7 +85,7 @@ class AppTextField extends StatelessWidget {
               fontSize: 14,
             ),
             filled: true,
-            fillColor: AppColors.lightGreenBg.withOpacity(0.6),
+            fillColor: AppColors.lightGreenBg.withOpacity(0.9),
             suffixIcon: suffixIcon,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -90,7 +93,10 @@ class AppTextField extends StatelessWidget {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
+              borderSide: BorderSide(
+                color: AppColors.primaryGreen.withValues(alpha: 0.25),
+                width: 1,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),

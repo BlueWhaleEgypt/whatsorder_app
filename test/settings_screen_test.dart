@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -67,6 +68,56 @@ void main() {
     expect(find.text('Sara Hassan'), findsOneWidget);
     expect(find.text('Ahmed Ali'), findsNothing);
   });
+
+  testWidgets('profile header handles long names without overflow', (
+    tester,
+  ) async {
+    ProfileName.fullName.value = List.filled(30, 'Abdelrahman').join(' ');
+    await tester.pumpWidget(_app(cubit));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
+  });
+
+  for (final entry in {
+    'en': Icons.chevron_right_rounded,
+    'ar': Icons.chevron_left_rounded,
+  }.entries) {
+    testWidgets(
+      'profile chevron points ${entry.key == 'ar' ? 'left' : 'right'} '
+      'in ${entry.key}',
+      (tester) async {
+        await tester.pumpWidget(
+          BlocProvider.value(
+            value: cubit,
+            child: MaterialApp(
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: AppLocalizations.supportedLocales,
+              locale: Locale(entry.key),
+              home: const SettingsScreen(),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byIcon(entry.value), findsOneWidget);
+        expect(
+          find.byIcon(
+            entry.key == 'ar'
+                ? Icons.chevron_right_rounded
+                : Icons.chevron_left_rounded,
+          ),
+          findsNothing,
+        );
+      },
+    );
+  }
 
   testWidgets('language dialog toggles the locale', (tester) async {
     await tester.pumpWidget(_app(cubit));

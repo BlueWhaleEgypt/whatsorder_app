@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/theme/app_colors.dart';
+import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/features/auth/otp/presentation/bloc/otp_bloc.dart';
 import 'package:whats_order/features/auth/otp/presentation/bloc/otp_event.dart';
 import 'package:whats_order/features/auth/otp/presentation/bloc/otp_state.dart';
@@ -130,19 +131,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         final loading = state is LoadingOtpState;
 
         return Scaffold(
-          backgroundColor: AppColors.scaffoldBg,
           appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            centerTitle: true,
             title: Text(
               context.tr('forgot_password_title'),
-              style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textDark,
-              ),
+              style: AppTextStyles.heading18,
             ),
           ),
           body: SafeArea(

@@ -5,6 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:whats_order/core/cache/cache_helper.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/network/network_info.dart';
+import 'package:whats_order/features/orders/presentation/bloc/make_offer_event.dart';
+import 'package:whats_order/features/orders/presentation/bloc/orders_bloc.dart';
+import 'package:whats_order/features/orders/presentation/bloc/orders_event.dart';
+import 'package:whats_order/features/orders/presentation/bloc/orders_state.dart';
 import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
 import 'package:whats_order/features/orders/presentation/bloc/vendor_event.dart';
 import 'package:whats_order/features/orders/presentation/bloc/vendor_state.dart';
@@ -151,4 +155,17 @@ Future<void> clearSnackBars(WidgetTester tester) async {
     tester.element(find.byType(Scaffold).first),
   ).clearSnackBars();
   await tester.pumpAndSettle();
+}
+
+class RecordingOrdersBloc extends OrdersBloc {
+  final events = <OrdersEvent>[];
+  RecordingOrdersBloc() : super(FakeNetwork());
+
+  @override
+  void add(OrdersEvent event) => events.add(event);
+
+  void show(OrdersState state) => emit(state);
+
+  List<MakeOfferEvent> get offers =>
+      events.whereType<MakeOfferEvent>().toList();
 }

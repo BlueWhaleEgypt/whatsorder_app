@@ -17,27 +17,32 @@ class ProfileHeader extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: AppColors.editIconBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(
+            color: AppColors.primaryGreen.withValues(alpha: 0.35),
+          ),
         ),
+
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: AppColors.primaryGreen,
+              width: 56,
+              height: 56,
+              padding: const EdgeInsets.all(11),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
                 shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.primaryGreen.withValues(alpha: 0.35),
+                  width: 1.5,
+                ),
               ),
-              child: Center(
-                child: SvgPicture.asset(
-                  AppAssets.person,
-                  width: 30,
-                  height: 30,
-                  colorFilter: const ColorFilter.mode(
-                    Colors.white,
-                    BlendMode.srcIn,
-                  ),
+              child: SvgPicture.asset(
+                AppAssets.person,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.primaryGreen,
+                  BlendMode.srcIn,
                 ),
               ),
             ),
@@ -59,7 +64,15 @@ class ProfileHeader extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.textGrey),
+            Container(
+              width: 30,
+              height: 30,
+              decoration: const BoxDecoration(
+                color: AppColors.surface,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.chevron_right, color: AppColors.textGrey),
+            ),
           ],
         ),
       ),

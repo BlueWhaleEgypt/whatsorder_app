@@ -186,8 +186,8 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
           children: [
             IndexedStack(index: _index, children: _pages),
             Positioned(
-              left: 30,
-              right: 30,
+              left: 40,
+              right: 40,
               bottom: 16,
               child: _FloatingNavBar(
                 selectedIndex: _index,
@@ -227,15 +227,15 @@ class _FloatingNavBar extends StatelessWidget {
   });
 
   static const Color _activeColor = Color(0xFF14B85E);
-  static const Color _inactiveColor = Color(0xFF9AA0A6);
+  static const Color _inactiveColor = Color.fromARGB(255, 132, 138, 143);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 38),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -245,7 +245,7 @@ class _FloatingNavBar extends StatelessWidget {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: List.generate(items.length, (i) {
           final selected = i == selectedIndex;
           final item = items[i];
@@ -275,7 +275,7 @@ class _FloatingNavBar extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 1),
                 Text(
                   item.label,
                   style: TextStyle(

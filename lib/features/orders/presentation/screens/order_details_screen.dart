@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/theme/app_colors.dart';
+import 'package:whats_order/core/theme/app_text_styles.dart';
+import 'package:whats_order/core/utils/logger.dart';
+import 'package:whats_order/core/widgets/gradient_button.dart';
 import 'package:whats_order/features/orders/presentation/bloc/orders_bloc.dart';
 import 'package:whats_order/features/orders/presentation/bloc/orders_state.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:whats_order/features/orders/presentation/screens/order_map_screen.dart';
+import 'package:whats_order/features/orders/presentation/screens/widgets/offer_form_fields.dart';
+import 'package:whats_order/features/orders/presentation/screens/widgets/order_location_section.dart';
+import 'package:whats_order/features/orders/presentation/screens/widgets/order_summary_card.dart';
 import '../bloc/make_offer_event.dart';
 
+/// Order details + "make offer" form. Coordinates the form, the Bloc, the
+/// reverse-geocoded address and the map navigation; the sections live in
+/// `widgets/`.
 class OrderDetailsScreen extends StatefulWidget {
-  // final OrderModel order;
   final int orderId;
   final String userId;
   final double? latitude;
@@ -18,7 +26,6 @@ class OrderDetailsScreen extends StatefulWidget {
 
   const OrderDetailsScreen({
     super.key,
-    // required this.order,
     required this.orderId,
     required this.userId,
     required this.latitude,
@@ -31,59 +38,99 @@ class OrderDetailsScreen extends StatefulWidget {
 }
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
+  /// Backend-facing label appended to the offer text. It is part of the
+  /// stored offer, not UI text, so it is intentionally not localized.
+  static const _executionTimePayloadLabel = 'مدة التنفيذ';
+
   final _formKey = GlobalKey<FormState>();
-  String? address;
-  bool loadingAddress = true;
-  final depreciationController = TextEditingController();
+  final _offerController = TextEditingController();
 
-  late List<String> executionTimes = [
-    context.tr("15_minutes"),
-    context.tr("30_minutes"),
-    context.tr("45_minutes"),
-    context.tr("1_hour"),
-    context.tr("2_hours"),
-  ];
+  String? _address;
+  late bool _loadingAddress;
 
-  String? selectedExecutionTime;
+  /// Selected execution-time translation key (see [ExecutionTimeSelector]).
+  String? _executionTimeKey;
+
+  bool get _hasCoordinates =>
+      widget.latitude != null && widget.longitude != null;
+
   @override
   void initState() {
     super.initState();
-    _getAddress();
+    _loadingAddress = _hasCoordinates;
+    if (_hasCoordinates) _resolveAddress();
   }
 
-  Future<void> _getAddress() async {
+  @override
+  void dispose() {
+    _offerController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _resolveAddress() async {
+    String? resolved;
     try {
       final places = await placemarkFromCoordinates(
         widget.latitude!,
         widget.longitude!,
       );
-
-      if (places.isNotEmpty) {
-        final place = places.first;
-
-        address = [
-          place.street,
-          place.subLocality,
-          place.locality,
-          place.administrativeArea,
-          place.country,
-        ].where((e) => e != null && e.isNotEmpty).join(", ");
-      }
+      if (places.isNotEmpty) resolved = _buildAddress(places.first);
     } catch (e) {
-      address = context.tr("unknown_location");
+      logger.e('Order address lookup failed: $e');
     }
 
-    if (mounted) {
-      setState(() {
-        loadingAddress = false;
-      });
-    }
+    if (!mounted) return;
+    setState(() {
+      _address = resolved;
+      _loadingAddress = false;
+    });
   }
 
-  @override
-  void dispose() {
-    depreciationController.dispose();
-    super.dispose();
+  /// Joins the non-empty, distinct address parts.
+  String? _buildAddress(Placemark place) {
+    final parts = <String>[];
+    for (final value in [
+      place.street,
+      place.subLocality,
+      place.locality,
+      place.administrativeArea,
+      place.country,
+    ]) {
+      final part = value?.trim() ?? '';
+      if (part.isNotEmpty && !parts.contains(part)) parts.add(part);
+    }
+    return parts.isEmpty ? null : parts.join(', ');
+  }
+
+  void _openMap() {
+    if (!_hasCoordinates) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => OrderMapScreen(
+          latitude: widget.latitude!,
+          longitude: widget.longitude!,
+        ),
+      ),
+    );
+  }
+
+  void _submit(bool isLoading) {
+    if (isLoading) return;
+    if (!_formKey.currentState!.validate()) return;
+
+    final executionTime = context.tr(_executionTimeKey!);
+    final offerDetails =
+        '${_offerController.text.trim()}\n$_executionTimePayloadLabel: $executionTime';
+
+    context.read<OrdersBloc>().add(
+      MakeOfferEvent(
+        orderId: widget.orderId,
+        userId: widget.userId,
+        offerDetails: offerDetails,
+      ),
+    );
   }
 
   @override
@@ -92,321 +139,60 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       listener: (context, state) {
         if (state is MakeOfferSuccessState) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.tr("offer_sent_successfully"))),
+            SnackBar(content: Text(context.tr('offer_sent_successfully'))),
           );
 
           Navigator.pop(context);
         }
 
         if (state is MakeOfferErrorState) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.trMessage(state.message))),
+          );
         }
       },
       builder: (context, state) {
         final isLoading = state is MakeOfferLoadingState;
 
         return Scaffold(
+          backgroundColor: AppColors.scaffoldBg,
           appBar: AppBar(
             title: Text(
-              context.tr("order_details"),
-              style: const TextStyle(
-                fontSize: 18,
-                fontFamily: "Cairo",
-                fontWeight: FontWeight.bold,
-              ),
+              context.tr('order_details'),
+              style: AppTextStyles.heading18,
             ),
           ),
           body: Form(
             key: _formKey,
             child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: const EdgeInsets.all(18),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          AppColors.primaryGreen,
-                          AppColors.primaryGreenDark,
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                context.tr("order_details"),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 24,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                widget.components ?? "",
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              context.tr("order_id_label"),
-                              style: const TextStyle(color: Colors.white70),
-                            ),
-                            Text(
-                              "#${widget.orderId}",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 22,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                  OrderSummaryCard(
+                    orderId: widget.orderId,
+                    description: widget.components,
                   ),
-                  const SizedBox(height: 25),
-                  Text(
-                    context.tr("location"),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  const SizedBox(height: 24),
+                  OrderLocationSection(
+                    address: _address,
+                    loading: _loadingAddress,
+                    onOpenMap: _hasCoordinates ? _openMap : null,
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 15,
-                            vertical: 18,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.mapGreenLight,
-                            borderRadius: BorderRadius.circular(15),
-                            border: Border.all(
-                              color: AppColors.primaryGreenLight,
-                              width: 1,
-                            ),
-                          ),
-                          child: loadingAddress
-                              ? Row(
-                                  children: [
-                                    const SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Text("${context.tr("loading_location")}"),
-                                  ],
-                                )
-                              : Text(
-                                  address ?? context.tr("unknown_location"),
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-
-                      Material(
-                        color: AppColors.mapGreenLight,
-                        borderRadius: BorderRadius.circular(15),
-
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(15),
-                          onTap: () {
-                            if (widget.latitude == null ||
-                                widget.longitude == null)
-                              return;
-
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => OrderMapScreen(
-                                  latitude: widget.latitude!,
-                                  longitude: widget.longitude!,
-                                ),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            height: 56,
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(
-                                color: AppColors.primaryGreenLight,
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.map_outlined,
-                                  size: 18,
-                                  color: AppColors.textDark,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  context.tr('open_map'),
-                                  style: const TextStyle(
-                                    color: AppColors.textDark,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              context.tr("offer_details"),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            TextFormField(
-                              controller: depreciationController,
-                              maxLines: 4,
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return context.tr(
-                                    "please_enter_offer_details",
-                                  );
-                                }
-
-                                if (value.trim().length < 5) {
-                                  return context.tr("offer_details_too_short");
-                                }
-
-                                return null;
-                              },
-                              decoration: InputDecoration(
-                                hintText: context.tr("write_your_offer"),
-                                filled: true,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                  const SizedBox(height: 24),
+                  OfferDetailsField(controller: _offerController),
                   const SizedBox(height: 20),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.tr("order_execution_time"),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      DropdownButtonFormField<String>(
-                        value: selectedExecutionTime,
-                        validator: (value) {
-                          if (value == null) {
-                            return context.tr("please_select_execution_time");
-                          }
-                          return null;
-                        },
-                        items: executionTimes
-                            .map(
-                              (e) => DropdownMenuItem(value: e, child: Text(e)),
-                            )
-                            .toList(),
-                        onChanged: isLoading
-                            ? null
-                            : (value) {
-                                setState(() {
-                                  selectedExecutionTime = value;
-                                });
-                              },
-                        decoration: InputDecoration(
-                          filled: true,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                      ),
-                    ],
+                  ExecutionTimeSelector(
+                    onChanged: isLoading
+                        ? null
+                        : (key) => setState(() => _executionTimeKey = key),
                   ),
-                  const SizedBox(height: 35),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryGreen,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                      ),
-                      onPressed: isLoading
-                          ? null
-                          : () {
-                              if (!_formKey.currentState!.validate()) {
-                                return;
-                              }
-                              final offerDetails =
-                                  "${depreciationController.text.trim()}\nمدة التنفيذ: ${selectedExecutionTime ?? ""}";
-                              context.read<OrdersBloc>().add(
-                                MakeOfferEvent(
-                                  orderId: widget.orderId,
-                                  userId: widget.userId,
-                                  offerDetails: offerDetails,
-                                  // offerDetails: depreciationController.text
-                                  //     .trim(),
-                                ),
-                              );
-                            },
-                      child: isLoading
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Colors.white,
-                              ),
-                            )
-                          : Text(
-                              context.tr("make_offer"),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                    ),
+                  const SizedBox(height: 32),
+                  GradientButton(
+                    label: context.tr('make_offer'),
+                    loading: isLoading,
+                    onPressed: () => _submit(isLoading),
                   ),
                 ],
               ),
