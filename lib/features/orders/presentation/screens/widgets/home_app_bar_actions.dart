@@ -35,7 +35,10 @@ class OrderSearchButton extends StatelessWidget {
               ? () {
                   showSearch(
                     context: context,
-                    delegate: OrderSearchDelegate(state.response.orders),
+                    delegate: OrderSearchDelegate(
+                      state.response.orders,
+                      ordersBloc: context.read<OrdersBloc>(),
+                    ),
                   );
                 }
               : null,

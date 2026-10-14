@@ -15,9 +15,7 @@ class VendorLoading extends VendorState {}
 class VendorLoaded extends VendorState {
   final VendorResponse vendorResponse;
 
-  const VendorLoaded({
-    required this.vendorResponse,
-  });
+  const VendorLoaded({required this.vendorResponse});
 
   @override
   List<Object?> get props => [vendorResponse];
@@ -26,9 +24,7 @@ class VendorLoaded extends VendorState {
 class VendorError extends VendorState {
   final String message;
 
-  const VendorError({
-    required this.message,
-  });
+  const VendorError({required this.message});
 
   @override
   List<Object?> get props => [message];

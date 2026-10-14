@@ -5,17 +5,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whats_order/core/cache/cache_helper.dart';
 import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
-import 'package:whats_order/core/routing/named_routes.dart';
 import 'package:whats_order/features/auth/sign_in/data/user_model.dart';
 import 'package:whats_order/features/orders/data/order_model.dart';
 import 'package:whats_order/features/orders/presentation/bloc/orders_bloc.dart';
 import 'package:whats_order/features/orders/presentation/bloc/orders_event.dart';
+import 'package:whats_order/features/orders/presentation/screens/order_details_screen.dart';
 
 /// Search-by-order-number delegate used from the Home app bar.
 class OrderSearchDelegate extends SearchDelegate<OrderModel?> {
   final List<OrderModel> orders;
 
-  OrderSearchDelegate(this.orders);
+  /// The Home screen's bloc. The search page lives in its own route, outside
+  /// Home's provider tree, so it cannot be looked up from the search context.
+  final OrdersBloc ordersBloc;
+
+  OrderSearchDelegate(this.orders, {required this.ordersBloc});
 
   List<OrderModel> get filteredOrders {
     if (query.trim().isEmpty) {
@@ -70,19 +74,24 @@ class OrderSearchDelegate extends SearchDelegate<OrderModel?> {
               ),
             );
 
-            Navigator.pushNamed(
+            // Same bloc instance as the orders list, like OrdersTable does.
+            Navigator.push(
               context,
-              NamedRoutes.orderDetail,
-              arguments: {
-                'orderId': order.orderId,
-                'userId': user.id,
-                'latitude': order.latitude,
-                'longitude': order.longitude,
-                'components': order.components,
-              },
+              MaterialPageRoute(
+                builder: (_) => BlocProvider.value(
+                  value: ordersBloc,
+                  child: OrderDetailsScreen(
+                    orderId: order.orderId!,
+                    userId: user.id!,
+                    latitude: order.latitude,
+                    longitude: order.longitude,
+                    components: order.components,
+                  ),
+                ),
+              ),
             );
 
-            context.read<OrdersBloc>().add(ViewOrderEvent(orders[index].id));
+            ordersBloc.add(ViewOrderEvent(order.id));
             // close(context, order);
           },
           child: ListTile(

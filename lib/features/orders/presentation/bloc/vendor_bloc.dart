@@ -34,11 +34,7 @@ class VendorBloc extends Bloc<VendorEvent, VendorState> {
       (response) {
         final vendorResponse = response as VendorResponse;
 
-        emit(
-          VendorLoaded(
-            vendorResponse: vendorResponse,
-          ),
-        );
+        emit(VendorLoaded(vendorResponse: vendorResponse));
       },
     );
   }

@@ -35,4 +35,3 @@ class ViewOrderEvent extends OrdersEvent {
   @override
   List<Object?> get props => [orderId];
 }
-

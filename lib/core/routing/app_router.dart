@@ -122,13 +122,6 @@ class AppRouter {
             child: const BranchesTab(),
           ),
         );
-      // case NamedRoutes.sectors:
-      //   return MaterialPageRoute(
-      //     builder: (_) => BlocProvider(
-      //       create: (_) => sl<SectorsBloc>(),
-      //       child: const SectorsScreen(),
-      //     ),
-      //   );
       case NamedRoutes.smsMessages:
         return MaterialPageRoute(
           builder: (_) => BlocProvider(

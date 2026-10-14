@@ -35,10 +35,7 @@ class _OrderMapScreenState extends State<OrderMapScreen> {
         onMapCreated: (c) {
           controller = c;
         },
-        initialCameraPosition: CameraPosition(
-          target: location,
-          zoom: 16,
-        ),
+        initialCameraPosition: CameraPosition(target: location, zoom: 16),
         markers: {
           Marker(
             markerId: MarkerId(context.tr("your_order")),

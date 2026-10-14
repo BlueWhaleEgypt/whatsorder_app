@@ -31,60 +31,59 @@ class OrderModel extends Equatable {
   final String? createdDate;
   final num? cost;
   final String? vendorId;
-  const OrderModel(
-      {required this.id,
-      this.orderId,
-      this.isChecked = false,
-      this.view = false,
-      this.price,
-      this.phone,
-      this.components,
-      this.sector,
-      this.latitude,
-      this.longitude,
-      this.createdDate,
-      this.cost,
-      this.vendorId});
+  const OrderModel({
+    required this.id,
+    this.orderId,
+    this.isChecked = false,
+    this.view = false,
+    this.price,
+    this.phone,
+    this.components,
+    this.sector,
+    this.latitude,
+    this.longitude,
+    this.createdDate,
+    this.cost,
+    this.vendorId,
+  });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) =>
       _$OrderModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$OrderModelToJson(this);
 
-  OrderModel copyWith({
-    bool? isChecked,
-    bool? view,
-  }) {
+  OrderModel copyWith({bool? isChecked, bool? view}) {
     return OrderModel(
-        id: id,
-        orderId: orderId,
-        isChecked: isChecked ?? this.isChecked,
-        view: view ?? this.view,
-        price: price,
-        phone: phone,
-        components: components,
-        sector: sector,
-        latitude: latitude,
-        longitude: longitude,
-        createdDate: createdDate,
-        cost: cost,
-        vendorId: vendorId);
+      id: id,
+      orderId: orderId,
+      isChecked: isChecked ?? this.isChecked,
+      view: view ?? this.view,
+      price: price,
+      phone: phone,
+      components: components,
+      sector: sector,
+      latitude: latitude,
+      longitude: longitude,
+      createdDate: createdDate,
+      cost: cost,
+      vendorId: vendorId,
+    );
   }
 
   @override
   List<Object?> get props => [
-        id,
-        orderId,
-        isChecked,
-        view,
-        price,
-        phone,
-        components,
-        sector,
-        latitude,
-        longitude,
-        createdDate,
-        cost,
-        vendorId
-      ];
+    id,
+    orderId,
+    isChecked,
+    view,
+    price,
+    phone,
+    components,
+    sector,
+    latitude,
+    longitude,
+    createdDate,
+    cost,
+    vendorId,
+  ];
 }

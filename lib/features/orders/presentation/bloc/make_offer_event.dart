@@ -12,9 +12,5 @@ class MakeOfferEvent extends OrdersEvent {
   });
 
   @override
-  List<Object?> get props => [
-        orderId,
-        userId,
-        offerDetails,
-      ];
+  List<Object?> get props => [orderId, userId, offerDetails];
 }
