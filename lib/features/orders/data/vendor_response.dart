@@ -50,7 +50,7 @@ class VendorResponse extends Equatable implements BaseRepository {
       final response = await DioHelper.getData(
         url: "${EndPoints.baseUrl}${EndPoints.epGetVendorById}/$vendorId",
       );
-      logger.w("RAW VENDOR RESPONSE => ${response.data}");
+      // logger.w("RAW VENDOR RESPONSE => ${response.data}");
 
       if (response.statusCode == 200) {
         final vendorResponse = VendorResponse.fromJson(response.data);

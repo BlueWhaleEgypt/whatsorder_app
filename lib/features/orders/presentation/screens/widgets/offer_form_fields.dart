@@ -99,6 +99,7 @@ class ExecutionTimeSelector extends StatelessWidget {
           ],
           onChanged: onChanged,
           decoration: InputDecoration(
+            hint: const Text("***"),
             filled: true,
             fillColor: AppColors.lightGreenBg.withValues(alpha: 0.6),
             contentPadding: const EdgeInsets.symmetric(
@@ -106,7 +107,13 @@ class ExecutionTimeSelector extends StatelessWidget {
               horizontal: 14,
             ),
             border: border(),
-            enabledBorder: border(),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: AppColors.primaryGreen.withValues(alpha: 0.25),
+                width: 1,
+              ),
+            ),
             focusedBorder: border(AppColors.primaryGreen),
             errorBorder: border(AppColors.danger),
             focusedErrorBorder: border(AppColors.danger),
