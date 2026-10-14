@@ -1,12 +1,5 @@
-
-
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:whats_order/core/cache/cache_helper.dart';
-import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/core/widgets/app_text_field.dart';
@@ -45,9 +38,19 @@ class _UserInfoTabState extends State<UserInfoTab> {
     lastNameController = TextEditingController(
       text: widget.vendor.lastName ?? '',
     );
-    emailController = TextEditingController(
-      text: widget.vendor.email ?? '',
-    );
+    emailController = TextEditingController(text: widget.vendor.email ?? '');
+  }
+
+  @override
+  void didUpdateWidget(covariant UserInfoTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Refreshed vendor arrived: show saved values unless the user is mid-edit.
+    if (widget.vendor != oldWidget.vendor && !isEditing) {
+      firstNameController.text = widget.vendor.firstName ?? '';
+      lastNameController.text = widget.vendor.lastName ?? '';
+      emailController.text = widget.vendor.email ?? '';
+    }
   }
 
   @override
@@ -58,59 +61,39 @@ class _UserInfoTabState extends State<UserInfoTab> {
     super.dispose();
   }
 
-  String? _getUserId() {
-    final cachedUser = CacheHelper.getDataFromSharedPreference(
-      key: CacheKeys.userModel,
-    );
-
-    if (cachedUser == null) return null;
-
-    try {
-      final Map<String, dynamic> userMap = cachedUser is String
-          ? jsonDecode(cachedUser) as Map<String, dynamic>
-          : Map<String, dynamic>.from(cachedUser as Map);
-
-      return (userMap['id'] ?? userMap['userId'])?.toString();
-    } catch (_) {
-      return null;
+  void _save() {
+    if (!isEditing) {
+      setState(() => isEditing = true);
+      return;
     }
-  }
 
+    if (!(formKey.currentState?.validate() ?? false)) {
+      return;
+    }
 
-void _save() {
-  if (!isEditing) {
-    setState(() => isEditing = true);
-    return;
-  }
+    final userId = widget.vendor.id.toString();
 
-  if (!(formKey.currentState?.validate() ?? false)) {
-    return;
-  }
+    if (userId.isEmpty || userId == 'null') {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.tr('user_id_not_found'))));
+      return;
+    }
 
-  final userId = widget.vendor.id.toString();
-
-  if (userId.isEmpty || userId == 'null') {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('User ID not found')),
-    );
-    return;
-  }
-
-  context.read<UpdateProfileBloc>().add(
-    SubmitUpdateProfileEvent(
-      request: UpdateProfileRequest.fromVendor(
-        userId: userId,
-        vendor: widget.vendor,
-        overrides: {
-          'firstName': firstNameController.text.trim(),
-          'lastName': lastNameController.text.trim(),
-          'email': emailController.text.trim(),
-        },
+    context.read<UpdateProfileBloc>().add(
+      SubmitUpdateProfileEvent(
+        request: UpdateProfileRequest.fromVendor(
+          userId: userId,
+          vendor: widget.vendor,
+          overrides: {
+            'firstName': firstNameController.text.trim(),
+            'lastName': lastNameController.text.trim(),
+            'email': emailController.text.trim(),
+          },
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,13 +103,13 @@ void _save() {
           setState(() => isEditing = false);
 
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
+            SnackBar(content: Text(context.trMessage(state.message))),
           );
         }
 
         if (state is UpdateProfileError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
+            SnackBar(content: Text(context.trMessage(state.message))),
           );
         }
       },
@@ -157,7 +140,7 @@ void _save() {
                         enabled: isEditing && !isLoading,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Required';
+                            return context.tr('field_required');
                           }
                           return null;
                         },
@@ -202,9 +185,7 @@ void _save() {
                   child: GradientButton(
                     label: isLoading
                         ? context.tr('loading')
-                        : context.tr(
-                            isEditing ? 'save_changes' : 'edit',
-                          ),
+                        : context.tr(isEditing ? 'save_changes' : 'edit'),
                     onPressed: isLoading ? () {} : _save,
                   ),
                 ),

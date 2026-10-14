@@ -14,10 +14,7 @@ class BranchesResponse implements BaseRepository {
   final List<BranchModel> branches;
   final BranchModel? branch;
 
-  const BranchesResponse({
-    this.branches = const [],
-    this.branch,
-  });
+  const BranchesResponse({this.branches = const [], this.branch});
 
   factory BranchesResponse.fromJson(Map<String, dynamic> json) {
     final categories = json['categories'];
@@ -33,20 +30,16 @@ class BranchesResponse implements BaseRepository {
 
     // Add/update responses return a single branch object.
     if (json.containsKey('id')) {
-      return BranchesResponse(
-        branch: BranchModel.fromJson(json),
-      );
+      return BranchesResponse(branch: BranchModel.fromJson(json));
     }
 
     return const BranchesResponse();
   }
 
   @override
-  Future<Either<Failure, BaseRepository>> getData(
-    dynamic request,
-  ) async {
+  Future<Either<Failure, BaseRepository>> getData(dynamic request) async {
     if (request is! BranchRequest) {
-      return const Left(ServerFailure('Invalid branch request'));
+      return const Left(ServerFailure('invalid_request'));
     }
 
     try {
@@ -102,27 +95,23 @@ class BranchesResponse implements BaseRepository {
         );
       }
 
-      return Left(
-        ServerFailure(response.statusMessage ?? 'Request failed'),
-      );
+      return const Left(ServerFailure('request_failed'));
     } on DioException catch (e) {
       logger.e('Branch API error: ${e.response?.data ?? e.message}');
 
       final data = e.response?.data;
-      var message = 'Something went wrong';
+      var message = 'something_went_wrong';
 
       if (data is Map) {
-        message = (data['detail'] ??
-                data['message'] ??
-                data['title'] ??
-                message)
-            .toString();
+        message =
+            (data['detail'] ?? data['message'] ?? data['title'] ?? message)
+                .toString();
       }
 
       return Left(ServerFailure(message));
     } catch (e, stackTrace) {
       logger.e('Branch error: $e\n$stackTrace');
-      return const Left(ServerFailure('Something went wrong'));
+      return const Left(ServerFailure('something_went_wrong'));
     }
   }
 

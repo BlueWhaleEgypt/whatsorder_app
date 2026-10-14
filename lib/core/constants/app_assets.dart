@@ -23,4 +23,6 @@ class AppAssets {
   static const String lang = 'assets/icons/lang.svg';
   static const String help = 'assets/icons/help.svg';
   static const String paper = 'assets/icons/paper.svg';
+  static const String grid = 'assets/icons/grid.svg';
+  static const String smartphone = 'assets/icons/smartphone.svg';
 }

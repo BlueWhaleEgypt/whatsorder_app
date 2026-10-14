@@ -7,6 +7,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:whats_order/base/base_repository.dart';
 import 'package:whats_order/core/cache/cache_helper.dart';
 import 'package:whats_order/core/cache/cache_keys.dart';
+import 'package:whats_order/core/cache/profile_name.dart';
 import 'package:whats_order/core/error/failures.dart';
 import 'package:whats_order/core/network/dio_helper.dart';
 import 'package:whats_order/core/network/end_points.dart';
@@ -56,9 +57,9 @@ class VendorResponse extends Equatable implements BaseRepository {
         // logger.w("RAW VENDOR RESPONSE => ${response.data}");
 
         final vendor = VendorResponse.fromJson(response.data);
-        await CacheHelper.saveDataSharedPreference(
-          key: CacheKeys.firstName,
-          value: vendor.vendor?.firstName ?? '',
+        await ProfileName.update(
+          firstName: vendor.vendor?.firstName,
+          lastName: vendor.vendor?.lastName,
         ); // logger.w("PARSED VENDOR ACTIVATION => ${vendor.vendor?.activation}");
 
         // logger.w(

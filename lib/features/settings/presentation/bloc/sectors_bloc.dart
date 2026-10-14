@@ -1,4 +1,3 @@
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:whats_order/base/base_repository.dart';
@@ -15,16 +14,13 @@ class SectorsBloc extends Bloc<SectorsEvent, SectorsState> {
     on<DeleteSectorEvent>(_onDelete);
   }
 
-  Future<void> _onAdd(
-    AddSectorEvent event,
-    Emitter<SectorsState> emit,
-  ) async {
+  Future<void> _onAdd(AddSectorEvent event, Emitter<SectorsState> emit) async {
     await _performMutation(
       emit: emit,
       userId: event.userId,
       sectorId: event.sectorId,
       action: 'add',
-      successMessage: 'sector added successfully',
+      successMessage: 'sector_added_successfully',
     );
   }
 
@@ -37,7 +33,7 @@ class SectorsBloc extends Bloc<SectorsEvent, SectorsState> {
       userId: event.userId,
       sectorId: event.sectorId,
       action: 'delete',
-      successMessage: 'sector removed successfully',
+      successMessage: 'sector_removed_successfully',
     );
   }
 
@@ -54,10 +50,7 @@ class SectorsBloc extends Bloc<SectorsEvent, SectorsState> {
     final assignedIds = previousState.assignedSectorIds;
 
     emit(
-      SectorsActionLoading(
-        sectors: sectors,
-        assignedSectorIds: assignedIds,
-      ),
+      SectorsActionLoading(sectors: sectors, assignedSectorIds: assignedIds),
     );
 
     try {
@@ -75,18 +68,10 @@ class SectorsBloc extends Bloc<SectorsEvent, SectorsState> {
       }
 
       final request = action == 'add'
-          ? SectorRequest.add(
-              userId: userId,
-              sectorId: sectorId,
-            )
-          : SectorRequest.delete(
-              userId: userId,
-              sectorId: sectorId,
-            );
+          ? SectorRequest.add(userId: userId, sectorId: sectorId)
+          : SectorRequest.delete(userId: userId, sectorId: sectorId);
 
-      final result = await BaseRepository(
-        'SectorTapResponse',
-      ).getData(request);
+      final result = await BaseRepository('SectorTapResponse').getData(request);
 
       result.fold(
         (failure) {
@@ -101,9 +86,7 @@ class SectorsBloc extends Bloc<SectorsEvent, SectorsState> {
         (_) {
           final updatedIds = action == 'add'
               ? <String>{...assignedIds, sectorId}.toList()
-              : assignedIds
-                  .where((id) => id != sectorId)
-                  .toList();
+              : assignedIds.where((id) => id != sectorId).toList();
 
           emit(
             SectorsActionSuccess(

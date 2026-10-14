@@ -21,7 +21,7 @@ class UpdateProfileResponse implements BaseRepository {
   @override
   Future<Either<Failure, BaseRepository>> getData(dynamic request) async {
     if (request is! UpdateProfileRequest) {
-      return const Left(ServerFailure('Invalid update profile request'));
+      return const Left(ServerFailure('invalid_request'));
     }
 
     Directory? tempDirectory;
@@ -134,11 +134,12 @@ class UpdateProfileResponse implements BaseRepository {
       if (response.statusCode != null &&
           response.statusCode! >= 200 &&
           response.statusCode! < 300) {
-        final message = data is Map
-            ? data['message']?.toString() ?? 'profile_updated_successfully'
-            : 'profile_updated_successfully';
-
-        return Right(UpdateProfileResult(message: message, data: data));
+        return Right(
+          UpdateProfileResult(
+            message: 'profile_updated_successfully',
+            data: data,
+          ),
+        );
       }
 
       return const Left(ServerFailure('profile_update_failed'));
@@ -154,14 +155,12 @@ class UpdateProfileResponse implements BaseRepository {
           ? responseData['message']?.toString()
           : null;
 
-      return Left(
-        ServerFailure(message ?? e.message ?? 'profile_update_failed'),
-      );
+      return Left(ServerFailure(message ?? 'profile_update_failed'));
     } catch (e, stackTrace) {
       logger.e('Update profile exception: $e');
       logger.e('Stack trace: $stackTrace');
 
-      return Left(ServerFailure(e.toString()));
+      return const Left(ServerFailure('something_went_wrong'));
     } finally {
       if (tempDirectory != null && await tempDirectory.exists()) {
         await tempDirectory.delete(recursive: true);

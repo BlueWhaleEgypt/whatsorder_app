@@ -186,8 +186,8 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
           children: [
             IndexedStack(index: _index, children: _pages),
             Positioned(
-              left: 16,
-              right: 16,
+              left: 30,
+              right: 30,
               bottom: 16,
               child: _FloatingNavBar(
                 selectedIndex: _index,
@@ -273,7 +273,7 @@ class _FloatingNavBar extends StatelessWidget {
                       selected ? _activeColor : _inactiveColor,
                       BlendMode.srcIn,
                     ),
-                  ),                 
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(

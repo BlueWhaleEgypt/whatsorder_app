@@ -119,6 +119,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 PasswordField(
                   label: context.tr("password"),
                   controller: _passwordController,
+                  hint: context.tr('minimum_8_characters'),
                   validator: (v) => (v == null || v.length < 8)
                       ? context.tr("minimum_8_characters")
                       : null,
@@ -126,6 +127,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 16),
                 PasswordField(
                   label: context.tr("confirm_password"),
+                  hint: context.tr('minimum_8_characters'),
+
                   controller: _confirmController,
                   validator: (v) => (v != _passwordController.text)
                       ? context.tr("passwords_dont_match")

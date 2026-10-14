@@ -38,17 +38,17 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     return BlocConsumer<ChangePasswordBloc, ChangePasswordState>(
       listener: (context, state) {
         if (state is ChangePasswordSuccess) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.trMessage(state.message))),
+          );
 
           Navigator.pop(context);
         }
 
         if (state is ChangePasswordError) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.trMessage(state.message))),
+          );
         }
       },
       builder: (context, state) {

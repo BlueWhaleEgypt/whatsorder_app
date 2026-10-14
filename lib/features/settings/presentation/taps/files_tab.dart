@@ -7,6 +7,7 @@ import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/network/end_points.dart';
 import 'package:whats_order/core/theme/app_colors.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
+import 'package:whats_order/core/widgets/gradient_button.dart';
 import 'package:whats_order/features/orders/data/vendor_model.dart';
 import 'package:whats_order/features/settings/data/profile/update_profile_request.dart';
 import 'package:whats_order/features/settings/presentation/bloc/event/update_profile_event.dart';
@@ -25,6 +26,8 @@ class FilesTab extends StatefulWidget {
 class _FilesTabState extends State<FilesTab> {
   final ImagePicker _picker = ImagePicker();
   final Map<String, File> _selectedFiles = {};
+
+  bool _isEditing = false;
 
   Future<void> _pickFile(String fieldName) async {
     final picked = await _picker.pickImage(
@@ -45,7 +48,7 @@ class _FilesTabState extends State<FilesTab> {
     if (userId == null || userId.trim().isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('User ID not found')));
+      ).showSnackBar(SnackBar(content: Text(context.tr('user_id_not_found'))));
       return;
     }
 
@@ -65,21 +68,25 @@ class _FilesTabState extends State<FilesTab> {
     return BlocConsumer<UpdateProfileBloc, UpdateProfileState>(
       listener: (context, state) {
         if (state is UpdateProfileSuccess) {
-          setState(() => _selectedFiles.clear());
+          setState(() {
+            _selectedFiles.clear();
+            _isEditing = false;
+          });
 
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.trMessage(state.message))),
+          );
         }
 
         if (state is UpdateProfileError) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.trMessage(state.message))),
+          );
         }
       },
       builder: (context, state) {
         final isLoading = state is UpdateProfileLoading;
+        final canEdit = _isEditing && !isLoading;
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -92,33 +99,66 @@ class _FilesTabState extends State<FilesTab> {
               ),
               const SizedBox(height: 10),
               _buildFileCard(
-                title: 'Face ID Card',
+                title: context.tr('face_id_card'),
                 fieldName: 'faceIdCard',
                 fileName: widget.vendor.faceIdCard,
                 icon: Icons.badge_outlined,
+                canEdit: canEdit,
               ),
               _buildFileCard(
-                title: 'Back ID Card',
+                title: context.tr('back_id_card'),
                 fieldName: 'backIdCard',
                 fileName: widget.vendor.backIdCard,
                 icon: Icons.badge_outlined,
+                canEdit: canEdit,
               ),
               _buildFileCard(
-                title: 'Commercial Register',
+                title: context.tr('commercial_register_title'),
                 fieldName: 'commercialRegister',
                 fileName: widget.vendor.commercialRegister,
                 icon: Icons.business_center_outlined,
+                canEdit: canEdit,
               ),
               const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: isLoading ? null : _saveFiles,
-                  child: isLoading
-                      ? const CircularProgressIndicator()
-                      : const Text('Save files'),
+              if (!_isEditing)
+                SizedBox(
+                  width: double.infinity,
+                  child: GradientButton(
+                    label: context.tr('edit_label'),
+                    onPressed: () => setState(() => _isEditing = true),
+                  ),
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () => setState(() {
+                                _selectedFiles.clear();
+                                _isEditing = false;
+                              }),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(52),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(context.tr('cancel')),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: GradientButton(
+                        label: context.tr('save_files'),
+                        loading: isLoading,
+                        onPressed: isLoading ? () {} : _saveFiles,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
             ],
           ),
         );
@@ -131,6 +171,7 @@ class _FilesTabState extends State<FilesTab> {
     required String fieldName,
     required String? fileName,
     required IconData icon,
+    required bool canEdit,
   }) {
     final selectedFile = _selectedFiles[fieldName];
     final hasSelectedFile = selectedFile != null;
@@ -160,13 +201,15 @@ class _FilesTabState extends State<FilesTab> {
               const SizedBox(width: 12),
               Expanded(child: Text(title, style: AppTextStyles.cardTitle15)),
               TextButton.icon(
-                onPressed: () => _pickFile(fieldName),
+                onPressed: canEdit ? () => _pickFile(fieldName) : null,
                 icon: Icon(
                   hasSelectedFile
                       ? Icons.check_circle_outline
                       : Icons.upload_file_outlined,
                 ),
-                label: Text(hasSelectedFile ? 'Selected' : 'Choose'),
+                label: Text(
+                  context.tr(hasSelectedFile ? 'file_selected' : 'file_choose'),
+                ),
               ),
             ],
           ),

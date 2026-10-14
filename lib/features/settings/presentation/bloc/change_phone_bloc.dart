@@ -33,7 +33,7 @@ class ChangePhoneBloc extends Bloc<ChangePhoneEvent, ChangePhoneState> {
         if (response is ChangePhoneResponse) {
           emit(ChangePhoneSuccess(response));
         } else {
-          emit(const ChangePhoneError('Invalid response'));
+          emit(const ChangePhoneError('invalid_response'));
         }
       },
     );

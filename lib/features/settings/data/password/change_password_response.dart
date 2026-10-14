@@ -41,16 +41,12 @@ class ChangePasswordResponse extends Equatable implements BaseRepository {
         final data = response.data;
         await CacheHelper.removeData(key: CacheKeys.rememberMe);
         logger.i(data);
-        return Right(
-          ChangePasswordResponse(
-            message: data is Map
-                ? data['message']?.toString()
-                : 'Password changed successfully',
-          ),
+        return const Right(
+          ChangePasswordResponse(message: 'password_changed_successfully'),
         );
       }
 
-      return Left(ServerFailure('Error ${response.statusCode}'));
+      return const Left(ServerFailure('request_failed'));
     } on DioException catch (e) {
       logger.e('Change Password URL: ${e.requestOptions.uri}');
       logger.e('Change Password METHOD: ${e.requestOptions.method}');
@@ -61,13 +57,11 @@ class ChangePasswordResponse extends Equatable implements BaseRepository {
 
       final message = data is Map ? data['message']?.toString() : null;
 
-      return Left(
-        ServerFailure(message ?? e.message ?? 'Failed to change password'),
-      );
+      return Left(ServerFailure(message ?? 'password_change_failed'));
     } catch (e) {
       logger.e('Change Password Error: $e');
 
-      return Left(ServerFailure(e.toString()));
+      return const Left(ServerFailure('something_went_wrong'));
     }
   }
 }

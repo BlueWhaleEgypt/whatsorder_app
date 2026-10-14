@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:whats_order/core/cache/cache_helper.dart';
 import 'package:whats_order/core/cache/cache_keys.dart';
+import 'package:whats_order/core/cache/profile_name.dart';
 import 'package:whats_order/core/constants/app_assets.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/routing/named_routes.dart';
@@ -148,8 +149,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   clipBehavior: Clip.none,
                   children: [
                     Container(
-                      width: 32,
-                      height: 32,
+                      width: 34,
+                      height: 34,
                       decoration: const BoxDecoration(
                         color: AppColors.primaryGreenTint,
                         shape: BoxShape.circle,
@@ -157,8 +158,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Center(
                         child: SvgPicture.asset(
                           AppAssets.chat,
-                          width: 16,
-                          height: 16,
+                          width: 18,
+                          height: 18,
                           colorFilter: const ColorFilter.mode(
                             Colors.white,
                             BlendMode.srcIn,
@@ -196,31 +197,31 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
-          const SizedBox(width: 8),
 
-          GestureDetector(
-            onTap: () => Navigator.pushNamed(context, NamedRoutes.profile),
-            child: Container(
-              width: 32,
-              height: 32,
-              decoration: const BoxDecoration(
-                color: AppColors.primaryGreenTint,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  AppAssets.person,
-                  width: 16,
-                  height: 16,
-                  colorFilter: const ColorFilter.mode(
-                    Colors.white,
-                    BlendMode.srcIn,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // const SizedBox(width: 8),
 
+          // GestureDetector(
+          //   onTap: () => Navigator.pushNamed(context, NamedRoutes.profile),
+          //   child: Container(
+          //     width: 32,
+          //     height: 32,
+          //     decoration: const BoxDecoration(
+          //       color: AppColors.primaryGreenTint,
+          //       shape: BoxShape.circle,
+          //     ),
+          //     child: Center(
+          //       child: SvgPicture.asset(
+          //         AppAssets.person,
+          //         width: 16,
+          //         height: 16,
+          //         colorFilter: const ColorFilter.mode(
+          //           Colors.white,
+          //           BlendMode.srcIn,
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
           const SizedBox(width: 16),
         ],
       ),
@@ -322,9 +323,6 @@ class _WelcomeCard extends StatelessWidget {
     //         '{}',
     //   ),
     // );
-    final user = CacheHelper.getDataFromSharedPreference(
-      key: CacheKeys.firstName,
-    );
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -350,12 +348,15 @@ class _WelcomeCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "${context.tr("welcome")} ${user ?? 'UserName'}",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
+                ValueListenableBuilder<String>(
+                  valueListenable: ProfileName.firstName,
+                  builder: (_, name, __) => Text(
+                    "${context.tr("welcome")} ${name.isEmpty ? 'UserName' : name}",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 6),

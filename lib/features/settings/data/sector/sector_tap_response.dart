@@ -1,5 +1,3 @@
-
-
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 
@@ -16,23 +14,16 @@ class SectorTapResponse implements BaseRepository {
   const SectorTapResponse();
 
   @override
-  Future<Either<Failure, BaseRepository>> getData(
-    dynamic request,
-  ) async {
+  Future<Either<Failure, BaseRepository>> getData(dynamic request) async {
     if (request is! SectorRequest) {
-      logger.e(
-        '[SECTORS] Invalid request type: ${request.runtimeType}',
-      );
-      return const Left(ServerFailure('Invalid sector request'));
+      logger.e('[SECTORS] Invalid request type: ${request.runtimeType}');
+      return const Left(ServerFailure('invalid_request'));
     }
 
     try {
       switch (request.action) {
-
-
         case 'add':
-          const url =
-              '${EndPoints.baseUrl}/api/auth/sector/addSectorToUser';
+          const url = '${EndPoints.baseUrl}/api/auth/sector/addSectorToUser';
 
           final query = {
             'userId': request.userId,
@@ -43,28 +34,19 @@ class SectorTapResponse implements BaseRepository {
           logger.i('URL: $url');
           logger.i('QUERY: $query');
 
-          final response = await DioHelper.postData(
-            url: url,
-            query: query,
-          );
+          final response = await DioHelper.postData(url: url, query: query);
 
           logger.i('[SECTORS][ADD] RESPONSE');
           logger.i('STATUS: ${response.statusCode}');
           logger.i('BODY: ${response.data}');
 
-          if (response.statusCode == 200 ||
-              response.statusCode == 201) {
+          if (response.statusCode == 200 || response.statusCode == 201) {
             return Right(
-              SectorMutationResult(
-                'sector_added_successfully',
-                response.data,
-              ),
+              SectorMutationResult('sector_added_successfully', response.data),
             );
           }
 
-          return const Left(
-            ServerFailure('Failed to add sector'),
-          );
+          return const Left(ServerFailure('sector_add_failed'));
 
         case 'delete':
           const url =
@@ -79,10 +61,7 @@ class SectorTapResponse implements BaseRepository {
           logger.i('URL: $url');
           logger.i('QUERY: $query');
 
-          final response = await DioHelper.deleteData(
-            url: url,
-            query: query,
-          );
+          final response = await DioHelper.deleteData(url: url, query: query);
 
           logger.i('[SECTORS][DELETE] RESPONSE');
           logger.i('STATUS: ${response.statusCode}');
@@ -99,17 +78,11 @@ class SectorTapResponse implements BaseRepository {
             );
           }
 
-          return const Left(
-            ServerFailure('Failed to remove sector'),
-          );
+          return const Left(ServerFailure('sector_remove_failed'));
 
         default:
-          logger.e(
-            '[SECTORS] Unknown action: ${request.action}',
-          );
-          return const Left(
-            ServerFailure('Unknown sector action'),
-          );
+          logger.e('[SECTORS] Unknown action: ${request.action}');
+          return const Left(ServerFailure('invalid_request'));
       }
     } on DioException catch (e, stackTrace) {
       logger.e(
@@ -123,13 +96,12 @@ class SectorTapResponse implements BaseRepository {
         'StackTrace: $stackTrace',
       );
 
-      return Left(
-        ServerFailure(
-          e.response?.data?.toString() ??
-              e.message ??
-              'Sector request failed',
-        ),
-      );
+      final data = e.response?.data;
+      final message = data is Map
+          ? (data['detail'] ?? data['message'] ?? data['title'])?.toString()
+          : null;
+
+      return Left(ServerFailure(message ?? 'request_failed'));
     } catch (e, stackTrace) {
       logger.e(
         '[SECTORS][UNEXPECTED ERROR]\n'
@@ -138,7 +110,7 @@ class SectorTapResponse implements BaseRepository {
         'StackTrace: $stackTrace',
       );
 
-      return Left(ServerFailure(e.toString()));
+      return const Left(ServerFailure('something_went_wrong'));
     }
   }
 }
@@ -149,9 +121,7 @@ class SectorListHolder implements BaseRepository {
   const SectorListHolder(this.sectors);
 
   @override
-  Future<Either<Failure, BaseRepository>> getData(
-    dynamic request,
-  ) async {
+  Future<Either<Failure, BaseRepository>> getData(dynamic request) async {
     return Right(this);
   }
 }
@@ -160,15 +130,10 @@ class SectorMutationResult implements BaseRepository {
   final String message;
   final dynamic responseData;
 
-  const SectorMutationResult(
-    this.message, [
-    this.responseData,
-  ]);
+  const SectorMutationResult(this.message, [this.responseData]);
 
   @override
-  Future<Either<Failure, BaseRepository>> getData(
-    dynamic request,
-  ) async {
+  Future<Either<Failure, BaseRepository>> getData(dynamic request) async {
     return Right(this);
   }
 }

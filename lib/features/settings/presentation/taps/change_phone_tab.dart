@@ -53,7 +53,7 @@ class _ChangePhoneTabState extends State<ChangePhoneTab> {
     if (userId.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('User ID is missing')));
+      ).showSnackBar(SnackBar(content: Text(context.tr('user_id_missing'))));
       return;
     }
 
@@ -72,9 +72,7 @@ class _ChangePhoneTabState extends State<ChangePhoneTab> {
       listener: (context, state) {
         if (state is ChangePhoneSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Phone change request sent successfully'),
-            ),
+            SnackBar(content: Text(context.tr('phone_change_request_sent'))),
           );
 
           Navigator.pushNamed(
@@ -87,9 +85,9 @@ class _ChangePhoneTabState extends State<ChangePhoneTab> {
         }
 
         if (state is ChangePhoneError) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.trMessage(state.message))),
+          );
         }
       },
       builder: (context, state) {

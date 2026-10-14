@@ -45,10 +45,10 @@ class ChangePhoneResponse extends Equatable implements BaseRepository {
         );
       }
 
-      return Left(ServerFailure('Error ${response.statusCode}'));
+      return const Left(ServerFailure('request_failed'));
     } catch (e) {
       logger.e(e);
-      return Left(ServerFailure(e.toString()));
+      return const Left(ServerFailure('something_went_wrong'));
     }
   }
 

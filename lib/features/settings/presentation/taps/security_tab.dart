@@ -37,9 +37,9 @@ class SecurityTab extends StatelessWidget {
           }
 
           if (state is ErrorOtpState) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(context.trMessage(state.message))),
+            );
           }
         },
         builder: (context, state) {

@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:whats_order/base/base_repository.dart';
 import 'package:whats_order/core/network/network_info.dart';
+import 'package:whats_order/core/utils/logger.dart';
 import 'package:whats_order/features/settings/data/profile/update_profile_response.dart';
 import 'package:whats_order/features/settings/presentation/bloc/event/update_profile_event.dart';
 import 'package:whats_order/features/settings/presentation/bloc/states/update_profile_state.dart';
@@ -33,7 +34,7 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
 
       result.fold(
         (failure) {
-          emit(UpdateProfileError(failure.toString()));
+          emit(UpdateProfileError(failure.message));
         },
         (repository) {
           if (repository is UpdateProfileResult) {
@@ -43,8 +44,9 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
           }
         },
       );
-    } catch (e) {
-      emit(UpdateProfileError(e.toString()));
+    } catch (e, s) {
+      logger.e('Update profile failed: $e\n$s');
+      emit(const UpdateProfileError('something_went_wrong'));
     }
   }
 }

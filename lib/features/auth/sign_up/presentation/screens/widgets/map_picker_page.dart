@@ -5,7 +5,11 @@ import 'package:location/location.dart';
 import 'package:whats_order/core/utils/logger.dart';
 
 class MapPickerPage extends StatefulWidget {
-  const MapPickerPage({super.key});
+  /// Optional starting point; when set, the map opens here instead of
+  /// the device's current location.
+  final LatLng? initialLocation;
+
+  const MapPickerPage({super.key, this.initialLocation});
 
   @override
   State<MapPickerPage> createState() => _MapPickerPageState();
@@ -21,7 +25,8 @@ class _MapPickerPageState extends State<MapPickerPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _loadCurrentLocation();
+    selectedLocation = widget.initialLocation;
+    if (selectedLocation == null) _loadCurrentLocation();
   }
 
   @override
@@ -33,7 +38,7 @@ class _MapPickerPageState extends State<MapPickerPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
+    if (state == AppLifecycleState.resumed && widget.initialLocation == null) {
       logger.i("App resumed");
       _loadCurrentLocation();
     }

@@ -28,12 +28,12 @@ class ChangePasswordBloc
 
     result.fold(
       (failure) {
-        emit(ChangePasswordError(failure.toString()));
+        emit(ChangePasswordError(failure.message));
       },
       (response) {
         final message = response is ChangePasswordResponse
-            ? response.message ?? 'Password changed successfully'
-            : 'Password changed successfully';
+            ? response.message ?? 'password_changed_successfully'
+            : 'password_changed_successfully';
 
         emit(ChangePasswordSuccess(message));
       },

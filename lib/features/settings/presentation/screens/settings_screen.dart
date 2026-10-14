@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:whats_order/core/cache/cache_helper.dart';
 import 'package:whats_order/core/cache/cache_keys.dart';
+import 'package:whats_order/core/cache/profile_name.dart';
 import 'package:whats_order/core/constants/app_assets.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
-import 'package:whats_order/core/localization/locale_cubit.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_counter.dart';
 import 'package:whats_order/features/settings/presentation/screens/terms_conditions_screen.dart';
+import 'package:whats_order/features/settings/presentation/widgets/language_dialog.dart';
+import 'package:whats_order/features/settings/presentation/widgets/profile_header.dart';
+import 'package:whats_order/features/settings/presentation/widgets/settings_confirmation_dialog.dart';
+import 'package:whats_order/features/settings/presentation/widgets/settings_group.dart';
+import 'package:whats_order/features/settings/presentation/widgets/settings_tile.dart';
 import '../../../../core/routing/named_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -37,16 +41,16 @@ class SettingsScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _ProfileHeader(),
+            const ProfileHeader(),
             const SizedBox(height: 24),
             Text(
               context.tr("preferences"),
               style: AppTextStyles.sectionLabel13,
             ),
             const SizedBox(height: 8),
-            _SettingsGroup(
+            SettingsGroup(
               children: [
-                _SettingsTile(
+                SettingsTile(
                   icon: SvgPicture.asset(
                     AppAssets.stor,
                     width: 20,
@@ -61,7 +65,7 @@ class SettingsScreen extends StatelessWidget {
                       Navigator.pushNamed(context, NamedRoutes.branches),
                 ),
 
-                _SettingsTile(
+                SettingsTile(
                   icon: SvgPicture.asset(
                     AppAssets.lang,
                     width: 20,
@@ -73,13 +77,13 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   label: context.tr('language'),
                   trailing: context.tr('language_label'),
-                  onTap: () => _showLanguageDialog(context),
+                  onTap: () => showLanguageDialog(context),
                   // onTap: () => context.read<LocaleCubit>().toggle(),
                 ),
                 ValueListenableBuilder<int>(
                   valueListenable: NotificationCounter.notificationCount,
                   builder: (context, count, child) {
-                    return _SettingsTile(
+                    return SettingsTile(
                       icon: SvgPicture.asset(
                         AppAssets.ring,
                         width: 20,
@@ -98,7 +102,7 @@ class SettingsScreen extends StatelessWidget {
                   },
                 ),
 
-                // _SettingsTile(
+                // SettingsTile(
                 //     icon: Icons.dark_mode_outlined,
                 //     label: context.tr('appearance'),
                 //     trailing: context.tr('system')),
@@ -107,9 +111,9 @@ class SettingsScreen extends StatelessWidget {
             const SizedBox(height: 20),
             Text(context.tr("account"), style: AppTextStyles.sectionLabel13),
             const SizedBox(height: 8),
-            _SettingsGroup(
+            SettingsGroup(
               children: [
-                _SettingsTile(
+                SettingsTile(
                   icon: SvgPicture.asset(
                     AppAssets.paper,
                     width: 20,
@@ -129,7 +133,7 @@ class SettingsScreen extends StatelessWidget {
                     );
                   },
                 ),
-                _SettingsTile(
+                SettingsTile(
                   icon: SvgPicture.asset(
                     AppAssets.help,
                     width: 20,
@@ -142,7 +146,7 @@ class SettingsScreen extends StatelessWidget {
                   label: context.tr('help_center'),
                   onTap: openWhatsApp,
                 ),
-                _SettingsTile(
+                SettingsTile(
                   icon: SvgPicture.asset(
                     AppAssets.logout,
                     width: 20,
@@ -155,37 +159,7 @@ class SettingsScreen extends StatelessWidget {
                   label: context.tr('logout'),
                   iconColor: AppColors.danger,
                   labelColor: AppColors.danger,
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text(context.tr('logout')),
-                        content: Text(context.tr('logout_msg')),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: Text(context.tr('cancel')),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              CacheHelper.removeData(key: CacheKeys.userModel);
-                              CacheHelper.removeData(
-                                key: CacheKeys.accessToken,
-                              );
-                              CacheHelper.removeData(
-                                key: CacheKeys.refreshToken,
-                              );
-                              Navigator.of(context).pushNamedAndRemoveUntil(
-                                NamedRoutes.signin,
-                                (r) => false,
-                              );
-                            },
-                            child: Text(context.tr('logout')),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                  onTap: () => _confirmLogout(context),
                 ),
               ],
             ),
@@ -193,6 +167,26 @@ class SettingsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmLogout(BuildContext context) async {
+    final confirmed = await showSettingsConfirmationDialog(
+      context,
+      title: context.tr('logout'),
+      message: context.tr('logout_msg'),
+      iconAsset: null,
+      confirmLabel: context.tr('logout'),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    CacheHelper.removeData(key: CacheKeys.userModel);
+    ProfileName.clear();
+    CacheHelper.removeData(key: CacheKeys.accessToken);
+    CacheHelper.removeData(key: CacheKeys.refreshToken);
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil(NamedRoutes.signin, (r) => false);
   }
 
   Future<void> openWhatsApp() async {
@@ -213,170 +207,4 @@ class SettingsScreen extends StatelessWidget {
       await launchUrl(webUri, mode: LaunchMode.externalApplication);
     }
   }
-}
-
-class _ProfileHeader extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final user = CacheHelper.getDataFromSharedPreference(
-      key: CacheKeys.firstName,
-    );
-
-    return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, NamedRoutes.profile),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: AppColors.primaryGreen,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  AppAssets.person,
-                  width: 30,
-                  height: 30,
-                  colorFilter: const ColorFilter.mode(
-                    Colors.white,
-                    BlendMode.srcIn,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('${user ?? ''}', style: AppTextStyles.cardTitle15),
-                  const SizedBox(height: 2),
-                  Text(
-                    context.tr("edit_profile"),
-                    style: AppTextStyles.cellMuted13,
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: AppColors.textGrey),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SettingsGroup extends StatelessWidget {
-  final List<Widget> children;
-  const _SettingsGroup({required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.border),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: List.generate(children.length, (i) {
-            return Column(
-              children: [
-                children[i],
-                if (i != children.length - 1)
-                  const Divider(height: 1, indent: 54, color: AppColors.border),
-              ],
-            );
-          }),
-        ),
-      ),
-    );
-  }
-}
-
-class _SettingsTile extends StatelessWidget {
-  // final IconData icon;
-  final Widget icon;
-  final String label;
-  final String? trailing;
-  final Color? iconColor;
-  final Color? labelColor;
-  final VoidCallback? onTap;
-
-  const _SettingsTile({
-    required this.icon,
-    required this.label,
-    this.trailing,
-    this.iconColor,
-    this.labelColor,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      onTap: onTap ?? () {},
-      leading: icon,
-      title: Text(
-        label,
-        style: AppTextStyles.cellText13.copyWith(
-          color: labelColor ?? AppColors.textDark,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      trailing: trailing != null
-          ? Text(trailing!, style: AppTextStyles.cellMuted13)
-          : const Icon(
-              Icons.chevron_right,
-              size: 18,
-              color: AppColors.textGrey,
-            ),
-    );
-  }
-}
-
-void _showLanguageDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (dialogContext) {
-      return AlertDialog(
-        title: Text(context.tr('language'), style: AppTextStyles.heading18),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Text('🇸🇦', style: TextStyle(fontSize: 20)),
-              title: const Text('العربية'),
-              onTap: () {
-                Navigator.pop(dialogContext);
-
-                // لو اللغة الحالية English
-                context.read<LocaleCubit>().toggle();
-              },
-            ),
-            const Divider(height: 1),
-            ListTile(
-              leading: const Text('🇬🇧', style: TextStyle(fontSize: 20)),
-              title: const Text('English'),
-              onTap: () {
-                Navigator.pop(dialogContext);
-
-                // لو اللغة الحالية Arabic
-                context.read<LocaleCubit>().toggle();
-              },
-            ),
-          ],
-        ),
-      );
-    },
-  );
 }
