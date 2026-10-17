@@ -12,7 +12,7 @@ class ForgotPasswordLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: Alignment.centerRight,
+      alignment: AlignmentDirectional.centerEnd,
       child: TextButton(
         onPressed: onTap,
         style: TextButton.styleFrom(
@@ -22,6 +22,8 @@ class ForgotPasswordLink extends StatelessWidget {
         ),
         child: Text(
           context.tr('forget_password'),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             fontSize: 12.5,
             fontWeight: FontWeight.w600,
@@ -49,7 +51,14 @@ class RememberMeRow extends StatelessWidget {
     return Row(
       children: [
         Checkbox(value: value, onChanged: (v) => onChanged(v ?? false)),
-        Text(context.tr('remember_me'), style: AppTextStyles.cellText13),
+        Flexible(
+          child: Text(
+            context.tr('remember_me'),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.cellText13,
+          ),
+        ),
       ],
     );
   }

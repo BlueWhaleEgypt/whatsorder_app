@@ -21,11 +21,19 @@ class SignInInfoChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.lightGreenBg,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryGreen.withValues(alpha: 0.12),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 16, color: AppColors.primaryGreen),
+          Icon(icon, size: 18, color: AppColors.primaryGreen),
           const SizedBox(height: 6),
           Text(
             title,

@@ -14,6 +14,7 @@ import 'package:whats_order/features/auth/sign_in/presentation/bloc/sign_in_bloc
 import 'package:whats_order/features/auth/sign_in/presentation/bloc/sign_in_event.dart';
 import 'package:whats_order/features/auth/sign_in/presentation/bloc/sign_in_state.dart';
 import 'package:whats_order/features/auth/sign_in/presentation/screens/sign_in_screen.dart';
+import 'package:whats_order/features/auth/sign_in/presentation/widgets/sign_in_welcome_hero.dart';
 import 'package:whats_order/injection/injection_container.dart';
 
 import 'helpers/harness.dart';
@@ -362,6 +363,69 @@ void main() {
 
       expect(find.text('route:${NamedRoutes.signup}'), findsOneWidget);
     });
+  });
+
+  group('layout', () {
+    testWidgets(
+      'fits a small screen with the keyboard open and stays reachable',
+      (tester) async {
+        await pump(tester);
+        tester.view.physicalSize = const Size(360, 480);
+        tester.view.viewInsets = const FakeViewPadding(bottom: 200);
+        addTearDown(tester.view.resetViewInsets);
+        addTearDown(tester.view.resetPhysicalSize);
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        await tester.ensureVisible(signInButton('en'));
+        expect(signInButton('en'), findsOneWidget);
+      },
+    );
+
+    for (final locale in ['en', 'ar']) {
+      testWidgets('form card holds fields and actions ($locale)', (
+        tester,
+      ) async {
+        await pump(tester, locale: locale);
+        final t = kTranslations[locale]!;
+
+        final card = find.ancestor(
+          of: find.byType(TextFormField).first,
+          matching: find.byType(Container),
+        );
+        expect(card, findsWidgets);
+        expect(find.text(t['remember_me']!), findsOneWidget);
+        expect(find.text(t['forget_password']!), findsOneWidget);
+        expect(tester.takeException(), isNull);
+
+        // Remember-me sits on the start side, forgot-password on the end side.
+        final rememberX = tester.getCenter(find.text(t['remember_me']!)).dx;
+        final forgotX = tester.getCenter(find.text(t['forget_password']!)).dx;
+        expect(rememberX < forgotX, locale == 'en');
+      });
+    }
+  });
+
+  group('welcome hero', () {
+    for (final locale in ['en', 'ar']) {
+      testWidgets('long text wraps without overflow ($locale)', (tester) async {
+        await initPrefs();
+        tester.view.physicalSize = const Size(320, 700);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        await tester.pumpWidget(
+          localizedApp(const SignInWelcomeHero(), locale: locale),
+        );
+        await tester.pumpAndSettle();
+
+        final t = kTranslations[locale]!;
+        expect(find.text(t['welcome_back']!), findsOneWidget);
+        expect(find.text(t['signin_subtitle']!), findsOneWidget);
+        expect(find.byIcon(Icons.shield_outlined), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      });
+    }
   });
 
   group('rendering', () {

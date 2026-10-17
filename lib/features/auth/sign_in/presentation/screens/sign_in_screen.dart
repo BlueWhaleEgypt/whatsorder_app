@@ -185,59 +185,117 @@ class _SignInScreenState extends State<SignInScreen> {
             },
             builder: (context, state) {
               final isLoading = state is LoadingSignInState;
-              return SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const TopBarPills(),
-                      const SizedBox(height: 20),
-                      const SignInWelcomeHero(),
-                      const SizedBox(height: 22),
-                      SignInPhoneField(controller: _phoneController),
-                      const SizedBox(height: 16),
-                      SignInPasswordField(controller: _passwordController),
-                      const SizedBox(height: 8),
-                      ForgotPasswordLink(onTap: _openForgotPassword),
-                      RememberMeRow(
-                        value: rememberMe,
-                        onChanged: (v) => setState(() => rememberMe = v),
-                      ),
-                      const SizedBox(height: 18),
-                      GradientButton(
-                        label: context.tr('sign_in'),
-                        loading: isLoading,
-                        onPressed: _submit,
-                      ),
-                      const SizedBox(height: 18),
-                      SignInFooter(
-                        onSignUp: () => Navigator.of(
-                          context,
-                        ).pushReplacementNamed(NamedRoutes.signup),
-                      ),
-                      const SizedBox(height: 22),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: SignInInfoChip(
-                              icon: Icons.shield_outlined,
-                              title: context.tr('secure_platform'),
-                              subtitle: context.tr('secure_platform_desc'),
+              return LayoutBuilder(
+                builder: (context, constraints) => SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 440),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const TopBarPills(),
+                            const SizedBox(height: 30),
+                            const SignInWelcomeHero(),
+                            const SizedBox(height: 20),
+                            // One card for the whole form so the fields,
+                            // options and action read as a single unit.
+                            Container(
+                              padding: const EdgeInsets.fromLTRB(
+                                18,
+                                20,
+                                18,
+                                18,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.surface,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: AppColors.border),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: AppColors.shadow,
+                                    blurRadius: 16,
+                                    offset: Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  SignInPhoneField(
+                                    controller: _phoneController,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  SignInPasswordField(
+                                    controller: _passwordController,
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: RememberMeRow(
+                                          value: rememberMe,
+                                          onChanged: (v) =>
+                                              setState(() => rememberMe = v),
+                                        ),
+                                      ),
+                                      Flexible(
+                                        child: ForgotPasswordLink(
+                                          onTap: _openForgotPassword,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 14),
+                                  GradientButton(
+                                    label: context.tr('sign_in'),
+                                    loading: isLoading,
+                                    onPressed: _submit,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: SignInInfoChip(
-                              icon: Icons.bolt_outlined,
-                              title: context.tr('fast_delivery'),
-                              subtitle: context.tr('fast_delivery_desc'),
+                            const SizedBox(height: 18),
+                            SignInFooter(
+                              onSignUp: () => Navigator.of(
+                                context,
+                              ).pushReplacementNamed(NamedRoutes.signup),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 22),
+                            IntrinsicHeight(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(
+                                    child: SignInInfoChip(
+                                      icon: Icons.shield_outlined,
+                                      title: context.tr('secure_platform'),
+                                      subtitle: context.tr(
+                                        'secure_platform_desc',
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: SignInInfoChip(
+                                      icon: Icons.bolt_outlined,
+                                      title: context.tr('fast_delivery'),
+                                      subtitle: context.tr(
+                                        'fast_delivery_desc',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               );

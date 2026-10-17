@@ -72,7 +72,6 @@ Future<void> getFirebaseToken() async {
 
   final token = await messaging.getToken();
 
-  print('FCM Token: $token');
   logger.w('FCM Token: $token');
 }
 

@@ -11,13 +11,7 @@ class SectorModelLogin extends Equatable {
   final num? cost;
   final bool? view;
 
-  const SectorModelLogin({
-    this.id,
-    this.name,
-    this.note,
-    this.cost,
-    this.view,
-  });
+  const SectorModelLogin({this.id, this.name, this.note, this.cost, this.view});
 
   factory SectorModelLogin.fromJson(Map<String, dynamic> json) =>
       _$SectorModelLoginFromJson(json);
@@ -25,11 +19,5 @@ class SectorModelLogin extends Equatable {
   Map<String, dynamic> toJson() => _$SectorModelLoginToJson(this);
 
   @override
-  List<Object?> get props => [
-        id,
-        name,
-        note,
-        cost,
-        view,
-      ];
+  List<Object?> get props => [id, name, note, cost, view];
 }

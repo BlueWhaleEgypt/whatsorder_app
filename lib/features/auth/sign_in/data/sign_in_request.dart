@@ -19,10 +19,10 @@ class SignInRequest {
   });
 
   Map<String, dynamic> toJson() => {
-        'username': phone,
-        'password': password,
-        'firebaseToken': fcmToken, // أو الاسم اللي الـ API محدده
-      };
+    'username': phone,
+    'password': password,
+    'firebaseToken': fcmToken, // أو الاسم اللي الـ API محدده
+  };
 }
 // class SignInRequest {
 //   final String phone;

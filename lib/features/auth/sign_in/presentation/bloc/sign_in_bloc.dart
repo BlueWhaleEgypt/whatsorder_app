@@ -30,7 +30,6 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
         'SignInResponse',
       ).getData(event.request);
 
-      
       emit(_mapFailureOrPostsToSigInState(failureOrResult));
     });
   }
