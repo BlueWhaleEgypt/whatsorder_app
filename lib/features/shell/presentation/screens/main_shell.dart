@@ -180,7 +180,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F8),
+      backgroundColor: const Color.fromARGB(255, 248, 247, 245),
       body: SafeArea(
         child: Stack(
           children: [

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:whats_order/core/theme/app_colors.dart';
 
 /// Small icon + title + subtitle tile (e.g. "Secure platform").
 class SignInInfoChip extends StatelessWidget {
-  final IconData icon;
+  final String icon;
   final String title;
   final String subtitle;
 
@@ -33,7 +34,15 @@ class SignInInfoChip extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: AppColors.primaryGreen),
+          SvgPicture.asset(
+            icon,
+            height: 18,
+            width: 18,
+            colorFilter: const ColorFilter.mode(
+              AppColors.primaryGreen,
+              BlendMode.srcIn,
+            ),
+          ),
           const SizedBox(height: 6),
           Text(
             title,

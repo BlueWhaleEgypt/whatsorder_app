@@ -67,17 +67,16 @@ class NotificationBellButton extends StatelessWidget {
               Container(
                 width: 32,
                 height: 32,
-                decoration: const BoxDecoration(
-                  color: AppColors.primaryGreenTint,
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF14B85E).withOpacity(0.12),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
                   child: SvgPicture.asset(
                     AppAssets.ring,
-                    width: 16,
-                    height: 16,
                     colorFilter: const ColorFilter.mode(
-                      Colors.white,
+                      AppColors.primaryGreenTint,
                       BlendMode.srcIn,
                     ),
                   ),
@@ -135,17 +134,16 @@ class SmsMessagesButton extends StatelessWidget {
               Container(
                 width: 34,
                 height: 34,
-                decoration: const BoxDecoration(
-                  color: AppColors.primaryGreenTint,
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF14B85E).withOpacity(0.12),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
                   child: SvgPicture.asset(
                     AppAssets.chat,
-                    width: 18,
-                    height: 18,
                     colorFilter: const ColorFilter.mode(
-                      Colors.white,
+                      AppColors.primaryGreenTint,
                       BlendMode.srcIn,
                     ),
                   ),

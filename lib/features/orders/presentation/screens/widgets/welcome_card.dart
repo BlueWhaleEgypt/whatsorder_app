@@ -105,6 +105,8 @@ class WelcomeCard extends StatelessWidget {
                               children: [
                                 if (isVerified) ...[
                                   Container(
+                                    width: 30,
+                                    height: 30,
                                     padding: const EdgeInsets.all(2),
                                     decoration: const BoxDecoration(
                                       color: AppColors.border,
@@ -112,10 +114,7 @@ class WelcomeCard extends StatelessWidget {
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
-                                        AppAssets.verified,
-                                        width: 20,
-                                        height: 20,
-
+                                        AppAssets.baselineVerified,
                                         colorFilter: const ColorFilter.mode(
                                           Color.fromARGB(255, 0, 136, 214),
                                           BlendMode.srcIn,

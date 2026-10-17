@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whats_order/core/cache/cache_helper.dart';
 import 'package:whats_order/core/cache/cache_keys.dart';
+import 'package:whats_order/core/constants/app_assets.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/utils/phone_utils.dart';
 import 'package:whats_order/core/widgets/gradient_button.dart';
@@ -272,7 +273,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                 children: [
                                   Expanded(
                                     child: SignInInfoChip(
-                                      icon: Icons.shield_outlined,
+                                      icon: AppAssets.safe,
                                       title: context.tr('secure_platform'),
                                       subtitle: context.tr(
                                         'secure_platform_desc',
@@ -282,7 +283,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: SignInInfoChip(
-                                      icon: Icons.bolt_outlined,
+                                      icon: AppAssets.fast,
                                       title: context.tr('fast_delivery'),
                                       subtitle: context.tr(
                                         'fast_delivery_desc',

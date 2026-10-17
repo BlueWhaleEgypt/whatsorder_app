@@ -25,4 +25,6 @@ class AppAssets {
   static const String paper = 'assets/icons/paper.svg';
   static const String grid = 'assets/icons/grid.svg';
   static const String smartphone = 'assets/icons/smartphone.svg';
+  static const String verifiedRounded = 'assets/icons/verified-rounded.svg';
+  static const String baselineVerified = 'assets/icons/baseline-verified.svg';
 }
