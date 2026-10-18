@@ -7,17 +7,14 @@ class BranchRequest {
   final String? branchId;
   final BranchModel? branch;
 
-  const BranchRequest.fetch({
-    required this.userId,
-  })  : action = BranchAction.fetch,
-        branchId = null,
-        branch = null;
+  const BranchRequest.fetch({required this.userId})
+    : action = BranchAction.fetch,
+      branchId = null,
+      branch = null;
 
-  const BranchRequest.add({
-    required this.userId,
-    required this.branch,
-  })  : action = BranchAction.add,
-        branchId = null;
+  const BranchRequest.add({required this.userId, required this.branch})
+    : action = BranchAction.add,
+      branchId = null;
 
   const BranchRequest.update({
     required this.userId,
@@ -25,9 +22,7 @@ class BranchRequest {
     required this.branch,
   }) : action = BranchAction.update;
 
-  const BranchRequest.delete({
-    required this.userId,
-    required this.branchId,
-  })  : action = BranchAction.delete,
-        branch = null;
+  const BranchRequest.delete({required this.userId, required this.branchId})
+    : action = BranchAction.delete,
+      branch = null;
 }

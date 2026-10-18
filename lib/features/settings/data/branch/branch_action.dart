@@ -1,6 +1,1 @@
-enum BranchAction {
-  fetch,
-  add,
-  update,
-  delete,
-}
+enum BranchAction { fetch, add, update, delete }

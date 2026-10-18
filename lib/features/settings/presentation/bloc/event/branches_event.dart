@@ -21,10 +21,7 @@ class AddBranchEvent extends BranchesEvent {
   final String userId;
   final BranchModel branch;
 
-  const AddBranchEvent({
-    required this.userId,
-    required this.branch,
-  });
+  const AddBranchEvent({required this.userId, required this.branch});
 
   @override
   List<Object?> get props => [userId, branch];
@@ -49,10 +46,7 @@ class DeleteBranchEvent extends BranchesEvent {
   final String userId;
   final String branchId;
 
-  const DeleteBranchEvent({
-    required this.userId,
-    required this.branchId,
-  });
+  const DeleteBranchEvent({required this.userId, required this.branchId});
 
   @override
   List<Object?> get props => [userId, branchId];

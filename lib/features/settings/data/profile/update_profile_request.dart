@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:whats_order/features/orders/data/vendor_model.dart';
@@ -37,12 +36,9 @@ class UpdateProfileRequest {
       'neighborhood': vendor.neighborhood ?? '',
       'servingTheEntireGovernorate':
           vendor.servingTheEntireGovernorate ?? false,
-      'servingTheEntireArea':
-          vendor.servingTheEntireArea ?? false,
-      'availableInAllRegions':
-          vendor.availableInAllRegions ?? false,
-      'serviceDistance':
-          vendor.serviceDistance?.toString() ?? '',
+      'servingTheEntireArea': vendor.servingTheEntireArea ?? false,
+      'availableInAllRegions': vendor.availableInAllRegions ?? false,
+      'serviceDistance': vendor.serviceDistance?.toString() ?? '',
     };
 
     fields.addAll(overrides);

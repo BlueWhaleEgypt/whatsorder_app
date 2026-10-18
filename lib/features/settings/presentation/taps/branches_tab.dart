@@ -62,15 +62,10 @@ class _BranchesTabState extends State<BranchesTab> {
         title: Text(context.tr("branches"), style: AppTextStyles.heading18),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              context.tr('branches_description'),
-              style: const TextStyle(color: Colors.grey, fontSize: 13),
-            ),
-            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -79,7 +74,7 @@ class _BranchesTabState extends State<BranchesTab> {
                   icon: const Icon(Icons.add_rounded, size: 20),
                   label: Text(context.tr('add_branch')),
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primaryGreen,
+                    backgroundColor: const Color.fromARGB(255, 47, 144, 87),
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: AppColors.border,
                     disabledForegroundColor: AppColors.textFaint,
@@ -96,6 +91,13 @@ class _BranchesTabState extends State<BranchesTab> {
                 ),
               ],
             ),
+            const SizedBox(height: 16),
+
+            Text(
+              context.tr('branches_description'),
+              style: const TextStyle(color: Colors.grey, fontSize: 13),
+            ),
+
             const SizedBox(height: 12),
             BlocConsumer<BranchesBloc, BranchesState>(
               listener: (context, state) {

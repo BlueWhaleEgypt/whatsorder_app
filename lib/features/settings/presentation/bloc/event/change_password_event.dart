@@ -19,9 +19,5 @@ class SubmitChangePasswordEvent extends ChangePasswordEvent {
   });
 
   @override
-  List<Object?> get props => [
-        userId,
-        plainPassword,
-        newPassword,
-      ];
+  List<Object?> get props => [userId, plainPassword, newPassword];
 }

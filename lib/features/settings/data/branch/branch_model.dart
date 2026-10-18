@@ -6,6 +6,11 @@ class BranchModel {
   final double? longitude;
   final String address;
 
+  /// Optional, display-only. Read from the API response when the backend
+  /// sends `city` / `area`; never written back (not part of [toJson]).
+  final String? city;
+  final String? area;
+
   const BranchModel({
     required this.id,
     required this.name,
@@ -13,6 +18,8 @@ class BranchModel {
     this.latitude,
     this.longitude,
     required this.address,
+    this.city,
+    this.area,
   });
 
   factory BranchModel.fromJson(Map<String, dynamic> json) {
@@ -23,6 +30,8 @@ class BranchModel {
       latitude: _toDouble(json['latitude']),
       longitude: _toDouble(json['longitude']),
       address: json['address']?.toString() ?? '',
+      city: json['city']?.toString(),
+      area: json['area']?.toString(),
     );
   }
 

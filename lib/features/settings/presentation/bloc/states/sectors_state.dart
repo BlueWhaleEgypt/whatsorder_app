@@ -1,4 +1,3 @@
-
 import 'package:equatable/equatable.dart';
 import 'package:whats_order/features/auth/sign_up/data/sector_model.dart';
 
@@ -20,24 +19,15 @@ class SectorsInitial extends SectorsState {
 }
 
 class SectorsLoading extends SectorsState {
-  const SectorsLoading({
-    super.sectors,
-    super.assignedSectorIds,
-  });
+  const SectorsLoading({super.sectors, super.assignedSectorIds});
 }
 
 class SectorsLoaded extends SectorsState {
-  const SectorsLoaded({
-    required super.sectors,
-    super.assignedSectorIds,
-  });
+  const SectorsLoaded({required super.sectors, super.assignedSectorIds});
 }
 
 class SectorsActionLoading extends SectorsState {
-  const SectorsActionLoading({
-    super.sectors,
-    super.assignedSectorIds,
-  });
+  const SectorsActionLoading({super.sectors, super.assignedSectorIds});
 }
 
 class SectorsActionSuccess extends SectorsState {
@@ -50,10 +40,7 @@ class SectorsActionSuccess extends SectorsState {
   });
 
   @override
-  List<Object?> get props => [
-        ...super.props,
-        messageKey,
-      ];
+  List<Object?> get props => [...super.props, messageKey];
 }
 
 class SectorsError extends SectorsState {
@@ -66,8 +53,5 @@ class SectorsError extends SectorsState {
   });
 
   @override
-  List<Object?> get props => [
-        ...super.props,
-        messageKey,
-      ];
+  List<Object?> get props => [...super.props, messageKey];
 }

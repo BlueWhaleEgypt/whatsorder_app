@@ -38,10 +38,7 @@ class BranchesErrorState extends BranchesState {
   final String message;
   final List<BranchModel> branches;
 
-  const BranchesErrorState(
-    this.message, {
-    this.branches = const [],
-  });
+  const BranchesErrorState(this.message, {this.branches = const []});
 
   // Every error is its own event: repeating the same failure (e.g. offline
   // twice in a row) must still reach the UI, so equality is by identity.

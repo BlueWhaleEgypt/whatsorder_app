@@ -11,10 +11,7 @@ class SubmitChangePhoneEvent extends ChangePhoneEvent {
   final String userId;
   final String phone;
 
-  const SubmitChangePhoneEvent({
-    required this.userId,
-    required this.phone,
-  });
+  const SubmitChangePhoneEvent({required this.userId, required this.phone});
 
   @override
   List<Object?> get props => [userId, phone];
