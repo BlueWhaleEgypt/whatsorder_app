@@ -65,6 +65,8 @@ class _WalletScreenState extends State<WalletScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.scaffoldBg,
+
       appBar: AppBar(
         title: Text(context.tr("your_wallet"), style: AppTextStyles.heading18),
         automaticallyImplyLeading: false,

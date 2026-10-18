@@ -33,6 +33,8 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.scaffoldBg,
+
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(context.tr("settings"), style: AppTextStyles.heading18),

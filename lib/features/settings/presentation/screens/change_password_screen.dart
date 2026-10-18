@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
+import 'package:whats_order/core/theme/app_colors.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/core/utils/logger.dart';
 import 'package:whats_order/core/widgets/gradient_button.dart';
@@ -55,6 +56,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         final isLoading = state is ChangePasswordLoading;
 
         return Scaffold(
+          backgroundColor: AppColors.scaffoldBg,
+
           appBar: AppBar(
             title: Text(
               context.tr('change_password'),

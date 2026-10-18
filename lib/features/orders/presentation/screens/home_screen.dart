@@ -35,6 +35,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.scaffoldBg,
+
       appBar: AppBar(
         title: Text(context.tr("your_order"), style: AppTextStyles.heading18),
         automaticallyImplyLeading: false,
