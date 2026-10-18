@@ -144,7 +144,6 @@ class _VerificationBadge extends StatelessWidget {
     final Color textColor = isVerified
         ? Colors.white
         : AppColors.pillYellowText;
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
 
     return Material(
       color: isVerified
@@ -202,11 +201,10 @@ class _VerificationBadge extends StatelessWidget {
                 const SizedBox(width: 6),
                 Icon(
                   // Points the way the text flows.
-                  isRtl
-                      ? Icons.arrow_back_ios_new_rounded
-                      : Icons.arrow_forward_ios_rounded,
+                  Icons.chevron_right,
                   color: textColor,
-                  size: 12,
+                  
+                  size: 22,
                 ),
               ],
             ],
