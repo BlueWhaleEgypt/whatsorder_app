@@ -183,9 +183,8 @@ class _UserInfoTabState extends State<UserInfoTab> {
                 SizedBox(
                   width: double.infinity,
                   child: GradientButton(
-                    label: isLoading
-                        ? context.tr('loading')
-                        : context.tr(isEditing ? 'save_changes' : 'edit'),
+                    label: context.tr(isEditing ? 'save_changes' : 'edit'),
+                    loading: isLoading,
                     onPressed: isLoading ? () {} : _save,
                   ),
                 ),
