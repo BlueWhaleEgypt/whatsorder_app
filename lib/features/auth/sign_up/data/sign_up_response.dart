@@ -67,11 +67,22 @@ class SignupResponse extends Equatable implements BaseRepository {
       } else {
         logger.i('<<<<<<<<<< error >>>>>>>>>> ${response.data}');
 
+        if (response.statusCode == 409) {
+          return const Left(ServerFailure('phone_already_registered'));
+        }
+
         return Left(ServerFailure('Error: ${response.data}'));
       }
     } on DioException catch (e) {
       logger.e("Status Code: ${e.response?.statusCode}");
       logger.e("Response: ${e.response?.data}");
+
+      // 409 Conflict on signup = the phone number already has an account.
+      // Report it with a stable key the UI can localize; it is a failure,
+      // so the signup flow must not continue.
+      if (e.response?.statusCode == 409) {
+        return const Left(ServerFailure('phone_already_registered'));
+      }
 
       String message = 'Something went wrong';
 

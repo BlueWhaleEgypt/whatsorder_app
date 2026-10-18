@@ -70,18 +70,16 @@ class UploadFilesStep extends StatelessWidget {
       listeners: [
         BlocListener<OnboardingCubit, OnboardingState>(
           listener: (context, state) {
-            if (state.submitted ||
-                (state.submitError?.contains("Phone is already taken") ??
-                    false)) {
+            // Only a successful signup continues to OTP verification. A failed
+            // one (including "phone already registered") stays on this step.
+            if (state.submitted) {
               context.read<OtpBloc>().add(SendOtpEvent(state.data.phone));
             }
 
-            if (state.submitError != null &&
-                !(state.submitError?.contains("Phone is already taken") ??
-                    false)) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.submitError!)));
+            if (state.submitError != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(context.trMessage(state.submitError))),
+              );
             }
           },
         ),
@@ -184,8 +182,7 @@ class UploadFilesStep extends StatelessWidget {
                 if (!isLocationValid) ...[
                   const SizedBox(height: 16),
                   _LocationWarningBanner(
-                    onTap: () =>
-                        context.read<OnboardingCubit>().goToStep(1),
+                    onTap: () => context.read<OnboardingCubit>().goToStep(1),
                   ),
                 ],
 
@@ -227,12 +224,19 @@ class _LocationWarningBanner extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.location_off_outlined, size: 18, color: Colors.orange),
+            const Icon(
+              Icons.location_off_outlined,
+              size: 18,
+              color: Colors.orange,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 context.tr("location_and_service_area_required"),
-                style: const TextStyle(fontSize: 12.5, color: AppColors.textDark),
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  color: AppColors.textDark,
+                ),
               ),
             ),
             const Icon(Icons.chevron_right, size: 18, color: Colors.orange),

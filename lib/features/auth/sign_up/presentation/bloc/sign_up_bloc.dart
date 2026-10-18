@@ -21,13 +21,16 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     on<SubmitSignUpEvent>((event, emit) async {
       emit(LoadingSignUpState());
 
-      final failureOrResult =
-          await BaseRepository('SignupResponse').getData(event.request);
+      final failureOrResult = await BaseRepository(
+        'SignupResponse',
+      ).getData(event.request);
 
-      emit(failureOrResult.fold(
-        (failure) => ErrorSignUpState(message: _mapFailureToMessage(failure)),
-        (response) => LoadedSignUpState(response: response as SignupResponse),
-      ));
+      emit(
+        failureOrResult.fold(
+          (failure) => ErrorSignUpState(message: _mapFailureToMessage(failure)),
+          (response) => LoadedSignUpState(response: response as SignupResponse),
+        ),
+      );
     });
   }
 

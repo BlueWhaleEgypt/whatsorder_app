@@ -8,7 +8,6 @@ import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/error/failures.dart';
 import 'package:whats_order/core/network/dio_helper.dart';
 import 'package:whats_order/core/network/end_points.dart';
-import 'package:whats_order/core/utils/logger.dart';
 import 'package:whats_order/features/wallet/data/transaction_model.dart';
 import 'package:whats_order/features/wallet/data/transaction_requiest.dart';
 
@@ -39,7 +38,7 @@ class TransactionResponse extends Equatable implements BaseRepository {
         query: {"page": req.page, "size": req.size},
       );
 
-      logger.i(response.data);
+      // logger.i(response.data);
 
       if (response.statusCode == 200) {
         return Right(TransactionResponse.fromJson(response.data));

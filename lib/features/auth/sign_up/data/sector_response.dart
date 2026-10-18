@@ -30,11 +30,7 @@ class SectorResponse extends Equatable implements BaseRepository {
     try {
       final response = await DioHelper.getData(
         url: '${EndPoints.baseUrl}${EndPoints.epSector}',
-        query: {
-          'isView': 'true',
-          'page': '0',
-          'size': '20',
-        },
+        query: {'isView': 'true', 'page': '0', 'size': '20'},
       );
 
       logger.i('<<<<<<<<<< Sectors >>>>>>>>>>>> ${response.data}');
@@ -47,7 +43,9 @@ class SectorResponse extends Equatable implements BaseRepository {
             .toList();
         return Right(_SectorListHolder(sectors));
       } else {
-        return Left(ServerFailure('Error loading sectors: ${response.statusCode}'));
+        return Left(
+          ServerFailure('Error loading sectors: ${response.statusCode}'),
+        );
       }
     } catch (e) {
       return Left(ServerFailure(e.toString()));

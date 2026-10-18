@@ -58,7 +58,9 @@ class OnboardingState extends Equatable {
       data: data ?? this.data,
       sectors: sectors ?? this.sectors,
       sectorsLoading: sectorsLoading ?? this.sectorsLoading,
-      sectorsError: clearSectorsError ? null : (sectorsError ?? this.sectorsError),
+      sectorsError: clearSectorsError
+          ? null
+          : (sectorsError ?? this.sectorsError),
       isSubmitting: isSubmitting ?? this.isSubmitting,
       submitError: clearError ? null : (submitError ?? this.submitError),
       submitted: submitted ?? this.submitted,
@@ -67,13 +69,13 @@ class OnboardingState extends Equatable {
 
   @override
   List<Object?> get props => [
-        currentStep,
-        data,
-        sectors,
-        sectorsLoading,
-        sectorsError,
-        isSubmitting,
-        submitError,
-        submitted,
-      ];
+    currentStep,
+    data,
+    sectors,
+    sectorsLoading,
+    sectorsError,
+    isSubmitting,
+    submitError,
+    submitted,
+  ];
 }

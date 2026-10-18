@@ -163,5 +163,3 @@ class _UserInfoStepState extends State<UserInfoStep> {
     );
   }
 }
-
-

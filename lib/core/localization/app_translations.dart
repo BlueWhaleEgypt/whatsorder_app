@@ -299,6 +299,8 @@ const Map<String, Map<String, String>> kTranslations = {
     "phone_number_missing": "Phone number is missing",
     "delete_sector_confirmation": "Are you sure you want to delete",
     "delete_sector": "Delete Sector",
+    "phone_already_registered":
+        "This phone number is already registered. Try signing in, or use a different number.",
     "branch_saved_refresh_failed":
         "Your change was saved, but the branch list could not be refreshed.",
     "user_id_missing": "User ID is missing",
@@ -603,6 +605,8 @@ const Map<String, Map<String, String>> kTranslations = {
     "phone_number_missing": "رقم الهاتف غير موجود",
     "delete_sector_confirmation": "هل أنت متأكد أنك تريد حذف القطاع",
     "delete_sector": "حذف قطاع",
+    "phone_already_registered":
+        "رقم الهاتف هذا مسجل بالفعل. جرّب تسجيل الدخول أو استخدم رقمًا آخر.",
     "branch_saved_refresh_failed":
         "تم حفظ التغيير، لكن تعذر تحديث قائمة الفروع.",
     "user_id_missing": "معرّف المستخدم غير موجود",

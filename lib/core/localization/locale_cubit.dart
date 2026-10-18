@@ -19,7 +19,9 @@ class LocaleCubit extends Cubit<Locale> {
   LocaleCubit() : super(_loadInitial());
 
   static Locale _loadInitial() {
-    final saved = CacheHelper.getDataFromSharedPreference(key: CacheKeys.appLang);
+    final saved = CacheHelper.getDataFromSharedPreference(
+      key: CacheKeys.appLang,
+    );
     if (saved is String && (saved == 'en' || saved == 'ar')) {
       return Locale(saved);
     }
@@ -35,6 +37,7 @@ class LocaleCubit extends Cubit<Locale> {
     emit(locale);
   }
 
-  Future<void> toggle() =>
-      changeLocale(state.languageCode == 'en' ? const Locale('ar') : const Locale('en'));
+  Future<void> toggle() => changeLocale(
+    state.languageCode == 'en' ? const Locale('ar') : const Locale('en'),
+  );
 }

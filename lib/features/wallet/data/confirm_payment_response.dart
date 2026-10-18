@@ -6,7 +6,6 @@ import 'package:whats_order/base/base_repository.dart';
 import 'package:whats_order/core/error/failures.dart';
 import 'package:whats_order/core/network/dio_helper.dart';
 import 'package:whats_order/core/network/end_points.dart';
-import 'package:whats_order/core/utils/logger.dart';
 
 part 'confirm_payment_response.g.dart';
 
@@ -32,13 +31,13 @@ class ConfirmPaymentResponse extends Equatable implements BaseRepository {
   Future<Either<Failure, BaseRepository>> getData(dynamic request) async {
     try {
       final params = request as Map<String, String>; // {sessionId, walletId}
-      logger.w(
-        "<<<<<<<<< ConfirmPaymentRequest <<<<<<<< sessionId ${params['sessionId']} walletId ${params['walletId']}",
-      );
+      // logger.w(
+      //   "<<<<<<<<< ConfirmPaymentRequest <<<<<<<< sessionId ${params['sessionId']} walletId ${params['walletId']}",
+      // );
 
       final url =
           "${EndPoints.baseUrl}${EndPoints.epAddPaymentToMyWallet}/${params['sessionId']}";
-      logger.w(url);
+      // logger.w(url);
 
       final response = await DioHelper.postData(
         url: url,
@@ -46,15 +45,15 @@ class ConfirmPaymentResponse extends Equatable implements BaseRepository {
       );
 
       if (response.statusCode == 200) {
-        logger.i(
-          "<<<<<<<<< ConfirmPaymentResponse 200 <<<<<<<< ${response.data}",
-        );
+        // logger.i(
+        //   "<<<<<<<<< ConfirmPaymentResponse 200 <<<<<<<< ${response.data}",
+        // );
         return Right(ConfirmPaymentResponse.fromJson(response.data));
       }
       return Left(ServerFailure(response.statusMessage ?? "Unknown Error"));
     } on DioException catch (e) {
-      logger.e(e.response?.data);
-      logger.e(e.message);
+      // logger.e(e.response?.data);
+      // logger.e(e.message);
 
       String message = "Something went wrong";
       final responseData = e.response?.data;

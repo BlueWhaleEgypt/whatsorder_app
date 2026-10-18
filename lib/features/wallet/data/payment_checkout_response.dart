@@ -6,7 +6,6 @@ import 'package:whats_order/base/base_repository.dart';
 import 'package:whats_order/core/error/failures.dart';
 import 'package:whats_order/core/network/dio_helper.dart';
 import 'package:whats_order/core/network/end_points.dart';
-import 'package:whats_order/core/utils/logger.dart';
 import 'package:whats_order/features/wallet/data/payment_checkout_request.dart';
 
 part 'payment_checkout_response.g.dart';
@@ -37,27 +36,27 @@ class PaymentCheckoutResponse extends Equatable implements BaseRepository {
   Future<Either<Failure, BaseRepository>> getData(dynamic request) async {
     try {
       final req = request as PaymentCheckoutRequest;
-      logger.w(
-        "<<<<<<<<<<<< PaymentCheckoutRequest >>>>>>>>>>>>>>>>>>>>> ${req.toJson()}",
-      );
+      // logger.w(
+      //   "<<<<<<<<<<<< PaymentCheckoutRequest >>>>>>>>>>>>>>>>>>>>> ${req.toJson()}",
+      // );
       const url = "${EndPoints.baseUrl}${EndPoints.epPaymentCheckout}";
-      logger.i(url);
+      // logger.i(url);
       final response = await DioHelper.postData(url: url, body: req.toJson());
-      logger.i(
-        "<<<<<<<<<<<<<< PaymentCheckoutResponse >>>>>>>>>>>>>>>>>>>>> ${response.data}",
-      );
+      // logger.i(
+      //   "<<<<<<<<<<<<<< PaymentCheckoutResponse >>>>>>>>>>>>>>>>>>>>> ${response.data}",
+      // );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        logger.i(
-          "<<<<<<<<<<<<<< PaymentCheckout  200  Response >>>>>>>>>>>>>>>>>>>>> ${response.data}",
-        );
+        // logger.i(
+        //   "<<<<<<<<<<<<<< PaymentCheckout  200  Response >>>>>>>>>>>>>>>>>>>>> ${response.data}",
+        // );
         return Right(PaymentCheckoutResponse.fromJson(response.data));
       }
       return Left(ServerFailure(response.statusMessage ?? "Unknown Error"));
     } on DioException catch (e) {
-      logger.e(e.response?.data);
-      logger.e(e.response?.data['message']);
-      logger.e(e.message);
+      // logger.e(e.response?.data);
+      // logger.e(e.response?.data['message']);
+      // logger.e(e.message);
       String message = "Something went wrong";
       if (e.response?.data is Map<String, dynamic>) {
         message = e.response!.data["message"] ?? message;

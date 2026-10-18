@@ -10,7 +10,6 @@ import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/error/failures.dart';
 import 'package:whats_order/core/network/dio_helper.dart';
 import 'package:whats_order/core/network/end_points.dart';
-import 'package:whats_order/core/utils/logger.dart';
 import 'package:whats_order/features/auth/sign_in/data/user_model.dart';
 
 part 'wallet_response.g.dart';
@@ -41,17 +40,17 @@ class WalletResponse extends Equatable implements BaseRepository {
         url: "${EndPoints.baseUrl}${EndPoints.epWalletByVendor}/${user.id}",
       );
 
-      logger.i("Wallet => ${response.data}");
+      // logger.i("Wallet => ${response.data}");
 
       if (response.statusCode == 200) {
-        logger.i("Wallet => ${response.data}");
+        // logger.i("Wallet => ${response.data}");
 
         return Right(WalletResponse.fromJson(response.data));
       }
 
       return Left(ServerFailure(response.statusMessage ?? "Unknown Error"));
     } on DioException catch (e) {
-      logger.e(e.response?.data);
+      // logger.e(e.response?.data);
 
       String message = "Something went wrong";
 

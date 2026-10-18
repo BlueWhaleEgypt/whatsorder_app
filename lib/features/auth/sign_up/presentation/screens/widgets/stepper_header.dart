@@ -21,7 +21,7 @@ class StepperHeader extends StatelessWidget {
   static const _icons = [
     Icons.person_outline,
     Icons.location_on_outlined,
-    Icons.description_outlined
+    Icons.description_outlined,
   ];
 
   @override
@@ -63,8 +63,9 @@ class StepperHeader extends StatelessWidget {
               child: Icon(
                 isDone ? Icons.check : _icons[stepIndex],
                 size: 17,
-                color:
-                    (isDone || isCurrent) ? Colors.white : AppColors.textGrey,
+                color: (isDone || isCurrent)
+                    ? Colors.white
+                    : AppColors.textGrey,
               ),
             ),
             const SizedBox(height: 6),
