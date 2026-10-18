@@ -40,14 +40,15 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(context.tr("your_order"), style: AppTextStyles.heading18),
         automaticallyImplyLeading: false,
+        centerTitle: false,
+        scrolledUnderElevation: 0,
         actions: const [
           OrderSearchButton(),
 
-          SizedBox(width: 8),
+          SizedBox(width: 12),
           NotificationBellButton(),
-          SizedBox(width: 8),
+          SizedBox(width: 10),
           SmsMessagesButton(),
-
           SizedBox(width: 16),
         ],
       ),
@@ -69,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverPadding(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.fromLTRB(14, 8, 14, 4),
                 sliver: SliverToBoxAdapter(
                   child: Column(
                     children: [
@@ -86,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           return const SizedBox.shrink();
                         },
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 14),
 
                       Align(
                         alignment: AlignmentDirectional.centerStart,
@@ -103,14 +104,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                         ),
                       ),
+                      const SizedBox(height: 14),
                     ],
                   ),
                 ),
               ),
               SliverFillRemaining(
-                // hasScrollBody: false,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
                   child: BlocBuilder<OrdersBloc, OrdersState>(
                     builder: (context, state) {
                       if (state is LoadingOrdersState) {

@@ -16,9 +16,9 @@ class SignInWelcomeHero extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
-            AppColors.primaryGreenDark,
             AppColors.primaryGreen,
             AppColors.primaryGreenTint,
+            AppColors.primaryGreenLight,
           ],
           stops: [0, 0.44, 1],
           begin: AlignmentDirectional.topStart,

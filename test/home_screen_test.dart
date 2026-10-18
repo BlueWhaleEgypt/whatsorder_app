@@ -94,6 +94,82 @@ void main() {
     expect(find.byIcon(Icons.arrow_forward_ios_rounded), findsOneWidget);
   });
 
+  testWidgets('verified badge is not tappable; unverified opens verification', (
+    tester,
+  ) async {
+    await pump(tester);
+    await showVendor(
+      tester,
+      const VendorModel(id: 'v', verificationStatus: 'Verified'),
+    );
+    expect(
+      tester
+          .widget<InkWell>(
+            find.ancestor(
+              of: find.text(_en('account_verified')),
+              matching: find.byType(InkWell),
+            ),
+          )
+          .onTap,
+      isNull,
+    );
+
+    await showVendor(
+      tester,
+      const VendorModel(id: 'v', verificationStatus: 'Pending'),
+    );
+    expect(
+      tester
+          .widget<InkWell>(
+            find.ancestor(
+              of: find.text(_en('account_not_verified')),
+              matching: find.byType(InkWell),
+            ),
+          )
+          .onTap,
+      isNotNull,
+    );
+  });
+
+  testWidgets('welcome card has no overflow on a narrow screen', (
+    tester,
+  ) async {
+    await pump(tester);
+    tester.view.physicalSize = const Size(280, 800);
+    ProfileName.firstName.value = List.filled(6, 'Abdelrahman').join(' ');
+    await showVendor(
+      tester,
+      const VendorModel(id: 'v', verificationStatus: 'Pending'),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.text(_en('export')), findsOneWidget);
+  });
+
+  testWidgets('unverified arrow points back in Arabic', (tester) async {
+    useTallScreen(tester);
+    ordersBloc = RecordingOrdersBloc();
+    vendorBloc = RecordingVendorBloc();
+    await tester.pumpWidget(
+      localizedApp(
+        MultiBlocProvider(
+          providers: [
+            BlocProvider<OrdersBloc>.value(value: ordersBloc),
+            BlocProvider<VendorBloc>.value(value: vendorBloc),
+          ],
+          child: const HomeScreen(),
+        ),
+        locale: 'ar',
+      ),
+    );
+    await tester.pumpAndSettle();
+    await showVendor(
+      tester,
+      const VendorModel(id: 'v', verificationStatus: 'Pending'),
+    );
+    expect(find.byIcon(Icons.arrow_back_ios_new_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_forward_ios_rounded), findsNothing);
+  });
+
   testWidgets('inactive banner appears only when activation is false', (
     tester,
   ) async {

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
+import 'package:whats_order/core/theme/app_colors.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/features/orders/presentation/bloc/orders_bloc.dart';
 import 'package:whats_order/features/orders/presentation/bloc/orders_event.dart';
@@ -29,32 +30,43 @@ class OrdersTable extends StatelessWidget {
     return Column(
       children: [
         const _TableHeader(),
-        const Divider(height: 1),
+        const SizedBox(height: 10),
         Expanded(
           child: orders.isEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        CupertinoIcons.cube_box,
-                        size: 55,
-                        color: Color(0xFFB0C4BE),
+                      Container(
+                        width: 96,
+                        height: 96,
+                        decoration: const BoxDecoration(
+                          color: AppColors.lightGreenBg,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          CupertinoIcons.cube_box,
+                          size: 46,
+                          color: AppColors.primaryGreenLight,
+                        ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 18),
                       Text(
                         context.tr("no_orders_yet"),
-                        style: AppTextStyles.tableHeader12,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.cardTitle15.copyWith(
+                          color: AppColors.textGrey,
+                        ),
                       ),
                     ],
                   ),
                 )
               : ListView.separated(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.only(bottom: 110),
+                  padding: const EdgeInsets.only(bottom: 110, top: 2),
                   // controller: controller,
                   itemCount: orders.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (_, index) {
                     if (index == orders.length) {
                       return const Padding(
@@ -119,31 +131,55 @@ class _TableHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final style = AppTextStyles.cellTextbold.copyWith(
+      color: AppColors.primaryGreen,
+      fontSize: 13,
+    );
+
     return Container(
-      height: 50,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: AppColors.editIconBg,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryGreen.withValues(alpha: 0.12),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // Same widths as OrderRow: checkbox column, then the 2/3/3 columns.
+          const SizedBox(width: 10),
           Expanded(
-            flex: 4,
+            flex: 2,
             child: Text(
               context.tr("order_id_label"),
-              style: AppTextStyles.cellTextbold,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: style,
             ),
           ),
+          const SizedBox(width: 44),
           Expanded(
-            flex: 4,
+            flex: 3,
             child: Text(
               context.tr("date_label"),
-              style: AppTextStyles.cellTextbold,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: style,
             ),
           ),
           Expanded(
             flex: 3,
             child: Text(
               context.tr("location_label"),
-              style: AppTextStyles.cellTextbold,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: style,
             ),
           ),
           SizedBox(
@@ -151,7 +187,9 @@ class _TableHeader extends StatelessWidget {
             child: Center(
               child: Text(
                 context.tr("view"),
-                style: AppTextStyles.cellTextbold,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: style,
               ),
             ),
           ),

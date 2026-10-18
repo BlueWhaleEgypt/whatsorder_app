@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:whats_order/core/theme/app_colors.dart';
 
 class DatePickerButton extends StatelessWidget {
   final DateTime selectedDate;
@@ -15,16 +16,21 @@ class DatePickerButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlinedButton.icon(
       style: OutlinedButton.styleFrom(
-        minimumSize: const Size(120, 10),
-        side: BorderSide(color: Colors.green.shade300),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        iconSize: 14,
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+        minimumSize: const Size(130, 40),
+        foregroundColor: AppColors.textDark,
+        backgroundColor: AppColors.surface,
+        side: BorderSide(color: AppColors.primaryGreen.withValues(alpha: 0.35)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        iconSize: 16,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       ),
-      icon: const Icon(Icons.calendar_today_rounded, color: Colors.green),
+      icon: const Icon(
+        Icons.calendar_today_rounded,
+        color: AppColors.primaryGreen,
+      ),
       label: Text(
         DateFormat('dd MMM yyyy').format(selectedDate),
-        style: const TextStyle(fontWeight: FontWeight.w400, fontSize: 12),
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5),
       ),
       onPressed: () => _showModernDatePicker(context),
     );

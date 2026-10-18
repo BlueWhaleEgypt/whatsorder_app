@@ -55,20 +55,27 @@ class OnboardingScreen extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            if (state.currentStep > 0)
-                              IconButton(
-                                onPressed: () => context
-                                    .read<OnboardingCubit>()
-                                    .previousStep(),
-                                icon: const Icon(
-                                  Icons.arrow_back_ios_new,
-                                  size: 16,
-                                ),
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
+                            // Shown on every step, including the first
+                            // (UserInfoStep, ValueKey('info')).
+                            IconButton(
+                              onPressed: () {
+                                final cubit = context.read<OnboardingCubit>();
+                                if (state.currentStep == 0) {
+                                  // Nothing before the first step: leave the
+                                  // flow if there is a screen to return to.
+                                  Navigator.of(context).maybePop();
+                                } else {
+                                  cubit.previousStep();
+                                }
+                              },
+                              icon: const Icon(
+                                Icons.arrow_back_ios_new,
+                                size: 16,
                               ),
-                            if (state.currentStep > 0)
-                              const SizedBox(width: 12),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                            const SizedBox(width: 12),
                             const Expanded(child: TopBarPills()),
                           ],
                         ),

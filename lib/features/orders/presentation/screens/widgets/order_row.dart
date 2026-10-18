@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
+import 'package:whats_order/core/constants/app_assets.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../data/order_model.dart';
@@ -34,11 +36,27 @@ class OrderRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 62,
-      color: order.view ? Colors.white : Colors.green.shade50,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      constraints: const BoxConstraints(minHeight: 68),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: BoxDecoration(
+        // Unseen orders get a light green tint.
+        color: order.view ? AppColors.surface : AppColors.lightGreenBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: order.view
+              ? AppColors.border
+              : AppColors.primaryGreen.withValues(alpha: 0.25),
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 10,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: 36,
@@ -61,18 +79,21 @@ class OrderRow extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: AppColors.primaryGreen,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14.5,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 10),
 
           /// DATE
           Expanded(
             flex: 3,
             child: Text(
               _formatDate(order.createdDate),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: AppColors.tableDateGrey,
                 fontSize: 13,
@@ -84,13 +105,13 @@ class OrderRow extends StatelessWidget {
           Expanded(
             flex: 3,
             child: Align(
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: InkWell(
                 onTap: onOpenMap,
                 borderRadius: BorderRadius.circular(18),
                 child: Container(
                   height: 32,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
                     color: AppColors.mapGreenLight,
                     borderRadius: BorderRadius.circular(18),
@@ -102,6 +123,8 @@ class OrderRow extends StatelessWidget {
                   alignment: Alignment.center,
                   child: Text(
                     context.tr('open_map'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: AppColors.textDark,
                       fontWeight: FontWeight.w600,
@@ -112,6 +135,7 @@ class OrderRow extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(width: 14),
 
           /// EDIT
           SizedBox(
@@ -120,13 +144,14 @@ class OrderRow extends StatelessWidget {
               child: InkWell(
                 onTap: onEdit,
                 borderRadius: BorderRadius.circular(20),
-                child: const CircleAvatar(
-                  radius: 16,
-                  backgroundColor: AppColors.editIconBg,
-                  child: Icon(
-                    Icons.edit_outlined,
-                    color: AppColors.primaryGreen,
-                    size: 16,
+                child: SvgPicture.asset(
+                  AppAssets.edit,
+                  width: 20,
+                  height: 20,
+
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.primaryGreenTint,
+                    BlendMode.srcIn,
                   ),
                 ),
               ),
