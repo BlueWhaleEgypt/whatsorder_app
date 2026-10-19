@@ -12,7 +12,6 @@ import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/error/failures.dart';
 import 'package:whats_order/core/network/dio_helper.dart';
 import 'package:whats_order/core/network/end_points.dart';
-import 'package:whats_order/core/utils/logger.dart';
 import 'package:whats_order/features/auth/sign_in/data/user_model.dart';
 import 'package:whats_order/features/orders/notification/data/notification_model.dart';
 
@@ -39,7 +38,7 @@ class NotificationResponse extends Equatable implements BaseRepository {
               '{}',
         ),
       );
-      logger.i("<<<<<<<<<<< User ID >>>>>>>>> ${user.id}");
+      // logger.i("<<<<<<<<<<< User ID >>>>>>>>> ${user.id}");
       final selectedDate = request is DateTime ? request : DateTime.now();
 
       final today = DateFormat('yyyy-MM-dd').format(selectedDate);
@@ -49,8 +48,8 @@ class NotificationResponse extends Equatable implements BaseRepository {
       );
 
       if (response.statusCode == 200) {
-        logger.i("<<<<<<<<<<<<<<<<<<< ${response.data}");
-        logger.i("today ${response.statusCode}");
+        // logger.i("<<<<<<<<<<<<<<<<<<< ${response.data}");
+        // logger.i("today ${response.statusCode}");
 
         return Right(NotificationResponse.fromJson(response.data));
       }

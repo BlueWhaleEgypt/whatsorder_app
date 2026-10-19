@@ -10,7 +10,6 @@ import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/error/failures.dart';
 import 'package:whats_order/core/network/dio_helper.dart';
 import 'package:whats_order/core/network/end_points.dart';
-import 'package:whats_order/core/utils/logger.dart';
 import 'package:whats_order/features/auth/sign_in/data/user_model.dart';
 
 import 'sms_message_model.dart';
@@ -37,7 +36,7 @@ class SmsMessagesResponse extends Equatable implements BaseRepository {
               '{}',
         ),
       );
-      logger.i("<<<<<<<<<<< User ID >>>>>>>>> ${user.id}");
+      // logger.i("<<<<<<<<<<< User ID >>>>>>>>> ${user.id}");
       final selectedDate = request is DateTime ? request : DateTime.now();
 
       final today = DateFormat('yyyy-MM-dd').format(selectedDate);
@@ -46,7 +45,7 @@ class SmsMessagesResponse extends Equatable implements BaseRepository {
         query: {"vendorId": user.id, "day": today},
       );
 
-      logger.i(response.data);
+      // logger.i(response.data);
 
       if (response.statusCode == 200) {
         return Right(SmsMessagesResponse.fromJson(response.data));
@@ -54,7 +53,7 @@ class SmsMessagesResponse extends Equatable implements BaseRepository {
 
       return Left(ServerFailure(response.statusMessage ?? "Unknown Error"));
     } catch (e) {
-      logger.e(e);
+      // logger.e(e);
       return Left(ServerFailure(e.toString()));
     }
   }

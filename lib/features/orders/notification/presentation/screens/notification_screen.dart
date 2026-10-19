@@ -6,13 +6,13 @@ import 'package:whats_order/core/cache/cache_helper.dart';
 import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/routing/named_routes.dart';
-import 'package:whats_order/core/theme/app_colors.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/features/auth/sign_in/data/user_model.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_bloc.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_counter.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_event.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_state.dart';
+import 'package:whats_order/features/orders/notification/presentation/widgets/notification_card.dart';
 import 'package:whats_order/features/orders/presentation/screens/widgets/date_picker.dart';
 
 class NotificationScreen extends StatefulWidget {
@@ -29,7 +29,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   void initState() {
     super.initState();
 
-    context.read<NotificationBloc>().add(FetchNotificationEvent());
+    context.read<NotificationBloc>().add(const FetchNotificationEvent());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       NotificationCounter.resetNotification();
     });
@@ -63,7 +63,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          context.read<NotificationBloc>().add(FetchNotificationEvent());
+          context.read<NotificationBloc>().add(const FetchNotificationEvent());
 
           await context.read<NotificationBloc>().stream.firstWhere(
             (state) => state is! NotificationLoadingState,
@@ -120,13 +120,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 itemBuilder: (_, index) {
                   final item = notifications[index];
 
-                  return GestureDetector(
+                  return NotificationCard(
+                    notification: item,
                     onTap: () {
-                      // Handle notification tap
-                      // For example, navigate to order details
-                      context.read<NotificationBloc>().add(
-                        PressNotificationEvent(item.id!),
-                      );
+                      // The bloc shows it as read right away, persists it, and
+                      // ignores notifications that are already read.
+                      final id = item.id;
+                      if (id != null) {
+                        context.read<NotificationBloc>().add(
+                          PressNotificationEvent(id),
+                        );
+                      }
                       final user = UserModel.fromJson(
                         jsonDecode(
                           CacheHelper.getDataFromSharedPreference(
@@ -147,63 +151,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         },
                       );
                     },
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: item.pressed == false
-                            ? Colors.white
-                            : Colors.green.withOpacity(.15),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.border),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(.08),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          CircleAvatar(
-                            radius: 24,
-                            backgroundColor: AppColors.primaryGreen.withOpacity(
-                              .1,
-                            ),
-                            child: const Icon(
-                              Icons.notifications,
-                              color: AppColors.primaryGreen,
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.title ?? "",
-                                  style: AppTextStyles.cardTitle15,
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  item.components ?? "",
-                                  style: AppTextStyles.cellMuted13,
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  "Order #${item.orderId}",
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primaryGreen,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   );
                 },
               );

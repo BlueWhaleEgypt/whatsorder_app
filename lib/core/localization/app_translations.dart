@@ -323,6 +323,12 @@ const Map<String, Map<String, String>> kTranslations = {
 
     //sms
     'sms_messages': 'SMS Messages',
+    'no_sms_messages': 'No messages',
+    'status_new': 'New',
+    'status_read': 'Read',
+    'call_customer': 'Call customer',
+    'no_phone_in_message': 'No phone number found in this message',
+    'cannot_open_dialer': 'Could not open the phone dialer',
 
     // Bottom nav
     'nav_orders': 'Orders',
@@ -635,6 +641,12 @@ const Map<String, Map<String, String>> kTranslations = {
 
     //sms
     'sms_messages': 'رسائل SMS',
+    'no_sms_messages': 'لا توجد رسائل',
+    'status_new': 'جديدة',
+    'status_read': 'مقروءة',
+    'call_customer': 'اتصل بالعميل',
+    'no_phone_in_message': 'لا يوجد رقم هاتف في هذه الرسالة',
+    'cannot_open_dialer': 'تعذر فتح تطبيق الاتصال',
 
     // Bottom nav
     'nav_orders': 'الطلبات',

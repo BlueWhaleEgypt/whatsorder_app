@@ -22,6 +22,20 @@ class NotificationModel extends Equatable {
     this.pressed,
   });
 
+  /// `pressed == true` means the user already opened this notification
+  /// (read). `false`/`null` means unread.
+  bool get isRead => pressed == true;
+
+  NotificationModel copyWith({bool? pressed}) => NotificationModel(
+    id: id,
+    components: components,
+    title: title,
+    orderId: orderId,
+    latitude: latitude,
+    longitude: longitude,
+    pressed: pressed ?? this.pressed,
+  );
+
   factory NotificationModel.fromJson(Map<String, dynamic> json) =>
       _$NotificationModelFromJson(json);
 

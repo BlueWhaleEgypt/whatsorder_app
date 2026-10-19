@@ -201,13 +201,6 @@ class _WalletScreenState extends State<WalletScreen> {
                                 );
                               },
                             );
-                            // return Column(
-                            //   children: state.response.content
-                            //       .map((e) =>
-
-                            //       _ActivityTile(transaction: e))
-                            //       .toList(),
-                            // );
                           }
 
                           return const SizedBox();
@@ -256,6 +249,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   onPressed: () => Navigator.pop(dialogContext),
                   child: Text(context.tr("cancel")),
                 ),
+                const SizedBox(width: 12),
                 ElevatedButton(
                   onPressed: () {
                     final value = num.tryParse(controller.text.trim());
