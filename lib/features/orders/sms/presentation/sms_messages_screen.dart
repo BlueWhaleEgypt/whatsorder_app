@@ -7,7 +7,7 @@ import 'package:whats_order/features/orders/notification/presentation/bloc/notif
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_counter.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_event.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_state.dart';
-import 'package:whats_order/features/orders/notification/presentation/widgets/sms_message_card.dart';
+import 'package:whats_order/features/orders/sms/presentation/sms_message_card.dart';
 import 'package:whats_order/features/orders/presentation/screens/widgets/date_picker.dart';
 
 class SmsMessagesScreen extends StatefulWidget {
@@ -37,7 +37,7 @@ class _SmsMessagesScreenState extends State<SmsMessagesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.tr("sms_messages"), style: AppTextStyles.heading18),
+        title: Text(context.tr("accepted_offers"), style: AppTextStyles.heading18),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -68,7 +68,7 @@ class _SmsMessagesScreenState extends State<SmsMessagesScreen> {
             final messages = state.response.smsMessages;
 
             if (messages.isEmpty) {
-              return Center(child: Text(context.tr("no_sms_messages")));
+              return Center(child: Text(context.tr("no_accepted_offers")));
             }
 
             return RefreshIndicator(

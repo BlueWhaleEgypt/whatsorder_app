@@ -7,7 +7,7 @@ import 'package:whats_order/features/auth/sign_up/presentation/cubit/onboarding_
 import 'package:whats_order/features/auth/sign_up/presentation/screens/onboarding_screen.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_bloc.dart';
 import 'package:whats_order/features/orders/notification/presentation/screens/notification_screen.dart';
-import 'package:whats_order/features/orders/notification/presentation/screens/sms_messages_screen.dart';
+import 'package:whats_order/features/orders/sms/presentation/sms_messages_screen.dart';
 import 'package:whats_order/features/orders/presentation/bloc/orders_bloc.dart';
 import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
 import 'package:whats_order/features/orders/presentation/screens/order_details_screen.dart';

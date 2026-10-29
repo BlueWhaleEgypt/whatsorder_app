@@ -140,8 +140,8 @@ class _SettingsView extends StatelessWidget {
                     return SettingsTile(
                       icon: SvgPicture.asset(
                         AppAssets.ring,
-                        width: 20,
-                        height: 20,
+                        width: 18,
+                        height: 18,
                         colorFilter: const ColorFilter.mode(
                           AppColors.primaryGreenTint,
                           BlendMode.srcIn,
@@ -155,7 +155,25 @@ class _SettingsView extends StatelessWidget {
                     );
                   },
                 ),
-
+                ValueListenableBuilder<int>(
+                  valueListenable: NotificationCounter.smsCount,
+                  builder: (context, count, child) {
+                    return SettingsTile(
+                      icon: SvgPicture.asset(
+                        AppAssets.shopingCart,
+                        width: 20,
+                        height: 20,
+                        colorFilter: const ColorFilter.mode(
+                          AppColors.primaryGreenTint,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      label: context.tr('accepted_offers'),
+                      onTap: () =>
+                          Navigator.pushNamed(context, NamedRoutes.smsMessages),
+                    );
+                  },
+                ),
                 // SettingsTile(
                 //     icon: Icons.dark_mode_outlined,
                 //     label: context.tr('appearance'),

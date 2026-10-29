@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:whats_order/features/orders/notification/data/notification_response.dart';
-import 'package:whats_order/features/orders/notification/data/sms_messages_response.dart';
+import 'package:whats_order/features/orders/sms/data/sms_messages_response.dart';
 
 abstract class NotificationState extends Equatable {
   const NotificationState();

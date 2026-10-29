@@ -27,4 +27,5 @@ class AppAssets {
   static const String smartphone = 'assets/icons/smartphone.svg';
   static const String verifiedRounded = 'assets/icons/verified-rounded.svg';
   static const String baselineVerified = 'assets/icons/baseline-verified.svg';
+  static const String shopingCart = 'assets/icons/shopping-cart.svg';
 }

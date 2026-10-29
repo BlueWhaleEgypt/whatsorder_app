@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whats_order/base/base_repository.dart';
 import 'package:whats_order/core/network/network_info.dart';
 import 'package:whats_order/features/orders/notification/data/notification_response.dart';
-import 'package:whats_order/features/orders/notification/data/sms_messages_response.dart';
+import 'package:whats_order/features/orders/sms/data/sms_messages_response.dart';
 
 import 'notification_event.dart';
 import 'notification_state.dart';

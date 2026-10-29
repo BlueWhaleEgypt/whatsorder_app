@@ -13,8 +13,8 @@ import 'package:whats_order/core/network/network_info.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_bloc.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_event.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_state.dart';
-import 'package:whats_order/features/orders/notification/presentation/screens/sms_messages_screen.dart';
-import 'package:whats_order/features/orders/notification/presentation/widgets/sms_phone.dart';
+import 'package:whats_order/features/orders/sms/presentation/sms_messages_screen.dart';
+import 'package:whats_order/features/orders/sms/presentation/sms_phone.dart';
 
 import 'helpers/harness.dart';
 

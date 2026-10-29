@@ -325,8 +325,8 @@ const Map<String, Map<String, String>> kTranslations = {
     "no_sectors_available": "No sectors available",
 
     //sms
-    'sms_messages': 'SMS Messages',
-    'no_sms_messages': 'No messages',
+    'accepted_offers': 'Accepted Offers',
+    'no_accepted_offers': 'No Accepted Offers',
     'status_new': 'New',
     'status_read': 'Read',
     'call_customer': 'Call customer',
@@ -646,8 +646,8 @@ const Map<String, Map<String, String>> kTranslations = {
     "save_new_password": "حفظ كلمة المرور الجديدة",
 
     //sms
-    'sms_messages': 'رسائل SMS',
-    'no_sms_messages': 'لا توجد رسائل',
+    'accepted_offers': 'العروض المقبولة',
+    'no_accepted_offers': 'لا توجد عروض مقبولة',
     'status_new': 'جديدة',
     'status_read': 'مقروءة',
     'call_customer': 'اتصل بالعميل',

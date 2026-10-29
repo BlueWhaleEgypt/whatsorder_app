@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/theme/app_colors.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
-import 'package:whats_order/features/orders/notification/data/sms_message_model.dart';
-import 'package:whats_order/features/orders/notification/presentation/widgets/sms_phone.dart';
+import 'package:whats_order/features/orders/sms/data/sms_message_model.dart';
+import 'package:whats_order/features/orders/sms/presentation/sms_phone.dart';
 
 /// One SMS message, split into header, content, order chip and phone section.
 /// Unread: light-green card with a "new" badge. Read: plain surface.
