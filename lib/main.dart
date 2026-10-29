@@ -45,10 +45,10 @@ Future<void> main() async {
   NotificationCounter.loadFromCache();
   DioHelper.init();
   await di.init();
-  FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-    logger.i('New FCM Token: $newToken');
-    // Send the new token to your backend
-  });
+  // FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+  //   logger.i('New FCM Token: $newToken');
+  //   // Send the new token to your backend
+  // });
 
   runApp(const MyApp());
   // // بعد ما الـ app اتبنى، دور على الـ initial message
