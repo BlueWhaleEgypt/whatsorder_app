@@ -111,7 +111,7 @@ class OrderSearchDelegate extends SearchDelegate<OrderModel?> {
 
   @override
   Widget buildLeading(BuildContext context) => IconButton(
-    icon: const Icon(Icons.arrow_back),
+    icon: const Icon(Icons.arrow_back, color: Colors.black),
     onPressed: () => close(context, null),
   );
 }
