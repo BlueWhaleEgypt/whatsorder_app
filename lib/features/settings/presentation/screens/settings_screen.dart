@@ -110,7 +110,7 @@ class _SettingsView extends StatelessWidget {
                     width: 20,
                     height: 20,
                     colorFilter: const ColorFilter.mode(
-                      AppColors.primaryGreen,
+                      AppColors.primaryGreenTint,
                       BlendMode.srcIn,
                     ),
                   ),
@@ -125,7 +125,7 @@ class _SettingsView extends StatelessWidget {
                     width: 20,
                     height: 20,
                     colorFilter: const ColorFilter.mode(
-                      AppColors.primaryGreen,
+                      AppColors.primaryGreenTint,
                       BlendMode.srcIn,
                     ),
                   ),
@@ -143,7 +143,7 @@ class _SettingsView extends StatelessWidget {
                         width: 20,
                         height: 20,
                         colorFilter: const ColorFilter.mode(
-                          AppColors.primaryGreen,
+                          AppColors.primaryGreenTint,
                           BlendMode.srcIn,
                         ),
                       ),
@@ -173,7 +173,7 @@ class _SettingsView extends StatelessWidget {
                     width: 20,
                     height: 20,
                     colorFilter: const ColorFilter.mode(
-                      AppColors.primaryGreen,
+                      AppColors.primaryGreenTint,
                       BlendMode.srcIn,
                     ),
                   ),
@@ -193,7 +193,7 @@ class _SettingsView extends StatelessWidget {
                     width: 20,
                     height: 20,
                     colorFilter: const ColorFilter.mode(
-                      AppColors.primaryGreen,
+                      AppColors.primaryGreenTint,
                       BlendMode.srcIn,
                     ),
                   ),

@@ -190,7 +190,7 @@ class _BranchCardState extends State<BranchCard> {
                   child: SvgPicture.asset(
                     AppAssets.stor,
                     colorFilter: const ColorFilter.mode(
-                      AppColors.primaryGreen,
+                      AppColors.primaryGreenTint,
                       BlendMode.srcIn,
                     ),
                   ),

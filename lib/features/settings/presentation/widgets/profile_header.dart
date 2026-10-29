@@ -41,7 +41,7 @@ class ProfileHeader extends StatelessWidget {
               child: SvgPicture.asset(
                 AppAssets.person,
                 colorFilter: const ColorFilter.mode(
-                  AppColors.primaryGreen,
+                  AppColors.primaryGreenTint,
                   BlendMode.srcIn,
                 ),
               ),

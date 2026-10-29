@@ -80,12 +80,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    logger.w(
-      'notification count is ${CacheHelper.getDataFromSharedPreference(key: 'notification_count')}',
-    );
-    logger.w(
-      'sms count is ${CacheHelper.getDataFromSharedPreference(key: 'sms_count')}',
-    );
+    // logger.w(
+    //   'notification count is ${CacheHelper.getDataFromSharedPreference(key: 'notification_count')}',
+    // );
+    // logger.w(
+    //   'sms count is ${CacheHelper.getDataFromSharedPreference(key: 'sms_count')}',
+    // );
     return BlocProvider<LocaleCubit>(
       create: (_) => di.sl<LocaleCubit>(),
       child: BlocBuilder<LocaleCubit, Locale>(

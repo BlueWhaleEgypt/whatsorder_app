@@ -28,14 +28,24 @@ class LocaleCubit extends Cubit<Locale> {
     return const Locale('en');
   }
 
+  // Future<void> changeLocale(Locale locale) async {
+  //   if (locale.languageCode == state.languageCode) return;
+  //   await CacheHelper.saveDataSharedPreference(
+  //     key: CacheKeys.appLang,
+  //     value: locale.languageCode,
+  //   );
+  //   emit(locale);
+  // }
   Future<void> changeLocale(Locale locale) async {
-    if (locale.languageCode == state.languageCode) return;
-    await CacheHelper.saveDataSharedPreference(
-      key: CacheKeys.appLang,
-      value: locale.languageCode,
-    );
-    emit(locale);
-  }
+  if (locale.languageCode == state.languageCode) return;
+
+  emit(locale);
+
+  await CacheHelper.saveDataSharedPreference(
+    key: CacheKeys.appLang,
+    value: locale.languageCode,
+  );
+}
 
   Future<void> toggle() => changeLocale(
     state.languageCode == 'en' ? const Locale('ar') : const Locale('en'),

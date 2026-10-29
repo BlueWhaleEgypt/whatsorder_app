@@ -9,56 +9,70 @@ import 'package:whats_order/features/settings/presentation/widgets/settings_dial
 void showLanguageDialog(BuildContext context) {
   final cubit = context.read<LocaleCubit>();
 
-  showDialog(
+  showDialog<void>(
     context: context,
     builder: (dialogContext) {
-      return AlertDialog(
-        backgroundColor: SettingsDialogStyle.background,
-        elevation: 0,
-        insetPadding: SettingsDialogStyle.insetPadding,
-        shape: SettingsDialogStyle.shape,
-        title: Text(
-          context.tr('language'),
-          textAlign: TextAlign.center,
-          style: AppTextStyles.heading18,
-        ),
-        content: BlocBuilder<LocaleCubit, Locale>(
-          bloc: cubit,
-          builder: (_, locale) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _LanguageOption(
-                flag: '🇸🇦',
-                label: 'العربية',
-                selected: locale.languageCode == 'ar',
-                onTap: () {
-                  Navigator.pop(dialogContext);
-                  cubit.changeLocale(const Locale('ar'));
-                },
+      return BlocProvider.value(
+        value: cubit,
+        child: BlocBuilder<LocaleCubit, Locale>(
+          builder: (context, locale) {
+            return AlertDialog(
+              backgroundColor: SettingsDialogStyle.background,
+              elevation: 0,
+              insetPadding: SettingsDialogStyle.insetPadding,
+              shape: SettingsDialogStyle.shape,
+              title: Text(
+                context.tr('language'),
+                textAlign: TextAlign.center,
+                style: AppTextStyles.heading18,
               ),
-              const SizedBox(height: 8),
-              _LanguageOption(
-                flag: '🇬🇧',
-                label: 'English',
-                selected: locale.languageCode == 'en',
-                onTap: () {
-                  Navigator.pop(dialogContext);
-                  cubit.changeLocale(const Locale('en'));
-                },
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _LanguageOption(
+                    flag: '🇸🇦',
+                    label: 'العربية',
+                    selected: locale.languageCode == 'ar',
+                    onTap: () async {
+                      if (locale.languageCode == 'ar') {
+                        Navigator.pop(dialogContext);
+                        return;
+                      }
+                      Navigator.pop(dialogContext);
+
+                      await cubit.changeLocale(const Locale('ar'));
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  _LanguageOption(
+                    flag: '🇬🇧',
+                    label: 'English',
+                    selected: locale.languageCode == 'en',
+                    onTap: () async {
+                      if (locale.languageCode == 'en') {
+                        Navigator.pop(dialogContext);
+                        return;
+                      }
+                      Navigator.pop(dialogContext);
+
+                      await cubit.changeLocale(const Locale('en'));
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       );
     },
   );
 }
 
-class _LanguageOption extends StatelessWidget {
+class _LanguageOption extends StatefulWidget {
   final String flag;
   final String label;
   final bool selected;
-  final VoidCallback onTap;
+  final Future<void> Function() onTap;
 
   const _LanguageOption({
     required this.flag,
@@ -68,35 +82,60 @@ class _LanguageOption extends StatelessWidget {
   });
 
   @override
+  State<_LanguageOption> createState() => _LanguageOptionState();
+}
+
+class _LanguageOptionState extends State<_LanguageOption> {
+  bool _isChangingLanguage = false;
+
+  Future<void> _handleTap() async {
+    if (_isChangingLanguage) return;
+
+    setState(() {
+      _isChangingLanguage = true;
+    });
+
+    try {
+      await widget.onTap();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isChangingLanguage = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
+      onTap: _isChangingLanguage ? null : _handleTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: selected
+          color: widget.selected
               ? AppColors.primaryGreen.withValues(alpha: 0.08)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? AppColors.primaryGreen : AppColors.border,
+            color: widget.selected ? AppColors.primaryGreen : AppColors.border,
           ),
         ),
         child: Row(
           children: [
-            Text(flag, style: const TextStyle(fontSize: 20)),
+            Text(widget.flag, style: const TextStyle(fontSize: 20)),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                label,
+                widget.label,
                 style: AppTextStyles.cellText13.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.textDark,
                 ),
               ),
             ),
-            if (selected)
+            if (widget.selected)
               const Icon(
                 Icons.check_circle,
                 size: 20,
