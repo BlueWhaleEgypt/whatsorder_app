@@ -6,7 +6,9 @@ import 'package:whats_order/features/auth/otp/presentation/bloc/otp_bloc.dart';
 import 'package:whats_order/features/auth/sign_up/presentation/cubit/onboarding_cubit.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_bloc.dart';
 import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
+import 'package:whats_order/core/cache/session_cleaner.dart';
 import 'package:whats_order/features/settings/presentation/bloc/branches_bloc.dart';
+import 'package:whats_order/features/settings/presentation/bloc/logout_bloc.dart';
 import 'package:whats_order/features/settings/presentation/bloc/change_password_bloc.dart';
 import 'package:whats_order/features/settings/presentation/bloc/change_phone_bloc.dart';
 import 'package:whats_order/features/settings/presentation/bloc/sectors_bloc.dart';
@@ -49,6 +51,7 @@ Future<void> init() async {
   sl.registerFactory(() => ChangePhoneBloc(sl()));
   sl.registerFactory(() => SectorsBloc(sl()));
   sl.registerFactory(() => UpdateProfileBloc(sl()));
+  sl.registerFactory(() => LogoutBloc(sl(), const LocalSessionCleaner()));
 
   // Add every new feature's Bloc here, e.g.:
   // sl.registerFactory(() => WalletBloc(sl()));

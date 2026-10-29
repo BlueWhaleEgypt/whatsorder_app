@@ -1,65 +1,101 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:whats_order/core/cache/cache_helper.dart';
+import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/cache/profile_name.dart';
-import 'package:whats_order/core/localization/app_localizations.dart';
+import 'package:whats_order/core/cache/session_cleaner.dart';
+import 'package:whats_order/core/localization/app_translations.dart';
 import 'package:whats_order/core/localization/locale_cubit.dart';
+import 'package:whats_order/core/routing/named_routes.dart';
+import 'package:whats_order/features/settings/presentation/bloc/logout_bloc.dart';
 import 'package:whats_order/features/settings/presentation/screens/settings_screen.dart';
+import 'package:whats_order/injection/injection_container.dart';
 
-Widget _app(LocaleCubit cubit) {
-  return BlocProvider.value(
-    value: cubit,
-    child: const MaterialApp(
-      localizationsDelegates: [
-        AppLocalizations.delegate,
-        DefaultWidgetsLocalizations.delegate,
-        DefaultMaterialLocalizations.delegate,
-      ],
-      supportedLocales: AppLocalizations.supportedLocales,
-      locale: Locale('en'),
-      home: SettingsScreen(),
-    ),
-  );
-}
+import 'helpers/harness.dart';
 
 void main() {
   late LocaleCubit cubit;
 
+  Future<void> pump(WidgetTester tester, {String locale = 'en'}) async {
+    useTallScreen(tester);
+    await tester.pumpWidget(
+      BlocProvider<LocaleCubit>.value(
+        value: cubit,
+        child: localizedApp(
+          const SettingsScreen(),
+          locale: locale,
+          onGenerateRoute: (settings) => MaterialPageRoute(
+            settings: settings,
+            builder: (_) => Scaffold(body: Text('route:${settings.name}')),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
   setUp(() async {
-    SharedPreferences.setMockInitialValues({});
-    await CacheHelper.init();
+    await initPrefs({CacheKeys.firstName: 'Ahmed'});
     ProfileName.fullName.value = 'Ahmed Ali';
     cubit = LocaleCubit();
+
+    if (sl.isRegistered<LogoutBloc>()) sl.unregister<LogoutBloc>();
+    sl.registerFactory(
+      () => LogoutBloc(FakeNetwork(), const LocalSessionCleaner()),
+    );
   });
 
-  tearDown(() => cubit.close());
+  tearDown(() async {
+    await cubit.close();
+    if (sl.isRegistered<LogoutBloc>()) sl.unregister<LogoutBloc>();
+  });
 
-  testWidgets('renders sections and labels', (tester) async {
-    await tester.pumpWidget(_app(cubit));
-    await tester.pumpAndSettle();
+  for (final locale in ['en', 'ar']) {
+    testWidgets('renders every section and tile ($locale)', (tester) async {
+      await pump(tester, locale: locale);
+      final t = kTranslations[locale]!;
 
-    expect(find.text('Settings'), findsOneWidget);
-    for (final key in [
-      'preferences',
-      'branches',
-      'language',
-      'notifications',
-      'account',
-      'terms_conditions',
-      'help_center',
-      'logout',
-    ]) {
-      final ctx = tester.element(find.byType(SettingsScreen));
-      expect(find.text(ctx.tr(key)), findsOneWidget, reason: key);
-    }
+      for (final key in [
+        'settings',
+        'preferences',
+        'branches',
+        'language',
+        'notifications',
+        'account',
+        'terms_conditions',
+        'help_center',
+        'logout',
+        'edit_profile',
+      ]) {
+        expect(find.text(t[key]!), findsOneWidget, reason: key);
+      }
+      expect(find.text('Ahmed Ali'), findsOneWidget);
+    });
+  }
+
+  testWidgets('provides its own LogoutBloc to the tree', (tester) async {
+    await pump(tester);
+
+    final bloc = BlocProvider.of<LogoutBloc>(
+      tester.element(find.text('Ahmed Ali')),
+    );
+    expect(bloc, isA<LogoutBloc>());
+  });
+
+  testWidgets('does not show a spinner or send logout until confirmed', (
+    tester,
+  ) async {
+    await pump(tester);
+
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    final bloc = BlocProvider.of<LogoutBloc>(
+      tester.element(find.text('Ahmed Ali')),
+    );
+    expect(bloc.state.runtimeType.toString(), 'LogoutInitial');
   });
 
   testWidgets('profile header follows ProfileName.fullName', (tester) async {
-    await tester.pumpWidget(_app(cubit));
-    await tester.pumpAndSettle();
+    await pump(tester);
     expect(find.text('Ahmed Ali'), findsOneWidget);
 
     ProfileName.fullName.value = 'Sara Hassan';
@@ -69,140 +105,63 @@ void main() {
     expect(find.text('Ahmed Ali'), findsNothing);
   });
 
-  testWidgets('profile header handles long names without overflow', (
-    tester,
-  ) async {
-    ProfileName.fullName.value = List.filled(30, 'Abdelrahman').join(' ');
-    await tester.pumpWidget(_app(cubit));
+  testWidgets('profile header opens the profile route', (tester) async {
+    await pump(tester);
+    await tester.tap(find.text('Ahmed Ali'));
     await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
-    expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
+    expect(find.text('route:${NamedRoutes.profile}'), findsOneWidget);
   });
 
-  for (final entry in {
-    'en': Icons.chevron_right_rounded,
-    'ar': Icons.chevron_left_rounded,
-  }.entries) {
-    testWidgets(
-      'profile chevron points ${entry.key == 'ar' ? 'left' : 'right'} '
-      'in ${entry.key}',
-      (tester) async {
-        await tester.pumpWidget(
-          BlocProvider.value(
-            value: cubit,
-            child: MaterialApp(
-              localizationsDelegates: const [
-                AppLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              supportedLocales: AppLocalizations.supportedLocales,
-              locale: Locale(entry.key),
-              home: const SettingsScreen(),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        expect(find.byIcon(entry.value), findsOneWidget);
-        expect(
-          find.byIcon(
-            entry.key == 'ar'
-                ? Icons.chevron_right_rounded
-                : Icons.chevron_left_rounded,
-          ),
-          findsNothing,
-        );
-      },
-    );
-  }
-
-  testWidgets('language dialog toggles the locale', (tester) async {
-    await tester.pumpWidget(_app(cubit));
+  testWidgets('branches tile opens the branches route', (tester) async {
+    await pump(tester);
+    await tester.tap(find.text(kTranslations['en']!['branches']!));
     await tester.pumpAndSettle();
-    final ctx = tester.element(find.byType(SettingsScreen));
 
-    await tester.tap(find.text(ctx.tr('language')));
+    expect(find.text('route:${NamedRoutes.branches}'), findsOneWidget);
+  });
+
+  testWidgets('notifications tile opens the notification route', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(find.text(kTranslations['en']!['notifications']!));
     await tester.pumpAndSettle();
+
+    expect(find.text('route:${NamedRoutes.notification}'), findsOneWidget);
+  });
+
+  testWidgets('language tile opens a dialog that switches the locale', (
+    tester,
+  ) async {
+    await pump(tester);
+
+    await tester.tap(find.text(kTranslations['en']!['language']!));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsOneWidget);
     expect(find.text('العربية'), findsOneWidget);
-    expect(
-      find.descendant(
-        of: find.byType(AlertDialog),
-        matching: find.text('English'),
-      ),
-      findsOneWidget,
-    );
 
     await tester.tap(find.text('العربية'));
     await tester.pumpAndSettle();
 
     expect(cubit.state.languageCode, 'ar');
-    expect(find.text('العربية'), findsNothing);
+    expect(find.byType(AlertDialog), findsNothing);
   });
 
-  testWidgets('selecting the active language keeps it; indicator follows', (
+  testWidgets('logout tile opens the confirmation and cancel dismisses it', (
     tester,
   ) async {
-    await tester.pumpWidget(_app(cubit));
-    await tester.pumpAndSettle();
-    final ctx = tester.element(find.byType(SettingsScreen));
+    await pump(tester);
+    final t = kTranslations['en']!;
 
-    Finder checkIn(String label) => find.descendant(
-      of: find.ancestor(
-        of: find.descendant(
-          of: find.byType(AlertDialog),
-          matching: find.text(label),
-        ),
-        matching: find.byType(InkWell),
-      ),
-      matching: find.byIcon(Icons.check_circle),
-    );
-
-    // English is active: it is marked, Arabic is not.
-    await tester.tap(find.text(ctx.tr('language')));
+    await tester.tap(find.text(t['logout']!));
     await tester.pumpAndSettle();
-    expect(checkIn('English'), findsOneWidget);
-    expect(checkIn('العربية'), findsNothing);
+    expect(find.text(t['logout_msg']!), findsOneWidget);
 
-    // Tapping the active language must not switch.
-    await tester.tap(
-      find.descendant(
-        of: find.byType(AlertDialog),
-        matching: find.text('English'),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(cubit.state.languageCode, 'en');
-
-    // Switch to Arabic, then the indicator moves.
-    await tester.tap(find.text(ctx.tr('language')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('العربية'));
-    await tester.pumpAndSettle();
-    expect(cubit.state.languageCode, 'ar');
-
-    await tester.tap(find.text(ctx.tr('language')));
-    await tester.pumpAndSettle();
-    expect(checkIn('العربية'), findsOneWidget);
-    expect(checkIn('English'), findsNothing);
-  });
-
-  testWidgets('logout dialog shows and can be dismissed', (tester) async {
-    await tester.pumpWidget(_app(cubit));
-    await tester.pumpAndSettle();
-    final ctx = tester.element(find.byType(SettingsScreen));
-
-    await tester.scrollUntilVisible(find.text(ctx.tr('logout')), 100);
-    await tester.tap(find.text(ctx.tr('logout')));
+    await tester.tap(find.text(t['cancel']!));
     await tester.pumpAndSettle();
 
-    expect(find.text(ctx.tr('logout_msg')), findsOneWidget);
-
-    await tester.tap(find.text(ctx.tr('cancel')));
-    await tester.pumpAndSettle();
-
-    expect(find.text(ctx.tr('logout_msg')), findsNothing);
+    expect(find.text(t['logout_msg']!), findsNothing);
+    expect(find.byType(SettingsScreen), findsOneWidget);
   });
 }

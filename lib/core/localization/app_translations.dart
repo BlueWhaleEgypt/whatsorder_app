@@ -226,6 +226,9 @@ const Map<String, Map<String, String>> kTranslations = {
     'logout': 'Logout',
     'edit_profile': 'Edit profile',
     'logout_msg': 'Are you sure you want to logout?',
+    'logout_server_failed':
+        'You were signed out on this device, but the server could not be reached to end your session.',
+    'logout_local_failed': 'Could not sign out. Please try again.',
     'cancel': 'Cancel',
     'no_Notifications': 'No Notifications',
     'terms_conditions': 'Terms & Conditions',
@@ -546,6 +549,9 @@ const Map<String, Map<String, String>> kTranslations = {
     'logout': 'تسجيل الخروج',
     'edit_profile': 'تعديل الملف الشخصي',
     'logout_msg': 'هل انت متأكد من تسجيل الخروج؟',
+    'logout_server_failed':
+        'تم تسجيل خروجك من هذا الجهاز، لكن تعذر الوصول إلى الخادم لإنهاء الجلسة.',
+    'logout_local_failed': 'تعذر تسجيل الخروج. يرجى المحاولة مرة أخرى.',
     'cancel': 'إلغاء',
     'no_Notifications': "لا يوجد إشعارات",
     'terms_conditions': 'الشروط والأحكام',

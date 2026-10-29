@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:whats_order/core/cache/cache_helper.dart';
-import 'package:whats_order/core/cache/cache_keys.dart';
-import 'package:whats_order/core/cache/profile_name.dart';
 import 'package:whats_order/core/constants/app_assets.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_counter.dart';
+import 'package:whats_order/features/settings/presentation/bloc/event/logout_event.dart';
+import 'package:whats_order/features/settings/presentation/bloc/logout_bloc.dart';
+import 'package:whats_order/features/settings/presentation/bloc/states/logout_state.dart';
 import 'package:whats_order/features/settings/presentation/screens/terms_conditions_screen.dart';
 import 'package:whats_order/features/settings/presentation/widgets/language_dialog.dart';
 import 'package:whats_order/features/settings/presentation/widgets/profile_header.dart';
 import 'package:whats_order/features/settings/presentation/widgets/settings_confirmation_dialog.dart';
 import 'package:whats_order/features/settings/presentation/widgets/settings_group.dart';
 import 'package:whats_order/features/settings/presentation/widgets/settings_tile.dart';
+import 'package:whats_order/injection/injection_container.dart';
 import '../../../../core/routing/named_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -29,6 +31,56 @@ import '../../../../core/theme/app_text_styles.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => sl<LogoutBloc>(),
+      child: BlocListener<LogoutBloc, LogoutState>(
+        listener: _onLogoutState,
+        child: Stack(
+          children: [
+            const _SettingsView(),
+            BlocBuilder<LogoutBloc, LogoutState>(
+              buildWhen: (a, b) => (a is LogoutLoading) != (b is LogoutLoading),
+              builder: (context, state) {
+                if (state is! LogoutLoading) return const SizedBox.shrink();
+                return const Positioned.fill(
+                  child: Stack(
+                    children: [
+                      ModalBarrier(dismissible: false, color: Colors.black26),
+                      Center(child: CircularProgressIndicator()),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _onLogoutState(BuildContext context, LogoutState state) {
+    if (state is LogoutFailure) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.tr(state.message))));
+    }
+
+    final signedOut =
+        state is LogoutSuccess ||
+        (state is LogoutFailure && state.sessionCleared);
+    if (signedOut) {
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil(NamedRoutes.signin, (r) => false);
+    }
+  }
+}
+
+class _SettingsView extends StatelessWidget {
+  const _SettingsView();
 
   @override
   Widget build(BuildContext context) {
@@ -182,13 +234,7 @@ class SettingsScreen extends StatelessWidget {
 
     if (confirmed != true || !context.mounted) return;
 
-    CacheHelper.removeData(key: CacheKeys.userModel);
-    ProfileName.clear();
-    CacheHelper.removeData(key: CacheKeys.accessToken);
-    CacheHelper.removeData(key: CacheKeys.refreshToken);
-    Navigator.of(
-      context,
-    ).pushNamedAndRemoveUntil(NamedRoutes.signin, (r) => false);
+    context.read<LogoutBloc>().add(const LogoutRequested());
   }
 
   Future<void> openWhatsApp() async {

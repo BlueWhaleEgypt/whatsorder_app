@@ -9,6 +9,7 @@ import 'package:whats_order/features/orders/notification/data/notification_respo
 import 'package:whats_order/features/orders/notification/data/press_sms_response.dart';
 import 'package:whats_order/features/orders/notification/data/sms_messages_response.dart';
 import 'package:whats_order/features/settings/data/branch/branches_response.dart';
+import 'package:whats_order/features/settings/data/logout/logout_response.dart';
 import 'package:whats_order/features/settings/data/password/change_password_response.dart';
 import 'package:whats_order/features/settings/data/phone/change_phone_response.dart';
 import 'package:whats_order/features/settings/data/profile/update_profile_response.dart';
@@ -68,11 +69,11 @@ abstract class BaseRepository {
       return const ChangePhoneResponse();
     if (responseType == 'ChangePasswordResponse')
       return const ChangePasswordResponse();
-          if (responseType == 'SectorTapResponse')
-      return const SectorTapResponse();
-             if (responseType == 'UpdateProfileResponse')
-      return UpdateProfileResponse();
-      
+    if (responseType == 'SectorTapResponse') return const SectorTapResponse();
+    if (responseType == 'UpdateProfileResponse') return UpdateProfileResponse();
+
+    if (responseType == 'LogoutResponse') return const LogoutResponse();
+
     // Add new feature responses above this line, e.g.:
     // if (responseType == 'WalletResponse') return const WalletResponse();
 
