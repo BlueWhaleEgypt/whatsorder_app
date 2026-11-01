@@ -141,7 +141,7 @@ class SmsMessagesButton extends StatelessWidget {
                 ),
                 child: Center(
                   child: SvgPicture.asset(
-                    AppAssets.chat,
+                    AppAssets.shopingCart,
                     colorFilter: const ColorFilter.mode(
                       AppColors.primaryGreenTint,
                       BlendMode.srcIn,
