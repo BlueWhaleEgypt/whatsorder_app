@@ -12,6 +12,7 @@ import 'package:whats_order/features/orders/presentation/bloc/orders_bloc.dart';
 import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
 import 'package:whats_order/features/orders/presentation/screens/order_details_screen.dart';
 import 'package:whats_order/features/settings/presentation/bloc/branches_bloc.dart';
+import 'package:whats_order/features/settings/presentation/screens/products_screen.dart';
 import 'package:whats_order/features/settings/presentation/screens/profile_screen.dart';
 import 'package:whats_order/features/settings/presentation/taps/branches_tab.dart';
 
@@ -39,6 +40,8 @@ import 'named_routes.dart';
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case NamedRoutes.products:
+        return MaterialPageRoute(builder: (_) => const ProductsScreen());
       case NamedRoutes.splash:
         return MaterialPageRoute(builder: (_) => const SplashScreen());
       case NamedRoutes.signin:

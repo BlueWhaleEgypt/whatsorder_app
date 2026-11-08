@@ -8,10 +8,7 @@ class TransactionModel extends Equatable {
   final String? type;
   final num? money;
 
-  const TransactionModel({
-    this.type,
-    this.money,
-  });
+  const TransactionModel({this.type, this.money});
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) =>
       _$TransactionModelFromJson(json);
@@ -19,8 +16,5 @@ class TransactionModel extends Equatable {
   Map<String, dynamic> toJson() => _$TransactionModelToJson(this);
 
   @override
-  List<Object?> get props => [
-        type,
-        money,
-      ];
+  List<Object?> get props => [type, money];
 }

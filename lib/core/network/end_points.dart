@@ -58,5 +58,10 @@ class EndPoints {
   static const String epUpdateBranch = '/api/branch/update';
   static const String epDeleteBranch = '/api/branch/delete';
 
+  // Products
+  static const String epAddProduct = '/api/auth/vendor-services';
+  static const String epVendorProducts =
+      '/api/auth/vendor-services/getServicesForVendor';
+
   // Add more endpoints here as features grow.
 }

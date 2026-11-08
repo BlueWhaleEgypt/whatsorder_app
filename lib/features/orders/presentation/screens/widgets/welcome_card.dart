@@ -203,7 +203,7 @@ class _VerificationBadge extends StatelessWidget {
                   // Points the way the text flows.
                   Icons.chevron_right,
                   color: textColor,
-                  
+
                   size: 22,
                 ),
               ],

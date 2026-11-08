@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/theme/app_colors.dart';
@@ -38,10 +37,7 @@ class _MapPickerFieldState extends State<MapPickerField> {
           borderRadius: BorderRadius.circular(12),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-              vertical: 14,
-              horizontal: 14,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
             decoration: BoxDecoration(
               color: AppColors.lightGreenBg.withOpacity(0.6),
               borderRadius: BorderRadius.circular(12),
@@ -49,9 +45,7 @@ class _MapPickerFieldState extends State<MapPickerField> {
             child: Row(
               children: [
                 Icon(
-                  widget.hasLocation
-                      ? Icons.check_circle
-                      : Icons.map_outlined,
+                  widget.hasLocation ? Icons.check_circle : Icons.map_outlined,
                   size: 18,
                   color: widget.hasLocation
                       ? AppColors.primaryGreen

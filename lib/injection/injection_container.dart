@@ -7,7 +7,9 @@ import 'package:whats_order/features/auth/sign_up/presentation/cubit/onboarding_
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_bloc.dart';
 import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
 import 'package:whats_order/core/cache/session_cleaner.dart';
+import 'package:whats_order/features/settings/presentation/bloc/add_product_bloc.dart';
 import 'package:whats_order/features/settings/presentation/bloc/branches_bloc.dart';
+import 'package:whats_order/features/settings/presentation/bloc/products_bloc.dart';
 import 'package:whats_order/features/settings/presentation/bloc/logout_bloc.dart';
 import 'package:whats_order/features/settings/presentation/bloc/change_password_bloc.dart';
 import 'package:whats_order/features/settings/presentation/bloc/change_phone_bloc.dart';
@@ -47,6 +49,8 @@ Future<void> init() async {
   sl.registerFactory(() => TransactionBloc(sl()));
   sl.registerFactory(() => NotificationBloc(sl()));
   sl.registerFactory(() => BranchesBloc(sl()));
+  sl.registerFactory(() => AddProductBloc(sl()));
+  sl.registerFactory(() => ProductsBloc(sl()));
   sl.registerFactory(() => ChangePasswordBloc(sl()));
   sl.registerFactory(() => ChangePhoneBloc(sl()));
   sl.registerFactory(() => SectorsBloc(sl()));

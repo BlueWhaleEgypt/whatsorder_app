@@ -13,12 +13,8 @@ class LogoutBloc extends Bloc<LogoutEvent, LogoutState> {
   final NetworkInfo networkInfo;
   final SessionCleaner sessionCleaner;
 
-  LogoutBloc(
-    this.networkInfo,
-    this.sessionCleaner, 
-   
-  ):
-       super(const LogoutInitial()) {
+  LogoutBloc(this.networkInfo, this.sessionCleaner)
+    : super(const LogoutInitial()) {
     on<LogoutRequested>(_onLogout);
   }
 

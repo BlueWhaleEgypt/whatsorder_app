@@ -24,4 +24,5 @@ class NamedRoutes {
   static const String smsMessages = "/sms_messages";
   static const String branches = '/branches';
   static const String sectors = '/sectors';
+  static const String products = '/products';
 }

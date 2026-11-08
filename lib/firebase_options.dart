@@ -63,8 +63,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '31047436964',
     projectId: 'fayez-6eab2',
     storageBucket: 'fayez-6eab2.firebasestorage.app',
-    androidClientId: '31047436964-1sad8m7th9f91sthc7vp8avfs44f3ctm.apps.googleusercontent.com',
-    iosClientId: '31047436964-qdua7td8jrh9r1lp91ac7or0u342pegn.apps.googleusercontent.com',
+    androidClientId:
+        '31047436964-1sad8m7th9f91sthc7vp8avfs44f3ctm.apps.googleusercontent.com',
+    iosClientId:
+        '31047436964-qdua7td8jrh9r1lp91ac7or0u342pegn.apps.googleusercontent.com',
     iosBundleId: 'com.bluewhale.whatsorder',
   );
 }

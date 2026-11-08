@@ -37,7 +37,10 @@ class _SmsMessagesScreenState extends State<SmsMessagesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.tr("accepted_offers"), style: AppTextStyles.heading18),
+        title: Text(
+          context.tr("accepted_offers"),
+          style: AppTextStyles.heading18,
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),

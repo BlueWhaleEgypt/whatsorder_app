@@ -146,6 +146,8 @@ class _SettingsView extends StatelessWidget {
                     ),
                   ),
                   label: context.tr('products'),
+                  onTap: () =>
+                      Navigator.pushNamed(context, NamedRoutes.products),
                 ),
 
                 /// notifications

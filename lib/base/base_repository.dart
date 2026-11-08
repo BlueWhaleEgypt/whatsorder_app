@@ -11,6 +11,8 @@ import 'package:whats_order/features/orders/sms/data/sms_messages_response.dart'
 import 'package:whats_order/features/settings/data/branch/branches_response.dart';
 import 'package:whats_order/features/settings/data/logout/logout_response.dart';
 import 'package:whats_order/features/settings/data/password/change_password_response.dart';
+import 'package:whats_order/features/settings/data/product/add_product_response.dart';
+import 'package:whats_order/features/settings/data/product/products_response.dart';
 import 'package:whats_order/features/settings/data/phone/change_phone_response.dart';
 import 'package:whats_order/features/settings/data/profile/update_profile_response.dart';
 import 'package:whats_order/features/settings/data/sector/sector_tap_response.dart';
@@ -71,6 +73,9 @@ abstract class BaseRepository {
       return const ChangePasswordResponse();
     if (responseType == 'SectorTapResponse') return const SectorTapResponse();
     if (responseType == 'UpdateProfileResponse') return UpdateProfileResponse();
+
+    if (responseType == 'ProductsResponse') return const ProductsResponse();
+    if (responseType == 'AddProductResponse') return const AddProductResponse();
 
     if (responseType == 'LogoutResponse') return const LogoutResponse();
 
