@@ -277,7 +277,7 @@ class _SettingsView extends StatelessWidget {
             const SizedBox(height: 20),
 
             Text(
-              "v1.2.1+11",
+              "v1.2.2+12",
               style: AppTextStyles.cellMuted13.copyWith(
                 color: AppColors.textGrey,
               ),

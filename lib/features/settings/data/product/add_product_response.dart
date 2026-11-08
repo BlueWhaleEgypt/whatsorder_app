@@ -28,22 +28,9 @@ class AddProductResponse extends Equatable implements BaseRepository {
     }
 
     try {
-      final formData = FormData.fromMap({
-        'name': request.name,
-        'price': request.price,
-        'delivaryTime': request.deliveryTime,
-        'sectorId': request.sectorId,
-        'vendorId': request.vendorId,
-        'note': request.note,
-        'photos': [
-          for (final path in request.photoPaths)
-            await MultipartFile.fromFile(path),
-        ],
-      });
-
       final response = await DioHelper.postData(
         url: '${EndPoints.baseUrl}${EndPoints.epAddProduct}',
-        formDataOverride: formData,
+        formDataOverride: await request.toFormData(),
       );
 
       final statusCode = response.statusCode ?? 0;

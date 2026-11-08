@@ -13,6 +13,8 @@ import 'package:whats_order/core/widgets/sector_dropdown.dart';
 import 'package:whats_order/features/auth/sign_up/presentation/cubit/onboarding_cubit.dart';
 import 'package:whats_order/features/auth/sign_up/presentation/cubit/onboarding_state.dart';
 import 'package:whats_order/features/settings/data/product/add_product_request.dart';
+import 'package:whats_order/features/settings/data/product/product_model.dart';
+import 'package:whats_order/features/settings/data/product/update_product_request.dart';
 import 'package:whats_order/features/settings/presentation/bloc/add_product_bloc.dart';
 import 'package:whats_order/features/settings/presentation/bloc/event/add_product_event.dart';
 import 'package:whats_order/features/settings/presentation/bloc/states/add_product_state.dart';
@@ -24,7 +26,8 @@ import 'package:whats_order/injection/injection_container.dart';
 
 /*
 |--------------------------------------------------------------------------
-| AddProductScreen — POST /api/auth/vendor-services.
+| AddProductScreen — POST /api/auth/vendor-services, or, when given a
+| [product], PUT /api/auth/vendor-services/{id} to edit it.
 |
 | Pops with `true` once the product is saved so the caller can refresh.
 | Every field is required; validation rules live in AddProductFormRules and
@@ -40,9 +43,15 @@ Future<List<XFile>> _pickFromGallery() =>
     ImagePicker().pickMultiImage(imageQuality: 80);
 
 class AddProductScreen extends StatelessWidget {
+  /// The product to edit; null adds a new one.
+  final ProductModel? product;
   final PickPhotos pickPhotos;
 
-  const AddProductScreen({super.key, this.pickPhotos = _pickFromGallery});
+  const AddProductScreen({
+    super.key,
+    this.product,
+    this.pickPhotos = _pickFromGallery,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -51,15 +60,16 @@ class AddProductScreen extends StatelessWidget {
         BlocProvider(create: (_) => sl<AddProductBloc>()),
         BlocProvider(create: (_) => sl<OnboardingCubit>()..loadSectors()),
       ],
-      child: _AddProductView(pickPhotos: pickPhotos),
+      child: _AddProductView(product: product, pickPhotos: pickPhotos),
     );
   }
 }
 
 class _AddProductView extends StatefulWidget {
+  final ProductModel? product;
   final PickPhotos pickPhotos;
 
-  const _AddProductView({required this.pickPhotos});
+  const _AddProductView({required this.product, required this.pickPhotos});
 
   @override
   State<_AddProductView> createState() => _AddProductViewState();
@@ -71,20 +81,35 @@ class _AddProductViewState extends State<_AddProductView> {
   static const _columnSpacing = SizedBox(width: 12);
 
   final _formKey = GlobalKey<FormState>();
-  final _name = TextEditingController();
-  final _price = TextEditingController();
-  final _delivery = TextEditingController();
-  final _note = TextEditingController();
-  final _photos = ProductPhotosController();
+  late final _name = TextEditingController(text: widget.product?.name);
+  late final _price = TextEditingController(text: _initialPrice);
+  late final _delivery = TextEditingController(
+    text: widget.product?.deliveryTime,
+  );
+  late final _note = TextEditingController(text: widget.product?.note);
+
+  /// A product being edited keeps the photos it already has, so none are
+  /// required.
+  late final _photos = ProductPhotosController(isRequired: !_isEditing);
 
   /// Read back from the dropdown; it is validated as non-null on submit.
-  String? _sectorId;
+  late String? _sectorId = widget.product?.sectorId;
 
   /// Set synchronously on submit. The Bloc only emits `Loading` after an
   /// async connectivity check, so this is what stops a quick double tap
   /// from sending the product twice.
   bool _isSubmitting = false;
   bool _isPickingPhotos = false;
+
+  bool get _isEditing => widget.product != null;
+
+  String? get _initialPrice {
+    final price = widget.product?.price;
+    if (price == null) return null;
+    return price == price.roundToDouble()
+        ? price.toStringAsFixed(0)
+        : price.toString();
+  }
 
   @override
   void dispose() {
@@ -132,19 +157,24 @@ class _AddProductViewState extends State<_AddProductView> {
       return;
     }
 
+    final request = AddProductRequest(
+      name: _name.text.trim(),
+      price: AddProductFormRules.parsePrice(_price.text)!,
+      deliveryTime: _delivery.text.trim(),
+      sectorId: _sectorId!,
+      vendorId: vendorId,
+      note: _note.text.trim(),
+      photoPaths: _photos.paths,
+    );
+
     _isSubmitting = true;
+    final product = widget.product;
     context.read<AddProductBloc>().add(
-      SubmitAddProductEvent(
-        AddProductRequest(
-          name: _name.text.trim(),
-          price: AddProductFormRules.parsePrice(_price.text)!,
-          deliveryTime: _delivery.text.trim(),
-          sectorId: _sectorId!,
-          vendorId: vendorId,
-          note: _note.text.trim(),
-          photoPaths: _photos.paths,
-        ),
-      ),
+      product == null
+          ? SubmitAddProductEvent(request)
+          : SubmitUpdateProductEvent(
+              UpdateProductRequest(id: product.id, product: request),
+            ),
     );
   }
 
@@ -177,7 +207,7 @@ class _AddProductViewState extends State<_AddProductView> {
         backgroundColor: AppColors.scaffoldBg,
         appBar: AppBar(
           title: Text(
-            context.tr('add_new_product'),
+            context.tr(_isEditing ? 'edit_product' : 'add_new_product'),
             style: AppTextStyles.heading18,
           ),
         ),
@@ -253,7 +283,9 @@ class _AddProductViewState extends State<_AddProductView> {
                   return GradientButton(
                     onPressed: loading ? null : _submit,
                     loading: loading,
-                    label: context.tr('publish_product'),
+                    label: context.tr(
+                      _isEditing ? 'save_changes' : 'publish_product',
+                    ),
                   );
                 },
               ),

@@ -17,15 +17,21 @@ import 'package:image_picker/image_picker.dart';
 class ProductPhotosController extends ChangeNotifier {
   static const int maxPhotos = 8;
 
+  /// Whether at least one photo must be picked. When editing a product the
+  /// photos it already has are kept, so none are needed.
+  final bool isRequired;
+
   final List<XFile> _photos = [];
   bool _submitAttempted = false;
+
+  ProductPhotosController({this.isRequired = true});
 
   UnmodifiableListView<XFile> get photos => UnmodifiableListView(_photos);
 
   bool get isEmpty => _photos.isEmpty;
   bool get canAddMore => _photos.length < maxPhotos;
   int get remaining => maxPhotos - _photos.length;
-  bool get showError => _submitAttempted && _photos.isEmpty;
+  bool get showError => _submitAttempted && isRequired && _photos.isEmpty;
 
   List<String> get paths => [for (final p in _photos) p.path];
 
@@ -48,6 +54,6 @@ class ProductPhotosController extends ChangeNotifier {
     final wasShowingError = showError;
     _submitAttempted = true;
     if (showError != wasShowingError) notifyListeners();
-    return !isEmpty;
+    return !isRequired || !isEmpty;
   }
 }

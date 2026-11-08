@@ -60,6 +60,7 @@ class EndPoints {
 
   // Products
   static const String epAddProduct = '/api/auth/vendor-services';
+  // PUT / DELETE: `$epAddProduct/{id}`
   static const String epVendorProducts =
       '/api/auth/vendor-services/getServicesForVendor';
 

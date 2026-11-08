@@ -43,7 +43,10 @@ class ProductPhotosPicker extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ProductFormLabel(context.tr('product_photos')),
+            ProductFormLabel(
+              context.tr('product_photos'),
+              isRequired: controller.isRequired,
+            ),
             SizedBox(
               height: _tileSize,
               child: ListView.builder(

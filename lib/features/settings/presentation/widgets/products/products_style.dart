@@ -16,12 +16,13 @@ class ProductsStyle {
   static const double pageButtonSize = 32;
 
   static const Color successTint = Color(0xFFDCFCE7);
+  static const Color dangerTint = Color(0xFFFEE2E2);
 
   static const List<Color> tileColors = [
     successTint,
     Color(0xFFFFEDD5),
     Color(0xFFDBEAFE),
-    Color(0xFFFEE2E2),
+    dangerTint,
   ];
 
   static Color tileColor(int index) => tileColors[index % tileColors.length];

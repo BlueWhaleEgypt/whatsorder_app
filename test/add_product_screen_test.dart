@@ -5,6 +5,7 @@ import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/widgets/gradient_button.dart';
 import 'package:whats_order/features/auth/sign_up/data/sector_model.dart';
 import 'package:whats_order/features/auth/sign_up/presentation/cubit/onboarding_cubit.dart';
+import 'package:whats_order/features/settings/data/product/product_model.dart';
 import 'package:whats_order/features/settings/presentation/bloc/add_product_bloc.dart';
 import 'package:whats_order/features/settings/presentation/bloc/event/add_product_event.dart';
 import 'package:whats_order/features/settings/presentation/bloc/states/add_product_state.dart';
@@ -119,6 +120,12 @@ void main() {
       expect(c.showError, isTrue);
     });
 
+    test('when optional, never errors and always validates', () {
+      final c = ProductPhotosController(isRequired: false);
+      expect(c.validate(), isTrue);
+      expect(c.showError, isFalse);
+    });
+
     test('notifies only when something changed', () {
       final c = ProductPhotosController();
       var notifications = 0;
@@ -164,10 +171,17 @@ void main() {
       return nextPick();
     }
 
-    Future<void> pump(WidgetTester tester, {String locale = 'en'}) async {
+    Future<void> pump(
+      WidgetTester tester, {
+      String locale = 'en',
+      ProductModel? product,
+    }) async {
       useTallScreen(tester);
       await tester.pumpWidget(
-        localizedApp(AddProductScreen(pickPhotos: pickPhotos), locale: locale),
+        localizedApp(
+          AddProductScreen(product: product, pickPhotos: pickPhotos),
+          locale: locale,
+        ),
       );
       await tester.pump();
     }
@@ -489,6 +503,123 @@ void main() {
         await tester.tap(find.byIcon(Icons.close).first);
         await tester.pump();
         expect(find.text('Add at least one product photo'), findsOneWidget);
+      });
+    });
+
+    group('editing', () {
+      const product = ProductModel(
+        id: 'prod-9',
+        name: 'Tea',
+        price: 50,
+        deliveryTime: '5',
+        note: 'Black tea',
+        sectorId: 's2',
+        sectorName: 'Bakery',
+      );
+
+      testWidgets('is titled and labelled for editing', (tester) async {
+        await pump(tester, product: product);
+
+        expect(find.text('Edit product'), findsOneWidget);
+        expect(find.text('Save Changes'), findsOneWidget);
+        expect(find.text('Publish product'), findsNothing);
+      });
+
+      testWidgets('adding keeps its own title and button', (tester) async {
+        await pump(tester);
+
+        expect(find.text('Add new product'), findsOneWidget);
+        expect(find.text('Publish product'), findsOneWidget);
+      });
+
+      testWidgets('fills the fields from the product', (tester) async {
+        await pump(tester, product: product);
+
+        String text(int field) => tester
+            .widget<TextFormField>(find.byType(TextFormField).at(field))
+            .controller!
+            .text;
+        expect(text(0), 'Tea');
+        expect(text(1), '50');
+        expect(text(2), '5');
+        expect(text(3), 'Black tea');
+      });
+
+      testWidgets('keeps a fractional price as is', (tester) async {
+        await pump(
+          tester,
+          product: const ProductModel(
+            id: 'p',
+            name: 'n',
+            price: 12.5,
+            deliveryTime: '1',
+            note: 'x',
+            sectorId: 's1',
+            sectorName: 'Supermarket',
+          ),
+        );
+
+        final price = tester
+            .widget<TextFormField>(find.byType(TextFormField).at(1))
+            .controller!
+            .text;
+        expect(price, '12.5');
+      });
+
+      testWidgets('saves without picking photos, keeping id and sector', (
+        tester,
+      ) async {
+        await pump(tester, product: product);
+        await submit(tester);
+
+        expect(find.text('Add at least one product photo'), findsNothing);
+        expect(bloc.submits, isEmpty, reason: 'it is an update, not an add');
+
+        final update = bloc.events.single as SubmitUpdateProductEvent;
+        expect(update.request.id, 'prod-9');
+        final sent = update.request.product;
+        expect(sent.name, 'Tea');
+        expect(sent.price, 50);
+        expect(sent.deliveryTime, '5');
+        expect(sent.note, 'Black tea');
+        expect(sent.sectorId, 's2');
+        expect(sent.vendorId, 'vendor-1');
+        expect(sent.photoPaths, isEmpty);
+      });
+
+      testWidgets('sends the edited values and any new photos', (tester) async {
+        await pump(tester, product: product);
+        await addPhotos(tester, [_photo(7)]);
+        await enter(tester, 0, 'Green tea');
+        await enter(tester, 1, '65.5');
+        await pickSector(tester, 'Supermarket');
+        await submit(tester);
+
+        final sent =
+            (bloc.events.single as SubmitUpdateProductEvent).request.product;
+        expect(sent.name, 'Green tea');
+        expect(sent.price, 65.5);
+        expect(sent.sectorId, 's1');
+        expect(sent.photoPaths, [_photo(7).path]);
+      });
+
+      testWidgets('still validates the other fields', (tester) async {
+        await pump(tester, product: product);
+        await enter(tester, 0, '');
+        await enter(tester, 1, '0');
+        await submit(tester);
+
+        expect(find.text('This field is required'), findsNWidgets(2));
+        expect(bloc.events, isEmpty);
+      });
+
+      testWidgets('a quick double tap saves only once', (tester) async {
+        await pump(tester, product: product);
+        await tester.tap(find.byType(GradientButton));
+        await tester.tap(find.byType(GradientButton));
+        await tester.pump();
+
+        expect(bloc.events, hasLength(1));
       });
     });
 

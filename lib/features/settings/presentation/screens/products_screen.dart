@@ -6,11 +6,15 @@ import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/theme/app_colors.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/features/settings/data/product/product_model.dart';
+import 'package:whats_order/features/settings/presentation/bloc/delete_product_bloc.dart';
+import 'package:whats_order/features/settings/presentation/bloc/event/delete_product_event.dart';
 import 'package:whats_order/features/settings/presentation/bloc/event/products_event.dart';
 import 'package:whats_order/features/settings/presentation/bloc/products_bloc.dart';
+import 'package:whats_order/features/settings/presentation/bloc/states/delete_product_state.dart';
 import 'package:whats_order/features/settings/presentation/bloc/states/products_state.dart';
 import 'package:whats_order/features/settings/presentation/screens/add_product_screen.dart';
 import 'package:whats_order/features/settings/presentation/utils/products_listing.dart';
+import 'package:whats_order/features/settings/presentation/widgets/settings_confirmation_dialog.dart';
 import 'package:whats_order/features/settings/presentation/widgets/products/product_card.dart';
 import 'package:whats_order/features/settings/presentation/widgets/products/products_empty_state.dart';
 import 'package:whats_order/features/settings/presentation/widgets/products/products_error_view.dart';
@@ -36,8 +40,11 @@ class ProductsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => sl<ProductsBloc>()..add(_fetchEvent()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => sl<ProductsBloc>()..add(_fetchEvent())),
+        BlocProvider(create: (_) => sl<DeleteProductBloc>()),
+      ],
       child: const _ProductsView(),
     );
   }
@@ -134,40 +141,75 @@ class _ProductsViewState extends State<_ProductsView> {
     return settled;
   }
 
-  Future<void> _openAddProduct() async {
-    final added = await Navigator.push<bool>(
+  /// Opens the add form, or the edit form for [product]; reloads the list
+  /// when something was saved.
+  Future<void> _openProductForm({ProductModel? product}) async {
+    final saved = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(builder: (_) => const AddProductScreen()),
+      MaterialPageRoute(builder: (_) => AddProductScreen(product: product)),
     );
-    if (added == true && mounted) _reload();
+    if (saved == true && mounted) _reload();
   }
+
+  Future<void> _confirmDelete(ProductModel product) async {
+    final bloc = context.read<DeleteProductBloc>();
+    if (bloc.state is DeleteProductLoading) return;
+
+    final confirmed = await showSettingsConfirmationDialog(
+      context,
+      title: context.tr('delete_product'),
+      message: context.tr('delete_product_confirmation'),
+      itemName: product.name,
+    );
+    if (confirmed != true || !mounted) return;
+
+    bloc.add(SubmitDeleteProductEvent(product.id));
+  }
+
+  void _onDeleteStateChanged(BuildContext context, DeleteProductState state) {
+    if (state is DeleteProductSuccess) {
+      _snack(context.tr(state.message));
+      _reload();
+    } else if (state is DeleteProductError) {
+      _snack(context.trMessage(state.message));
+    }
+  }
+
+  void _snack(String text) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
-      appBar: AppBar(
-        title: Text(context.tr('products'), style: AppTextStyles.heading18),
-      ),
-      body: BlocConsumer<ProductsBloc, ProductsState>(
-        listenWhen: (_, current) => current is ProductsLoadedState,
-        listener: (_, state) {
-          if (state is ProductsLoadedState) _onProductsLoaded(state.products);
-        },
-        // Keep the list on screen while it reloads so a pull-to-refresh
-        // isn't torn down by a full-screen spinner.
-        buildWhen: (previous, current) =>
-            !(previous is ProductsLoadedState &&
-                current is ProductsLoadingState),
-        builder: (context, state) {
-          if (state is ProductsLoadedState) {
-            return _buildLoaded(_listingFor(state.products));
-          }
-          if (state is ProductsErrorState) {
-            return ProductsErrorView(message: state.message, onRetry: _reload);
-          }
-          return const Center(child: CircularProgressIndicator());
-        },
+    return BlocListener<DeleteProductBloc, DeleteProductState>(
+      listener: _onDeleteStateChanged,
+      child: Scaffold(
+        backgroundColor: AppColors.scaffoldBg,
+        appBar: AppBar(
+          title: Text(context.tr('products'), style: AppTextStyles.heading18),
+        ),
+        body: BlocConsumer<ProductsBloc, ProductsState>(
+          listenWhen: (_, current) => current is ProductsLoadedState,
+          listener: (_, state) {
+            if (state is ProductsLoadedState) _onProductsLoaded(state.products);
+          },
+          // Keep the list on screen while it reloads so a pull-to-refresh
+          // isn't torn down by a full-screen spinner.
+          buildWhen: (previous, current) =>
+              !(previous is ProductsLoadedState &&
+                  current is ProductsLoadingState),
+          builder: (context, state) {
+            if (state is ProductsLoadedState) {
+              return _buildLoaded(_listingFor(state.products));
+            }
+            if (state is ProductsErrorState) {
+              return ProductsErrorView(
+                message: state.message,
+                onRetry: _reload,
+              );
+            }
+            return const Center(child: CircularProgressIndicator());
+          },
+        ),
       ),
     );
   }
@@ -190,7 +232,7 @@ class _ProductsViewState extends State<_ProductsView> {
                     children: [
                       ProductsHeader(
                         productsCount: listing.totalCount,
-                        onAddProduct: _openAddProduct,
+                        onAddProduct: _openProductForm,
                       ),
                       const SizedBox(height: 16),
                       ProductsStatistics(
@@ -219,12 +261,26 @@ class _ProductsViewState extends State<_ProductsView> {
                       return Padding(
                         key: ValueKey(product.id),
                         padding: const EdgeInsets.only(bottom: 10),
-                        child: ProductCard(
-                          product: product,
-                          tileColor: ProductsStyle.tileColor(
-                            listing.firstIndex + index,
-                          ),
-                        ),
+                        child:
+                            BlocSelector<
+                              DeleteProductBloc,
+                              DeleteProductState,
+                              bool
+                            >(
+                              selector: (state) =>
+                                  state is DeleteProductLoading &&
+                                  state.productId == product.id,
+                              builder: (context, isDeleting) => ProductCard(
+                                product: product,
+                                tileColor: ProductsStyle.tileColor(
+                                  listing.firstIndex + index,
+                                ),
+                                isBusy: isDeleting,
+                                onEdit: () =>
+                                    _openProductForm(product: product),
+                                onDelete: () => _confirmDelete(product),
+                              ),
+                            ),
                       );
                     },
                   ),

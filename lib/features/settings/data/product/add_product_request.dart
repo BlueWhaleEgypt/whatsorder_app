@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+
 class AddProductRequest {
   final String name;
   final double price;
@@ -17,5 +19,19 @@ class AddProductRequest {
     required this.vendorId,
     this.note = '',
     this.photoPaths = const [],
+  });
+
+  /// The multipart body of POST / PUT /api/auth/vendor-services. The API
+  /// spells the delivery field `delivaryTime`.
+  Future<FormData> toFormData() async => FormData.fromMap({
+    'name': name,
+    'price': price,
+    'delivaryTime': deliveryTime,
+    'sectorId': sectorId,
+    'vendorId': vendorId,
+    'note': note,
+    'photos': [
+      for (final path in photoPaths) await MultipartFile.fromFile(path),
+    ],
   });
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:whats_order/core/constants/app_assets.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/theme/app_colors.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
@@ -21,11 +23,19 @@ class ProductCard extends StatelessWidget {
 
   final ProductModel product;
   final Color tileColor;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  /// While true the actions are disabled (the product is being deleted).
+  final bool isBusy;
 
   const ProductCard({
     super.key,
     required this.product,
     required this.tileColor,
+    required this.onEdit,
+    required this.onDelete,
+    this.isBusy = false,
   });
 
   @override
@@ -39,6 +49,8 @@ class ProductCard extends StatelessWidget {
           _Thumbnail(color: tileColor),
           const SizedBox(width: 12),
           Expanded(child: _Details(product: product)),
+          const SizedBox(width: 8),
+          _Actions(onEdit: onEdit, onDelete: onDelete, isBusy: isBusy),
         ],
       ),
     );
@@ -142,6 +154,100 @@ class _DeliveryChip extends StatelessWidget {
       child: Text(
         '${context.tr('delivery_time')}: $deliveryTime',
         style: _style,
+      ),
+    );
+  }
+}
+
+class _Actions extends StatelessWidget {
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+  final bool isBusy;
+
+  const _Actions({
+    required this.onEdit,
+    required this.onDelete,
+    required this.isBusy,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _ActionButton(
+          tooltip: context.tr('edit'),
+          asset: AppAssets.edit,
+          color: AppColors.primaryGreen,
+          background: AppColors.editIconBg,
+          onTap: isBusy ? null : onEdit,
+        ),
+        const SizedBox(height: 6),
+        isBusy
+            ? const SizedBox(
+                width: _ActionButton.size,
+                height: _ActionButton.size,
+                child: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.danger,
+                  ),
+                ),
+              )
+            : _ActionButton(
+                tooltip: context.tr('delete'),
+                asset: AppAssets.delete,
+                color: AppColors.danger,
+                background: ProductsStyle.dangerTint,
+                onTap: onDelete,
+              ),
+      ],
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  static const double size = 32;
+
+  final String tooltip;
+  final String asset;
+  final Color color;
+  final Color background;
+  final VoidCallback? onTap;
+
+  const _ActionButton({
+    required this.tooltip,
+    required this.asset,
+    required this.color,
+    required this.background,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: Container(
+          width: size,
+          height: size,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: background,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: SvgPicture.asset(
+            asset,
+            width: 16,
+            height: 16,
+            colorFilter: ColorFilter.mode(
+              onTap == null ? AppColors.textFaint : color,
+              BlendMode.srcIn,
+            ),
+          ),
+        ),
       ),
     );
   }

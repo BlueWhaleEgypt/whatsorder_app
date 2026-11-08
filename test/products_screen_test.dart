@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/utils/price_formatter.dart';
+import 'package:whats_order/features/auth/sign_up/data/sector_model.dart';
+import 'package:whats_order/features/auth/sign_up/presentation/cubit/onboarding_cubit.dart';
+import 'package:whats_order/features/settings/presentation/bloc/add_product_bloc.dart';
+import 'package:whats_order/features/settings/presentation/bloc/delete_product_bloc.dart';
+import 'package:whats_order/features/settings/presentation/bloc/event/add_product_event.dart';
+import 'package:whats_order/features/settings/presentation/bloc/event/delete_product_event.dart';
+import 'package:whats_order/features/settings/presentation/bloc/states/add_product_state.dart';
+import 'package:whats_order/features/settings/presentation/bloc/states/delete_product_state.dart';
 import 'package:whats_order/features/settings/data/product/product_model.dart';
 import 'package:whats_order/features/settings/presentation/bloc/event/products_event.dart';
 import 'package:whats_order/features/settings/presentation/bloc/products_bloc.dart';
@@ -38,6 +47,46 @@ class _FakeProductsBloc extends ProductsBloc {
   void add(ProductsEvent event) => events.add(event);
 
   void show(ProductsState state) => emit(state);
+}
+
+class _FakeDeleteProductBloc extends DeleteProductBloc {
+  final events = <DeleteProductEvent>[];
+
+  _FakeDeleteProductBloc() : super(FakeNetwork());
+
+  @override
+  void add(DeleteProductEvent event) => events.add(event);
+
+  void show(DeleteProductState state) => emit(state);
+}
+
+class _FakeAddProductBloc extends AddProductBloc {
+  final events = <AddProductEvent>[];
+
+  _FakeAddProductBloc() : super(FakeNetwork());
+
+  @override
+  void add(AddProductEvent event) => events.add(event);
+
+  void show(AddProductState state) => emit(state);
+}
+
+class _FakeOnboardingCubit extends OnboardingCubit {
+  @override
+  Future<void> loadSectors() async => emit(
+    state.copyWith(
+      sectors: const [
+        SectorModel(
+          id: 's1',
+          name: 'Supermarket',
+          note: '',
+          cost: 0,
+          view: true,
+        ),
+        SectorModel(id: 's2', name: 'Bakery', note: '', cost: 0, view: true),
+      ],
+    ),
+  );
 }
 
 void main() {
@@ -122,17 +171,31 @@ void main() {
 
   group('ProductsScreen', () {
     late _FakeProductsBloc bloc;
+    late _FakeDeleteProductBloc deleteBloc;
+    late _FakeAddProductBloc addBloc;
+
+    void unregisterAll() {
+      if (sl.isRegistered<ProductsBloc>()) sl.unregister<ProductsBloc>();
+      if (sl.isRegistered<DeleteProductBloc>()) {
+        sl.unregister<DeleteProductBloc>();
+      }
+      if (sl.isRegistered<AddProductBloc>()) sl.unregister<AddProductBloc>();
+      if (sl.isRegistered<OnboardingCubit>()) sl.unregister<OnboardingCubit>();
+    }
 
     setUp(() async {
-      await initPrefs();
+      await initPrefs({CacheKeys.vendorId: 'vendor-1'});
       bloc = _FakeProductsBloc();
-      if (sl.isRegistered<ProductsBloc>()) sl.unregister<ProductsBloc>();
+      deleteBloc = _FakeDeleteProductBloc();
+      addBloc = _FakeAddProductBloc();
+      unregisterAll();
       sl.registerFactory<ProductsBloc>(() => bloc);
+      sl.registerFactory<DeleteProductBloc>(() => deleteBloc);
+      sl.registerFactory<AddProductBloc>(() => addBloc);
+      sl.registerFactory<OnboardingCubit>(() => _FakeOnboardingCubit());
     });
 
-    tearDown(() async {
-      if (sl.isRegistered<ProductsBloc>()) sl.unregister<ProductsBloc>();
-    });
+    tearDown(unregisterAll);
 
     Future<void> pump(WidgetTester tester, {String locale = 'en'}) async {
       useTallScreen(tester);
@@ -293,6 +356,123 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.byType(ProductCard), findsOneWidget);
       expect(find.text('All categories'), findsOneWidget);
+    });
+
+    group('edit and delete', () {
+      Future<void> load(WidgetTester tester) async {
+        await pump(tester);
+        await show(
+          tester,
+          ProductsLoadedState([
+            _product(1, name: 'Tea', price: 50),
+            _product(2, name: 'Sugar'),
+          ]),
+        );
+      }
+
+      testWidgets('every card has an edit and a delete button', (tester) async {
+        await load(tester);
+        expect(find.byTooltip('Edit'), findsNWidgets(2));
+        expect(find.byTooltip('Delete'), findsNWidgets(2));
+      });
+
+      testWidgets('delete asks first and cancelling sends nothing', (
+        tester,
+      ) async {
+        await load(tester);
+        await tester.tap(find.byTooltip('Delete').first);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Delete product'), findsOneWidget);
+        expect(find.text('Tea'), findsWidgets);
+
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+        expect(deleteBloc.events, isEmpty);
+      });
+
+      testWidgets('confirming deletes that product', (tester) async {
+        await load(tester);
+        await tester.tap(find.byTooltip('Delete').last);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Delete'));
+        await tester.pumpAndSettle();
+
+        final event = deleteBloc.events.single as SubmitDeleteProductEvent;
+        expect(event.productId, 'p2');
+      });
+
+      testWidgets('a successful delete confirms and reloads the list', (
+        tester,
+      ) async {
+        await load(tester);
+        expect(bloc.events, hasLength(1));
+
+        deleteBloc.show(
+          const DeleteProductSuccess('product_deleted_successfully'),
+        );
+        await tester.pump();
+
+        expect(find.text('Product deleted successfully'), findsOneWidget);
+        expect(bloc.events, hasLength(2));
+      });
+
+      testWidgets('a failed delete shows the error and does not reload', (
+        tester,
+      ) async {
+        await load(tester);
+        deleteBloc.show(const DeleteProductError('product_delete_failed'));
+        await tester.pump();
+
+        expect(find.text('Failed to delete the product'), findsOneWidget);
+        expect(bloc.events, hasLength(1));
+      });
+
+      testWidgets('only the product being deleted is locked', (tester) async {
+        await load(tester);
+        deleteBloc.show(const DeleteProductLoading('p1'));
+        await tester.pump();
+
+        // p1 swaps its delete button for a spinner; p2 is untouched.
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(find.byTooltip('Delete'), findsOneWidget);
+
+        // A second delete while one is running is ignored.
+        await tester.tap(find.byTooltip('Delete'));
+        await tester.pump(const Duration(milliseconds: 500));
+        expect(find.text('Delete product'), findsNothing);
+      });
+
+      testWidgets('edit opens the form filled in, and saving reloads', (
+        tester,
+      ) async {
+        await load(tester);
+        await tester.tap(find.byTooltip('Edit').first);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Edit product'), findsOneWidget);
+        expect(find.text('Tea'), findsOneWidget); // name field
+        expect(find.text('50'), findsOneWidget); // price field
+
+        addBloc.show(const AddProductSuccess('product_updated_successfully'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Edit product'), findsNothing);
+        expect(find.text('Product updated successfully'), findsOneWidget);
+        expect(bloc.events, hasLength(2));
+      });
+
+      testWidgets('leaving the edit form without saving does not reload', (
+        tester,
+      ) async {
+        await load(tester);
+        await tester.tap(find.byTooltip('Edit').first);
+        await tester.pumpAndSettle();
+
+        await tester.pageBack();
+        await tester.pumpAndSettle();
+        expect(bloc.events, hasLength(1));
+      });
     });
 
     testWidgets('renders in Arabic', (tester) async {

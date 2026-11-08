@@ -29,10 +29,7 @@ class DashedUploadBox extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
       child: CustomPaint(
-        painter: DashedBorderPainter(
-          color: AppColors.primaryGreen,
-          radius: 14,
-        ),
+        painter: DashedBorderPainter(color: AppColors.primaryGreen, radius: 14),
         child: SizedBox(
           width: double.infinity,
           height: height,

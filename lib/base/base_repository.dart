@@ -12,6 +12,8 @@ import 'package:whats_order/features/settings/data/branch/branches_response.dart
 import 'package:whats_order/features/settings/data/logout/logout_response.dart';
 import 'package:whats_order/features/settings/data/password/change_password_response.dart';
 import 'package:whats_order/features/settings/data/product/add_product_response.dart';
+import 'package:whats_order/features/settings/data/product/delete_product_response.dart';
+import 'package:whats_order/features/settings/data/product/update_product_response.dart';
 import 'package:whats_order/features/settings/data/product/products_response.dart';
 import 'package:whats_order/features/settings/data/phone/change_phone_response.dart';
 import 'package:whats_order/features/settings/data/profile/update_profile_response.dart';
@@ -75,6 +77,12 @@ abstract class BaseRepository {
     if (responseType == 'UpdateProfileResponse') return UpdateProfileResponse();
 
     if (responseType == 'ProductsResponse') return const ProductsResponse();
+    if (responseType == 'UpdateProductResponse') {
+      return const UpdateProductResponse();
+    }
+    if (responseType == 'DeleteProductResponse') {
+      return const DeleteProductResponse();
+    }
     if (responseType == 'AddProductResponse') return const AddProductResponse();
 
     if (responseType == 'LogoutResponse') return const LogoutResponse();

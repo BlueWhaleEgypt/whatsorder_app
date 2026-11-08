@@ -191,4 +191,3 @@ class FakeLogoutResponse implements BaseRepository {
         : const Right(LogoutResponse());
   }
 }
-
