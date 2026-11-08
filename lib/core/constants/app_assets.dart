@@ -28,4 +28,8 @@ class AppAssets {
   static const String verifiedRounded = 'assets/icons/verified-rounded.svg';
   static const String baselineVerified = 'assets/icons/baseline-verified.svg';
   static const String shopingCart = 'assets/icons/shopping-cart.svg';
+  static const String bell = 'assets/icons/bell.svg';
+  static const String cart = 'assets/icons/cart.svg';
+  static const String storeProfile = 'assets/icons/store_profile.svg';
+  static const String products = 'assets/icons/products.svg';
 }

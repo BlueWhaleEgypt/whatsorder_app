@@ -104,6 +104,7 @@ class _SettingsView extends StatelessWidget {
             const SizedBox(height: 8),
             SettingsGroup(
               children: [
+                /// branches
                 SettingsTile(
                   icon: SvgPicture.asset(
                     AppAssets.stor,
@@ -119,9 +120,10 @@ class _SettingsView extends StatelessWidget {
                       Navigator.pushNamed(context, NamedRoutes.branches),
                 ),
 
+                /// store profile
                 SettingsTile(
                   icon: SvgPicture.asset(
-                    AppAssets.lang,
+                    AppAssets.storeProfile,
                     width: 20,
                     height: 20,
                     colorFilter: const ColorFilter.mode(
@@ -129,11 +131,24 @@ class _SettingsView extends StatelessWidget {
                       BlendMode.srcIn,
                     ),
                   ),
-                  label: context.tr('language'),
-                  trailing: context.tr('language_label'),
-                  onTap: () => showLanguageDialog(context),
-                  // onTap: () => context.read<LocaleCubit>().toggle(),
+                  label: context.tr('store_profile'),
                 ),
+
+                /// products
+                SettingsTile(
+                  icon: SvgPicture.asset(
+                    AppAssets.products,
+                    width: 20,
+                    height: 20,
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.primaryGreenTint,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  label: context.tr('products'),
+                ),
+
+                /// notifications
                 ValueListenableBuilder<int>(
                   valueListenable: NotificationCounter.notificationCount,
                   builder: (context, count, child) {
@@ -155,6 +170,8 @@ class _SettingsView extends StatelessWidget {
                     );
                   },
                 ),
+
+                /// accepted offers
                 ValueListenableBuilder<int>(
                   valueListenable: NotificationCounter.smsCount,
                   builder: (context, count, child) {
@@ -174,6 +191,23 @@ class _SettingsView extends StatelessWidget {
                     );
                   },
                 ),
+
+                /// language
+                SettingsTile(
+                  icon: SvgPicture.asset(
+                    AppAssets.lang,
+                    width: 20,
+                    height: 20,
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.primaryGreenTint,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  label: context.tr('language'),
+                  trailing: context.tr('language_label'),
+                  onTap: () => showLanguageDialog(context),
+                  // onTap: () => context.read<LocaleCubit>().toggle(),
+                ),
                 // SettingsTile(
                 //     icon: Icons.dark_mode_outlined,
                 //     label: context.tr('appearance'),
@@ -181,6 +215,8 @@ class _SettingsView extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
+
+            /// Account section
             Text(context.tr("account"), style: AppTextStyles.sectionLabel13),
             const SizedBox(height: 8),
             SettingsGroup(
@@ -190,6 +226,7 @@ class _SettingsView extends StatelessWidget {
                     AppAssets.paper,
                     width: 20,
                     height: 20,
+
                     colorFilter: const ColorFilter.mode(
                       AppColors.primaryGreenTint,
                       BlendMode.srcIn,
@@ -244,6 +281,7 @@ class _SettingsView extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 100),
           ],
         ),
       ),

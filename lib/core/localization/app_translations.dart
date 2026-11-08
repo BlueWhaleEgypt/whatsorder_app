@@ -323,6 +323,8 @@ const Map<String, Map<String, String>> kTranslations = {
     "current_user_not_identified": "Unable to identify the current user",
     "vendor_data_not_available": "Vendor data is not available",
     "no_sectors_available": "No sectors available",
+    "store_profile": "Store Profile",
+    "products": "Products",
 
     //sms
     'accepted_offers': 'Accepted Offers',
@@ -644,6 +646,8 @@ const Map<String, Map<String, String>> kTranslations = {
     "confirm_new_password": "تأكيد كلمة المرور الجديدة",
     "field_required": "هذا الحقل مطلوب",
     "save_new_password": "حفظ كلمة المرور الجديدة",
+    "store_profile": "ملف المتجر",
+    "products": "المنتجات",
 
     //sms
     'accepted_offers': 'العروض المقبولة',
