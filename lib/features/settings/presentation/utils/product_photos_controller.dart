@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,30 +9,45 @@ import 'package:image_picker/image_picker.dart';
 | ProductPhotosController — the photos picked for a new product.
 |
 | Enforces the [maxPhotos] limit and owns the "at least one photo" error.
-| The first photo is the cover. The error only appears once a submit was
-| attempted, and then follows the list: adding a photo clears it, removing
-| the last one brings it back.
+| When editing, it also holds the photos the product already has (file
+| names); they can be removed like new ones. The first photo is the cover.
+| The error only appears once a submit was attempted, and then follows the
+| list: adding a photo clears it, removing the last one brings it back.
 |--------------------------------------------------------------------------
 */
 
 class ProductPhotosController extends ChangeNotifier {
   static const int maxPhotos = 8;
 
-  /// Whether at least one photo must be picked. When editing a product the
-  /// photos it already has are kept, so none are needed.
+  /// Whether at least one photo (existing or new) must be present.
   final bool isRequired;
 
+  final List<String> _existing;
   final List<XFile> _photos = [];
   bool _submitAttempted = false;
+  bool _removedExisting = false;
 
-  ProductPhotosController({this.isRequired = true});
+  /// [existingPhotos] are the server file names of a product being edited.
+  ProductPhotosController({
+    this.isRequired = true,
+    List<String> existingPhotos = const [],
+  }) : _existing = [...existingPhotos];
 
+  /// File names of the product's photos that are still kept.
+  UnmodifiableListView<String> get existingPhotos =>
+      UnmodifiableListView(_existing);
+
+  /// Newly picked photos.
   UnmodifiableListView<XFile> get photos => UnmodifiableListView(_photos);
 
-  bool get isEmpty => _photos.isEmpty;
-  bool get canAddMore => _photos.length < maxPhotos;
-  int get remaining => maxPhotos - _photos.length;
-  bool get showError => _submitAttempted && isRequired && _photos.isEmpty;
+  int get totalCount => _existing.length + _photos.length;
+  bool get isEmpty => totalCount == 0;
+  bool get canAddMore => remaining > 0;
+  int get remaining => math.max(0, maxPhotos - totalCount);
+  bool get showError => _submitAttempted && isRequired && isEmpty;
+
+  /// Whether the photo set differs from what the product started with.
+  bool get hasChanges => _removedExisting || _photos.isNotEmpty;
 
   List<String> get paths => [for (final p in _photos) p.path];
 
@@ -46,6 +62,13 @@ class ProductPhotosController extends ChangeNotifier {
   void removeAt(int index) {
     if (index < 0 || index >= _photos.length) return;
     _photos.removeAt(index);
+    notifyListeners();
+  }
+
+  void removeExistingAt(int index) {
+    if (index < 0 || index >= _existing.length) return;
+    _existing.removeAt(index);
+    _removedExisting = true;
     notifyListeners();
   }
 

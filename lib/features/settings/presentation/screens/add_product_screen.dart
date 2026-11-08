@@ -88,9 +88,13 @@ class _AddProductViewState extends State<_AddProductView> {
   );
   late final _note = TextEditingController(text: widget.product?.note);
 
-  /// A product being edited keeps the photos it already has, so none are
-  /// required.
-  late final _photos = ProductPhotosController(isRequired: !_isEditing);
+  /// Holds the photos of a product being edited too, so they can be removed
+  /// or replaced.
+  late final _photos = ProductPhotosController(
+    // A product that has photos can't end up with none; one without may.
+    isRequired: widget.product?.photos.isNotEmpty ?? true,
+    existingPhotos: widget.product?.photos ?? const [],
+  );
 
   /// Read back from the dropdown; it is validated as non-null on submit.
   late String? _sectorId = widget.product?.sectorId;
@@ -165,6 +169,10 @@ class _AddProductViewState extends State<_AddProductView> {
       vendorId: vendorId,
       note: _note.text.trim(),
       photoPaths: _photos.paths,
+      // Only touch the photos when they changed; see keptPhotoFileNames.
+      keptPhotoFileNames: _photos.hasChanges
+          ? _photos.existingPhotos.toList()
+          : const [],
     );
 
     _isSubmitting = true;

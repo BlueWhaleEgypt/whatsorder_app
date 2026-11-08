@@ -2,16 +2,17 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/theme/app_colors.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/core/widgets/dashed_upload_box.dart';
+import 'package:whats_order/features/settings/data/product/product_model.dart';
 import 'package:whats_order/features/settings/presentation/utils/product_photos_controller.dart';
 import 'package:whats_order/features/settings/presentation/widgets/add_product/product_form_label.dart';
 
-/// Photo strip of the add-product form: an "add" tile followed by the picked
-/// photos (the first one is the cover), and a hint that turns into the
+/// Photo strip of the add-product form: an "add" tile, the photos the product
+/// already has (when editing), then the newly picked photos. All of them can
+/// be removed. The first photo is the cover. A hint below turns into the
 /// "photo required" error.
 class ProductPhotosPicker extends StatelessWidget {
   static const double _tileSize = 96;
@@ -34,6 +35,7 @@ class ProductPhotosPicker extends StatelessWidget {
       listenable: controller,
       builder: (context, _) {
         final photos = controller.photos;
+        final existing = controller.existingPhotos;
         final hasAddTile = controller.canAddMore;
         // Only a few placeholders are shown as a hint, not one per free slot.
         final emptySlots = math.min(controller.remaining, _emptySlotCount);
@@ -51,27 +53,53 @@ class ProductPhotosPicker extends StatelessWidget {
               height: _tileSize,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: photos.length + (hasAddTile ? 1 : 0) + emptySlots,
+                itemCount:
+                    existing.length +
+                    photos.length +
+                    (hasAddTile ? 1 : 0) +
+                    emptySlots,
                 itemBuilder: (context, index) {
                   if (hasAddTile && index == 0) {
                     return _AddTile(onTap: onAddPressed);
                   }
-                  final photoIndex = hasAddTile ? index - 1 : index;
-                  if (photoIndex >= photos.length) {
+                  // Position among the photo tiles (existing, then new, then
+                  // empty slots), ignoring the add tile.
+                  final slot = hasAddTile ? index - 1 : index;
+                  if (slot < existing.length) {
+                    return _PhotoTile(
+                      key: ValueKey(existing[slot]),
+                      isCover: slot == 0,
+                      onRemove: () => controller.removeExistingAt(slot),
+                      image: Image.network(
+                        ProductModel.photoUrl(existing[slot]),
+                        fit: BoxFit.cover,
+                        cacheWidth: decodeWidth,
+                        loadingBuilder: (_, child, progress) => progress == null
+                            ? child
+                            : const _ImagePlaceholder(),
+                        errorBuilder: (_, _, _) => const _ImagePlaceholder(),
+                      ),
+                    );
+                  }
+                  final newIndex = slot - existing.length;
+                  if (newIndex >= photos.length) {
                     return _EmptySlot(
-                      color: _EmptySlot
-                          .palette[photoIndex % _EmptySlot.palette.length],
-                      showCover: photoIndex == 0,
+                      color:
+                          _EmptySlot.palette[slot % _EmptySlot.palette.length],
+                      showCover: slot == 0,
                       onTap: onAddPressed,
                     );
                   }
-                  final photo = photos[photoIndex];
+                  final photo = photos[newIndex];
                   return _PhotoTile(
                     key: ValueKey(photo.path),
-                    photo: photo,
-                    isCover: photoIndex == 0,
-                    decodeWidth: decodeWidth,
-                    onRemove: () => controller.removeAt(photoIndex),
+                    isCover: slot == 0,
+                    image: Image.file(
+                      File(photo.path),
+                      fit: BoxFit.cover,
+                      cacheWidth: decodeWidth,
+                    ),
+                    onRemove: () => controller.removeAt(newIndex),
                   );
                 },
               ),
@@ -207,16 +235,15 @@ class _PhotoTile extends StatelessWidget {
     color: Colors.white,
   );
 
-  final XFile photo;
+  final Widget image;
   final bool isCover;
-  final int decodeWidth;
+
   final VoidCallback onRemove;
 
   const _PhotoTile({
     super.key,
-    required this.photo,
+    required this.image,
     required this.isCover,
-    required this.decodeWidth,
     required this.onRemove,
   });
 
@@ -232,12 +259,7 @@ class _PhotoTile extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: ProductPhotosPicker._tileRadius,
-            // Decode at tile size instead of the full camera resolution.
-            child: Image.file(
-              File(photo.path),
-              fit: BoxFit.cover,
-              cacheWidth: decodeWidth,
-            ),
+            child: image,
           ),
           PositionedDirectional(
             top: 4,
@@ -265,6 +287,25 @@ class _PhotoTile extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Shown while a remote photo loads, or when it can't be loaded.
+class _ImagePlaceholder extends StatelessWidget {
+  const _ImagePlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: AppColors.lightGreenBg,
+      child: Center(
+        child: Icon(
+          Icons.image_outlined,
+          size: 32,
+          color: Colors.black.withValues(alpha: 0.3),
+        ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whats_order/core/cache/cache_keys.dart';
+import 'package:whats_order/core/network/end_points.dart';
 import 'package:whats_order/core/utils/price_formatter.dart';
 import 'package:whats_order/features/auth/sign_up/data/sector_model.dart';
 import 'package:whats_order/features/auth/sign_up/presentation/cubit/onboarding_cubit.dart';
@@ -28,6 +29,7 @@ ProductModel _product(
   String? name,
   String note = '',
   double price = 10,
+  List<String> photos = const [],
 }) => ProductModel(
   id: 'p$i',
   name: name ?? 'Product $i',
@@ -36,6 +38,7 @@ ProductModel _product(
   note: note,
   sectorId: sectorId,
   sectorName: sectorName,
+  photos: photos,
 );
 
 class _FakeProductsBloc extends ProductsBloc {
@@ -100,6 +103,50 @@ void main() {
     test('fractional amounts keep two decimals', () {
       expect(PriceFormatter.egp(12.5), '12.50 EGP');
       expect(PriceFormatter.egp(1999.99), '1,999.99 EGP');
+    });
+  });
+
+  group('ProductModel photos', () {
+    Map<String, dynamic> json(Object? photos) => {
+      'id': 'p1',
+      'name': 'Tea',
+      'price': 50,
+      'delivaryTime': '5',
+      'note': 'x',
+      if (photos != null) 'photos': photos,
+      'sector': {'id': 's1', 'name': 'Supermarket'},
+    };
+
+    test('reads the photo file names in order', () {
+      final product = ProductModel.fromJson(
+        json(['1794125568629A-Ascaled_1000001089.jpg', 'second.jpg']),
+      );
+      expect(product.photos, [
+        '1794125568629A-Ascaled_1000001089.jpg',
+        'second.jpg',
+      ]);
+    });
+
+    test('the cover is the first photo, served from /uploads/', () {
+      final product = ProductModel.fromJson(json(['a.jpg', 'b.jpg']));
+      expect(product.coverPhotoUrl, '${EndPoints.baseUrl}/uploads/a.jpg');
+    });
+
+    test('file names are URL-encoded', () {
+      final product = ProductModel.fromJson(json(['my photo ص.jpg']));
+      expect(
+        product.coverPhotoUrl,
+        '${EndPoints.baseUrl}/uploads/${Uri.encodeComponent('my photo ص.jpg')}',
+      );
+    });
+
+    test('missing, null, empty or malformed photos mean no cover', () {
+      expect(ProductModel.fromJson(json(null)).coverPhotoUrl, isNull);
+      expect(ProductModel.fromJson(json(<String>[])).coverPhotoUrl, isNull);
+      expect(ProductModel.fromJson(json('oops')).photos, isEmpty);
+      expect(ProductModel.fromJson(json([null, '', 'ok.jpg'])).photos, [
+        'ok.jpg',
+      ]);
     });
   });
 
@@ -356,6 +403,65 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.byType(ProductCard), findsOneWidget);
       expect(find.text('All categories'), findsOneWidget);
+    });
+
+    group('cover photo', () {
+      testWidgets('shows the first photo of the product', (tester) async {
+        await pump(tester);
+        await show(
+          tester,
+          ProductsLoadedState([
+            _product(1, photos: ['cover.jpg', 'other.jpg']),
+          ]),
+        );
+
+        final image = tester.widget<Image>(
+          find.descendant(
+            of: find.byType(ProductCard),
+            matching: find.byType(Image),
+          ),
+        );
+        expect((image.image as ResizeImage).imageProvider, isA<NetworkImage>());
+        final provider =
+            (image.image as ResizeImage).imageProvider as NetworkImage;
+        expect(provider.url, '${EndPoints.baseUrl}/uploads/cover.jpg');
+      });
+
+      testWidgets('a product without photos shows the placeholder', (
+        tester,
+      ) async {
+        await pump(tester);
+        await show(tester, ProductsLoadedState([_product(1)]));
+
+        expect(
+          find.descendant(
+            of: find.byType(ProductCard),
+            matching: find.byType(Image),
+          ),
+          findsNothing,
+        );
+        expect(find.byIcon(Icons.image_outlined), findsOneWidget);
+      });
+
+      testWidgets('a photo that fails to load falls back to the placeholder', (
+        tester,
+      ) async {
+        await pump(tester);
+        await show(
+          tester,
+          ProductsLoadedState([
+            _product(1, photos: ['broken.jpg']),
+          ]),
+        );
+        // Let the (blocked) test HTTP request fail.
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 100)),
+        );
+        await tester.pump();
+
+        expect(find.byIcon(Icons.image_outlined), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      });
     });
 
     group('edit and delete', () {

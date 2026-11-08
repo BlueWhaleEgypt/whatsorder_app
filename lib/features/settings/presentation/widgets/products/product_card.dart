@@ -46,7 +46,7 @@ class ProductCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _Thumbnail(color: tileColor),
+          _Thumbnail(color: tileColor, photoUrl: product.coverPhotoUrl),
           const SizedBox(width: 12),
           Expanded(child: _Details(product: product)),
           const SizedBox(width: 8),
@@ -58,24 +58,43 @@ class ProductCard extends StatelessWidget {
 }
 
 class _Thumbnail extends StatelessWidget {
-  final Color color;
+  static const double _size = 44;
+  static const _radius = BorderRadius.all(Radius.circular(10));
+  static const _placeholder = Icon(
+    Icons.image_outlined,
+    size: 20,
+    color: AppColors.textGrey,
+  );
 
-  const _Thumbnail({required this.color});
+  final Color color;
+  final String? photoUrl;
+
+  const _Thumbnail({required this.color, required this.photoUrl});
 
   @override
   Widget build(BuildContext context) {
+    final url = photoUrl;
     return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: const Icon(
-        Icons.image_outlined,
-        size: 20,
-        color: AppColors.textGrey,
-      ),
+      width: _size,
+      height: _size,
+      decoration: BoxDecoration(color: color, borderRadius: _radius),
+      child: url == null
+          ? _placeholder
+          : ClipRRect(
+              borderRadius: _radius,
+              child: Image.network(
+                url,
+                fit: BoxFit.cover,
+                // Decode at thumbnail size instead of the full photo.
+                cacheWidth: (_size * MediaQuery.devicePixelRatioOf(context))
+                    .round(),
+                // The tinted tile shows until the photo arrives, and stays
+                // if it can't be loaded.
+                loadingBuilder: (_, child, progress) =>
+                    progress == null ? child : _placeholder,
+                errorBuilder: (_, _, _) => _placeholder,
+              ),
+            ),
     );
   }
 }

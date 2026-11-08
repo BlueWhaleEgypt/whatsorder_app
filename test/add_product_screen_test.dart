@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:whats_order/core/cache/cache_keys.dart';
+import 'package:whats_order/core/network/end_points.dart';
 import 'package:whats_order/core/widgets/gradient_button.dart';
 import 'package:whats_order/features/auth/sign_up/data/sector_model.dart';
 import 'package:whats_order/features/auth/sign_up/presentation/cubit/onboarding_cubit.dart';
@@ -118,6 +119,60 @@ void main() {
 
       c.removeAt(0);
       expect(c.showError, isTrue);
+    });
+
+    test('existing photos count toward the limit', () {
+      final c = ProductPhotosController(
+        isRequired: false,
+        existingPhotos: [for (var i = 0; i < 6; i++) 'p$i.jpg'],
+      );
+      expect(c.remaining, 2);
+      expect(c.totalCount, 6);
+
+      c.add([for (var i = 0; i < 5; i++) _photo(i)]);
+      expect(c.photos, hasLength(2));
+      expect(c.canAddMore, isFalse);
+
+      expect(
+        ProductPhotosController(
+          existingPhotos: [for (var i = 0; i < 20; i++) 'p$i.jpg'],
+        ).remaining,
+        0,
+        reason: 'never negative',
+      );
+    });
+
+    test('removing an existing photo frees a slot and marks a change', () {
+      final c = ProductPhotosController(existingPhotos: ['a.jpg', 'b.jpg']);
+      expect(c.hasChanges, isFalse);
+
+      c.removeExistingAt(9);
+      c.removeExistingAt(-1);
+      expect(c.existingPhotos, ['a.jpg', 'b.jpg']);
+      expect(c.hasChanges, isFalse);
+
+      c.removeExistingAt(0);
+      expect(c.existingPhotos, ['b.jpg']);
+      expect(c.hasChanges, isTrue);
+      expect(c.remaining, ProductPhotosController.maxPhotos - 1);
+    });
+
+    test('adding a photo is a change too', () {
+      final c = ProductPhotosController(existingPhotos: ['a.jpg']);
+      c.add([_photo(1)]);
+      expect(c.hasChanges, isTrue);
+    });
+
+    test('existing photos satisfy the requirement; none left does not', () {
+      final c = ProductPhotosController(existingPhotos: ['a.jpg']);
+      expect(c.validate(), isTrue);
+
+      c.removeExistingAt(0);
+      expect(c.showError, isTrue);
+      expect(c.validate(), isFalse);
+
+      c.add([_photo(1)]);
+      expect(c.validate(), isTrue);
     });
 
     test('when optional, never errors and always validates', () {
@@ -516,6 +571,166 @@ void main() {
         sectorId: 's2',
         sectorName: 'Bakery',
       );
+
+      ProductModel withPhotos(List<String> photos) => ProductModel(
+        id: 'prod-9',
+        name: 'Tea',
+        price: 50,
+        deliveryTime: '5',
+        note: 'Black tea',
+        sectorId: 's2',
+        sectorName: 'Bakery',
+        photos: photos,
+      );
+
+      List<String> shownUrls(WidgetTester tester) => [
+        for (final image in tester.widgetList<Image>(find.byType(Image)))
+          if (image.image is ResizeImage &&
+              (image.image as ResizeImage).imageProvider is NetworkImage)
+            ((image.image as ResizeImage).imageProvider as NetworkImage).url,
+      ];
+
+      testWidgets('shows the existing photos, the first one as cover', (
+        tester,
+      ) async {
+        await pump(tester, product: withPhotos(['a.jpg', 'b b.jpg']));
+
+        expect(shownUrls(tester), [
+          '${EndPoints.baseUrl}/uploads/a.jpg',
+          '${EndPoints.baseUrl}/uploads/${Uri.encodeComponent('b b.jpg')}',
+        ]);
+        expect(find.text('Cover'), findsOneWidget);
+      });
+
+      testWidgets('existing photos can be removed, the next becomes cover', (
+        tester,
+      ) async {
+        await pump(tester, product: withPhotos(['a.jpg', 'b.jpg']));
+        expect(find.byIcon(Icons.close), findsNWidgets(2));
+
+        await tester.tap(find.byIcon(Icons.close).first);
+        await tester.pump();
+
+        expect(shownUrls(tester), ['${EndPoints.baseUrl}/uploads/b.jpg']);
+        expect(find.text('Cover'), findsOneWidget);
+      });
+
+      testWidgets('new photos are added after the existing ones', (
+        tester,
+      ) async {
+        await pump(tester, product: withPhotos(['a.jpg']));
+        await addPhotos(tester, [_photo(1)]);
+
+        expect(find.byType(Image), findsNWidgets(2));
+        expect(shownUrls(tester), hasLength(1));
+        expect(find.byIcon(Icons.close), findsNWidgets(2));
+        expect(find.text('Cover'), findsOneWidget);
+
+        // The new photo is the last tile; removing it leaves the existing one.
+        await tester.tap(find.byIcon(Icons.close).last);
+        await tester.pump();
+        expect(find.byType(Image), findsOneWidget);
+        expect(shownUrls(tester), hasLength(1));
+      });
+
+      testWidgets('existing photos count toward the 8-photo limit', (
+        tester,
+      ) async {
+        await pump(
+          tester,
+          product: withPhotos([for (var i = 0; i < 6; i++) 'p$i.jpg']),
+        );
+        await addPhotos(tester, [for (var i = 0; i < 5; i++) _photo(i)]);
+
+        expect(find.byType(Image), findsNWidgets(8));
+        expect(find.text('Add photos'), findsNothing);
+      });
+
+      testWidgets('unchanged photos are not sent at all', (tester) async {
+        await pump(tester, product: withPhotos(['a.jpg', 'b.jpg']));
+        await submit(tester);
+
+        final sent =
+            (bloc.events.single as SubmitUpdateProductEvent).request.product;
+        expect(sent.keptPhotoFileNames, isEmpty);
+        expect(sent.photoPaths, isEmpty);
+      });
+
+      testWidgets('adding a photo sends the kept ones plus the new one', (
+        tester,
+      ) async {
+        await pump(tester, product: withPhotos(['a.jpg', 'b.jpg']));
+        await addPhotos(tester, [_photo(3)]);
+        await submit(tester);
+
+        final sent =
+            (bloc.events.single as SubmitUpdateProductEvent).request.product;
+        expect(sent.keptPhotoFileNames, ['a.jpg', 'b.jpg']);
+        expect(sent.photoPaths, [_photo(3).path]);
+      });
+
+      testWidgets('removing a photo sends only the ones that remain', (
+        tester,
+      ) async {
+        await pump(tester, product: withPhotos(['a.jpg', 'b.jpg', 'c.jpg']));
+        await tester.tap(find.byIcon(Icons.close).at(1));
+        await tester.pump();
+        await submit(tester);
+
+        final sent =
+            (bloc.events.single as SubmitUpdateProductEvent).request.product;
+        expect(sent.keptPhotoFileNames, ['a.jpg', 'c.jpg']);
+        expect(sent.photoPaths, isEmpty);
+      });
+
+      testWidgets('replacing every photo sends only the new ones', (
+        tester,
+      ) async {
+        await pump(tester, product: withPhotos(['a.jpg', 'b.jpg']));
+        await tester.tap(find.byIcon(Icons.close).first);
+        await tester.pump();
+        await tester.tap(find.byIcon(Icons.close).first);
+        await tester.pump();
+        await addPhotos(tester, [_photo(5)]);
+        await submit(tester);
+
+        final sent =
+            (bloc.events.single as SubmitUpdateProductEvent).request.product;
+        expect(sent.keptPhotoFileNames, isEmpty);
+        expect(sent.photoPaths, [_photo(5).path]);
+      });
+
+      testWidgets('a product with photos cannot be saved with none', (
+        tester,
+      ) async {
+        await pump(tester, product: withPhotos(['a.jpg']));
+        await tester.tap(find.byIcon(Icons.close).first);
+        await tester.pump();
+        await submit(tester);
+
+        expect(find.text('Add at least one product photo'), findsOneWidget);
+        expect(bloc.events, isEmpty);
+      });
+
+      testWidgets('removing a photo at the limit makes room to add again', (
+        tester,
+      ) async {
+        await pump(
+          tester,
+          product: withPhotos([for (var i = 0; i < 8; i++) 'p$i.jpg']),
+        );
+        expect(find.text('Add photos'), findsNothing);
+
+        await tester.tap(find.byIcon(Icons.close).first);
+        await tester.pump();
+        expect(find.text('Add photos'), findsOneWidget);
+      });
+
+      testWidgets('a product without photos shows no images', (tester) async {
+        await pump(tester, product: product);
+        expect(find.byType(Image), findsNothing);
+        expect(find.text('Add photos'), findsOneWidget);
+      });
 
       testWidgets('is titled and labelled for editing', (tester) async {
         await pump(tester, product: product);
