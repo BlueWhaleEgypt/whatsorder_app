@@ -213,8 +213,9 @@ void main() {
         await pump(tester);
         await submit(tester);
 
-        // name, category, price, delivery time, description
-        expect(find.text('This field is required'), findsNWidgets(5));
+        // name, price, delivery time, description (the category is reported
+        // with a snackbar instead of an inline error).
+        expect(find.text('This field is required'), findsNWidgets(4));
         expect(find.text('Add at least one product photo'), findsOneWidget);
         expect(bloc.submits, isEmpty);
       });
@@ -249,8 +250,16 @@ void main() {
         await enter(tester, 2, '2');
         await enter(tester, 3, 'x');
         await submit(tester);
+        await tester.pump(const Duration(milliseconds: 100));
 
-        expect(find.text('This field is required'), findsOneWidget);
+        // No inline errors: the missing category is shown in a snackbar.
+        expect(
+          find.descendant(
+            of: find.byType(SnackBar),
+            matching: find.text('This field is required'),
+          ),
+          findsOneWidget,
+        );
         expect(bloc.submits, isEmpty);
       });
 
@@ -491,7 +500,7 @@ void main() {
         Directionality.of(tester.element(find.byType(GradientButton))),
         TextDirection.rtl,
       );
-      expect(find.text('هذا الحقل مطلوب'), findsNWidgets(5));
+      expect(find.text('هذا الحقل مطلوب'), findsNWidgets(4));
       expect(tester.takeException(), isNull);
     });
   });

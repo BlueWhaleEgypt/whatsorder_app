@@ -9,7 +9,9 @@ import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/core/utils/logger.dart';
 import 'package:whats_order/core/utils/price_formatter.dart';
 import 'package:whats_order/core/widgets/gradient_button.dart';
+import 'package:whats_order/core/widgets/sector_dropdown.dart';
 import 'package:whats_order/features/auth/sign_up/presentation/cubit/onboarding_cubit.dart';
+import 'package:whats_order/features/auth/sign_up/presentation/cubit/onboarding_state.dart';
 import 'package:whats_order/features/settings/data/product/add_product_request.dart';
 import 'package:whats_order/features/settings/presentation/bloc/add_product_bloc.dart';
 import 'package:whats_order/features/settings/presentation/bloc/event/add_product_event.dart';
@@ -18,7 +20,6 @@ import 'package:whats_order/features/settings/presentation/utils/add_product_for
 import 'package:whats_order/features/settings/presentation/utils/product_photos_controller.dart';
 import 'package:whats_order/features/settings/presentation/widgets/add_product/product_form_field.dart';
 import 'package:whats_order/features/settings/presentation/widgets/add_product/product_photos_picker.dart';
-import 'package:whats_order/features/settings/presentation/widgets/add_product/product_sector_dropdown.dart';
 import 'package:whats_order/injection/injection_container.dart';
 
 /*
@@ -116,6 +117,10 @@ class _AddProductViewState extends State<_AddProductView> {
     final formValid = _formKey.currentState!.validate();
     final photosValid = _photos.validate();
     if (!formValid || !photosValid) return;
+    if (_sectorId == null) {
+      _snack(context.tr('field_required'));
+      return;
+    }
 
     final vendorId =
         CacheHelper.getDataFromSharedPreference(
@@ -164,9 +169,6 @@ class _AddProductViewState extends State<_AddProductView> {
       ? context.tr('field_required')
       : null;
 
-  String? _validateSector(String? value) =>
-      value == null ? context.tr('field_required') : null;
-
   @override
   Widget build(BuildContext context) {
     return BlocListener<AddProductBloc, AddProductState>(
@@ -195,9 +197,19 @@ class _AddProductViewState extends State<_AddProductView> {
                 validator: _validateRequired,
               ),
               _fieldSpacing,
-              ProductSectorDropdown(
-                onChanged: (value) => _sectorId = value,
-                validator: _validateSector,
+              BlocBuilder<OnboardingCubit, OnboardingState>(
+                buildWhen: (previous, current) =>
+                    previous.sectors != current.sectors ||
+                    previous.sectorsLoading != current.sectorsLoading ||
+                    previous.sectorsError != current.sectorsError,
+                builder: (context, state) => SectorDropdown(
+                  sectors: state.sectors,
+                  loading: state.sectorsLoading,
+                  error: state.sectorsError,
+                  value: _sectorId,
+                  onChanged: (v) => setState(() => _sectorId = v),
+                  onRetry: () => context.read<OnboardingCubit>().loadSectors(),
+                ),
               ),
               _fieldSpacing,
               Row(

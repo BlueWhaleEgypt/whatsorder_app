@@ -29,7 +29,7 @@ class DashedUploadBox extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
       child: CustomPaint(
-        painter: _DashedBorderPainter(
+        painter: DashedBorderPainter(
           color: AppColors.primaryGreen,
           radius: 14,
         ),
@@ -79,13 +79,13 @@ class DashedUploadBox extends StatelessWidget {
   }
 }
 
-class _DashedBorderPainter extends CustomPainter {
+class DashedBorderPainter extends CustomPainter {
   final Color color;
   final double radius;
   final double dashWidth;
   final double dashGap;
 
-  _DashedBorderPainter({
+  DashedBorderPainter({
     required this.color,
     this.radius = 14,
     this.dashWidth = 6,
