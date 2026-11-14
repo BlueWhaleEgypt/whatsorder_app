@@ -89,20 +89,20 @@ class OrdersResponse extends Equatable implements BaseRepository {
       }
 
       final response = await DioHelper.getData(url: url, query: query);
-      // logger.i("<<<<<<<<<<< Response >>>>>>>>> ${response.data}");
+      logger.i("<<<<<<<<<<< Response >>>>>>>>> ${response.data}");
       if (response.statusCode == 200) {
         final ordersResponse = OrdersResponse.fromJson(response.data);
         // logger.i(response.data);
-        if (ordersResponse.orders.isNotEmpty) {
-          await CacheHelper.saveDataSharedPreference(
-            key: CacheKeys.vendorId,
-            value: ordersResponse.orders.first.vendorId ?? '',
-          );
+        // if (ordersResponse.orders.isNotEmpty) {
+        // await CacheHelper.saveDataSharedPreference(
+        //  key: CacheKeys.vendorId,
+        // value: ordersResponse.orders.first.vendorId ?? '',
+        // );
 
-          logger.i(
-            "Vendor ID Saved => ${ordersResponse.orders.first.vendorId}",
-          );
-        }
+        // logger.i(
+        //   "Vendor ID Saved => ${ordersResponse.orders.first.vendorId}",
+        // );
+        //}
 
         return Right(ordersResponse);
       }
