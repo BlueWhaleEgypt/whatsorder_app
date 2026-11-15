@@ -279,7 +279,7 @@ const Map<String, Map<String, String>> kTranslations = {
     "invalid_coordinates": "Enter valid coordinates",
     "invalid_number": "Enter a valid number",
     "required_field": "This field is required",
-    "edit": "Edit",
+    "edit": "EDIT",
     "delete": "Delete",
     "add": "Add",
     "save": "Save",

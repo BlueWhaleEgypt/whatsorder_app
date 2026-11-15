@@ -7,7 +7,6 @@ import 'package:whats_order/base/base_repository.dart';
 import 'package:whats_order/core/error/failures.dart';
 import 'package:whats_order/core/network/dio_helper.dart';
 import 'package:whats_order/core/network/end_points.dart';
-import 'package:whats_order/core/utils/logger.dart';
 
 import 'update_profile_request.dart';
 
@@ -54,7 +53,7 @@ class UpdateProfileResponse implements BaseRepository {
             MapEntry(fieldName, await MultipartFile.fromFile(newFile.path)),
           );
 
-          logger.w('$fieldName: using newly selected file');
+          // logger.w('$fieldName: using newly selected file');
           continue;
         }
 
@@ -62,7 +61,7 @@ class UpdateProfileResponse implements BaseRepository {
 
         // No previous image exists for this field.
         if (oldFileName == null || oldFileName.isEmpty) {
-          logger.w('$fieldName: no existing file');
+          // logger.w('$fieldName: no existing file');
           continue;
         }
 
@@ -97,28 +96,28 @@ class UpdateProfileResponse implements BaseRepository {
           ),
         );
 
-        logger.w('$fieldName: reusing existing file $oldFileName');
+        // logger.w('$fieldName: reusing existing file $oldFileName');
       }
 
       final url =
           '${EndPoints.baseUrl}/api/auth/updateProfile/'
           '${request.userId}';
 
-      logger.w('========== UPDATE PROFILE REQUEST ==========');
-      logger.w('URL: $url');
+      // logger.w('========== UPDATE PROFILE REQUEST ==========');
+      // logger.w('URL: $url');
 
-      logger.w('========== REQUEST FIELDS ==========');
-      for (final field in formData.fields) {
-        logger.w('${field.key}: ${field.value}');
-      }
+      // logger.w('========== REQUEST FIELDS ==========');
+      // for (final field in formData.fields) {
+      //   logger.w('${field.key}: ${field.value}');
+      // }
 
-      logger.w('========== REQUEST FILES ==========');
-      for (final entry in formData.files) {
-        logger.w(
-          'Field: ${entry.key} | '
-          'Filename: ${entry.value.filename}',
-        );
-      }
+      // logger.w('========== REQUEST FILES ==========');
+      // for (final entry in formData.files) {
+      //   logger.w(
+      //     'Field: ${entry.key} | '
+      //     'Filename: ${entry.value.filename}',
+      //   );
+      // }
 
       final response = await DioHelper.putData(
         url: url,
@@ -127,9 +126,9 @@ class UpdateProfileResponse implements BaseRepository {
 
       final data = response.data;
 
-      logger.w('========== UPDATE PROFILE RESPONSE ==========');
-      logger.w('Status Code: ${response.statusCode}');
-      logger.w('Response Data: $data');
+      // logger.w('========== UPDATE PROFILE RESPONSE ==========');
+      // logger.w('Status Code: ${response.statusCode}');
+      // logger.w('Response Data: $data');
 
       if (response.statusCode != null &&
           response.statusCode! >= 200 &&
@@ -146,19 +145,19 @@ class UpdateProfileResponse implements BaseRepository {
     } on DioException catch (e) {
       final responseData = e.response?.data;
 
-      logger.e('========== UPDATE PROFILE ERROR ==========');
-      logger.e('Status Code: ${e.response?.statusCode}');
-      logger.e('Response Data: $responseData');
-      logger.e('Error: ${e.message}');
+      // logger.e('========== UPDATE PROFILE ERROR ==========');
+      // logger.e('Status Code: ${e.response?.statusCode}');
+      // logger.e('Response Data: $responseData');
+      // logger.e('Error: ${e.message}');
 
       final message = responseData is Map
           ? responseData['message']?.toString()
           : null;
 
       return Left(ServerFailure(message ?? 'profile_update_failed'));
-    } catch (e, stackTrace) {
-      logger.e('Update profile exception: $e');
-      logger.e('Stack trace: $stackTrace');
+    } catch (e) {
+      // logger.e('Update profile exception: $e');
+      // logger.e('Stack trace: $stackTrace');
 
       return const Left(ServerFailure('something_went_wrong'));
     } finally {
