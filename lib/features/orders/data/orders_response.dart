@@ -89,7 +89,7 @@ class OrdersResponse extends Equatable implements BaseRepository {
       }
 
       final response = await DioHelper.getData(url: url, query: query);
-      logger.i("<<<<<<<<<<< Response >>>>>>>>> ${response.data}");
+      // logger.i("<<<<<<<<<<< Response >>>>>>>>> ${response.data}");
       if (response.statusCode == 200) {
         final ordersResponse = OrdersResponse.fromJson(response.data);
         // logger.i(response.data);

@@ -64,12 +64,18 @@ class SignInResponse extends Equatable implements BaseRepository {
         body: signInRequest.toJson(),
       );
 
-      logger.i("<<<<<<<<<<< SignIn >>>>>>>>> ${response.data.toString()}");
+      // logger.i("<<<<<<<<<<< SignIn >>>>>>>>> ${response.data.toString()}");
 
       if (response.data is Map<String, dynamic> &&
           response.data['message'] != null &&
           (response.statusCode != 200 && response.statusCode != 201)) {
         return Left(ServerFailure(response.data['message']));
+      }
+      // Check if phone is not verified.
+      if (response.data is Map<String, dynamic> &&
+          response.data['message'] == 'User phone not verified yet') {
+        logger.w("<<<<<<<<<<< SignIn >>>>>>>>> User phone not verified yet");
+        return const Left(ServerFailure('User phone not verified yet'));
       }
 
       if (response.statusCode == 200 || response.statusCode == 201) {

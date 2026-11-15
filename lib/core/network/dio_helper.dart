@@ -3,7 +3,6 @@ import '../cache/cache_helper.dart';
 import '../cache/cache_keys.dart';
 import '../routing/named_routes.dart';
 import '../utils/navigation_helper.dart';
-import '../utils/logger.dart';
 import 'end_points.dart';
 
 /*
@@ -131,7 +130,7 @@ class DioHelper {
     Map<String, dynamic>? query,
     String? token,
   }) async {
-    logger.i("$url");
+    // logger.i("$url");
     dio.options.headers = {
       'Accept': 'application/json',
       'Content-Type': 'application/json',

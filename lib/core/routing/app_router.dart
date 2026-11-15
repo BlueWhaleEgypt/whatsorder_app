@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whats_order/features/auth/otp/presentation/bloc/otp_bloc.dart';
 import 'package:whats_order/features/auth/otp/presentation/screens/forgot_password_screen.dart';
 import 'package:whats_order/features/auth/otp/presentation/screens/verify_otp_screen.dart';
+import 'package:whats_order/features/auth/sign_in/presentation/bloc/sign_in_bloc.dart';
 import 'package:whats_order/features/auth/sign_up/presentation/cubit/onboarding_cubit.dart';
 import 'package:whats_order/features/auth/sign_up/presentation/screens/onboarding_screen.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_bloc.dart';
@@ -45,7 +46,16 @@ class AppRouter {
       case NamedRoutes.splash:
         return MaterialPageRoute(builder: (_) => const SplashScreen());
       case NamedRoutes.signin:
-        return MaterialPageRoute(builder: (_) => const SignInScreen());
+        return MaterialPageRoute(
+          builder: (_) => MultiBlocProvider(
+            providers: [
+              BlocProvider<OtpBloc>(create: (_) => sl<OtpBloc>()),
+              BlocProvider<SignInBloc>(create: (_) => sl<SignInBloc>()),
+            ],
+            child: const SignInScreen(),
+          ),
+
+        );
       case NamedRoutes.signup:
         return MaterialPageRoute(builder: (_) => const SignUpScreen());
       case NamedRoutes.onboarding:

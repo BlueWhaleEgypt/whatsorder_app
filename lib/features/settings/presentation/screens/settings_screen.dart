@@ -132,6 +132,12 @@ class _SettingsView extends StatelessWidget {
                     ),
                   ),
                   label: context.tr('store_profile'),
+                  onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Coming soon"),
+                      backgroundColor: AppColors.primaryGreenTint,
+                    ),
+                  ),
                 ),
 
                 /// products
@@ -277,7 +283,7 @@ class _SettingsView extends StatelessWidget {
             const SizedBox(height: 20),
 
             Text(
-              "v1.2.3+15",
+              "v1.2.4+16",
               style: AppTextStyles.cellMuted13.copyWith(
                 color: AppColors.textGrey,
               ),

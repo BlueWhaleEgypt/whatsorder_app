@@ -231,7 +231,7 @@ class _ProductsViewState extends State<_ProductsView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ProductsHeader(
-                        productsCount: listing.totalCount,
+                        // productsCount: listing.totalCount,
                         onAddProduct: _openProductForm,
                       ),
                       const SizedBox(height: 16),

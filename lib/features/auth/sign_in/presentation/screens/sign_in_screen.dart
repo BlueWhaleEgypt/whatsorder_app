@@ -5,12 +5,14 @@ import 'package:whats_order/core/cache/cache_helper.dart';
 import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/constants/app_assets.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
+import 'package:whats_order/core/utils/logger.dart';
 import 'package:whats_order/core/utils/phone_utils.dart';
 import 'package:whats_order/core/widgets/gradient_button.dart';
 import 'package:whats_order/core/widgets/top_bar_pills.dart';
+import 'package:whats_order/features/auth/otp/presentation/bloc/otp_bloc.dart';
+import 'package:whats_order/features/auth/otp/presentation/bloc/otp_event.dart';
 import '../../../../../core/routing/named_routes.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../../../../../injection/injection_container.dart';
 import '../../data/sign_in_request.dart';
 import '../bloc/sign_in_bloc.dart';
 import '../bloc/sign_in_event.dart';
@@ -50,7 +52,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
-  late final SignInBloc _bloc = sl<SignInBloc>();
+  // late final SignInBloc _bloc = sl<SignInBloc>();
 
   bool rememberMe = false;
 
@@ -67,7 +69,7 @@ class _SignInScreenState extends State<SignInScreen> {
   void dispose() {
     _phoneController.dispose();
     _passwordController.dispose();
-    _bloc.close();
+    // _bloc.close();
     super.dispose();
   }
 
@@ -120,7 +122,7 @@ class _SignInScreenState extends State<SignInScreen> {
   // ───────────────────────── Actions ─────────────────────────
 
   Future<void> _submit() async {
-    if (_submitting || _bloc.state is LoadingSignInState) return;
+    if (_submitting || context.read<SignInBloc>().state is LoadingSignInState) return;
     if (!_formKey.currentState!.validate()) return;
 
     final phone = normalizePhone(_phoneController.text);
@@ -131,7 +133,7 @@ class _SignInScreenState extends State<SignInScreen> {
       final fcmToken = await widget.fcmTokenProvider() ?? '';
       if (!mounted) return;
 
-      _bloc.add(
+      context.read<SignInBloc>().add(
         LoginEvent(
           request: SignInRequest(
             phone: phone,
@@ -170,138 +172,148 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _bloc,
-      child: Scaffold(
-        backgroundColor: AppColors.scaffoldBg,
-        body: SafeArea(
-          child: BlocConsumer<SignInBloc, SignInState>(
-            listener: (context, state) {
-              if (state is LoadedSignInState) _onLoggedIn();
-              if (state is ErrorSignInState) {
-                ScaffoldMessenger.of(
+    return Scaffold(
+      backgroundColor: AppColors.scaffoldBg,
+      body: SafeArea(
+        child: BlocConsumer<SignInBloc, SignInState>(
+          listener: (context, state) {
+            if (state is LoadedSignInState) _onLoggedIn();
+            if (state is ErrorSignInState) {
+              logger.i("SignIn error: ${state.message}");
+              if (state.message == 'User phone not verified yet') {
+                context.read<OtpBloc>().add(
+                  SendOtpEvent(normalizePhone(_phoneController.text)),
+                );
+    
+                Navigator.pushNamed(
                   context,
-                ).showSnackBar(SnackBar(content: Text(state.message)));
+                  NamedRoutes.verifyOtp,
+                  arguments: normalizePhone(_phoneController.text),
+                );
+                return;
               }
-            },
-            builder: (context, state) {
-              final isLoading = state is LoadingSignInState;
-              return LayoutBuilder(
-                builder: (context, constraints) => SingleChildScrollView(
-                  keyboardDismissBehavior:
-                      ScrollViewKeyboardDismissBehavior.onDrag,
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 440),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const TopBarPills(),
-                            const SizedBox(height: 30),
-                            const SignInWelcomeHero(),
-                            const SizedBox(height: 20),
-                            // One card for the whole form so the fields,
-                            // options and action read as a single unit.
-                            Container(
-                              padding: const EdgeInsets.fromLTRB(
-                                18,
-                                20,
-                                18,
-                                18,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: AppColors.border),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: AppColors.shadow,
-                                    blurRadius: 16,
-                                    offset: Offset(0, 6),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  SignInPhoneField(
-                                    controller: _phoneController,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  SignInPasswordField(
-                                    controller: _passwordController,
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: RememberMeRow(
-                                          value: rememberMe,
-                                          onChanged: (v) =>
-                                              setState(() => rememberMe = v),
-                                        ),
-                                      ),
-                                      Flexible(
-                                        child: ForgotPasswordLink(
-                                          onTap: _openForgotPassword,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 14),
-                                  GradientButton(
-                                    label: context.tr('sign_in'),
-                                    loading: isLoading,
-                                    onPressed: _submit,
-                                  ),
-                                ],
-                              ),
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.message)));
+            }
+          },
+          builder: (context, state) {
+            final isLoading = state is LoadingSignInState;
+            return LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 440),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const TopBarPills(),
+                          const SizedBox(height: 30),
+                          const SignInWelcomeHero(),
+                          const SizedBox(height: 20),
+                          // One card for the whole form so the fields,
+                          // options and action read as a single unit.
+                          Container(
+                            padding: const EdgeInsets.fromLTRB(
+                              18,
+                              20,
+                              18,
+                              18,
                             ),
-                            const SizedBox(height: 18),
-                            SignInFooter(
-                              onSignUp: () => Navigator.of(
-                                context,
-                              ).pushReplacementNamed(NamedRoutes.signup),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: AppColors.border),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: AppColors.shadow,
+                                  blurRadius: 16,
+                                  offset: Offset(0, 6),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 22),
-                            IntrinsicHeight(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Expanded(
-                                    child: SignInInfoChip(
-                                      icon: AppAssets.safe,
-                                      title: context.tr('secure_platform'),
-                                      subtitle: context.tr(
-                                        'secure_platform_desc',
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                SignInPhoneField(
+                                  controller: _phoneController,
+                                ),
+                                const SizedBox(height: 16),
+                                SignInPasswordField(
+                                  controller: _passwordController,
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: RememberMeRow(
+                                        value: rememberMe,
+                                        onChanged: (v) =>
+                                            setState(() => rememberMe = v),
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: SignInInfoChip(
-                                      icon: AppAssets.fast,
-                                      title: context.tr('fast_delivery'),
-                                      subtitle: context.tr(
-                                        'fast_delivery_desc',
+                                    Flexible(
+                                      child: ForgotPasswordLink(
+                                        onTap: _openForgotPassword,
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                  ],
+                                ),
+                                const SizedBox(height: 14),
+                                GradientButton(
+                                  label: context.tr('sign_in'),
+                                  loading: isLoading,
+                                  onPressed: _submit,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 18),
+                          SignInFooter(
+                            onSignUp: () => Navigator.of(
+                              context,
+                            ).pushReplacementNamed(NamedRoutes.signup),
+                          ),
+                          const SizedBox(height: 22),
+                          IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Expanded(
+                                  child: SignInInfoChip(
+                                    icon: AppAssets.safe,
+                                    title: context.tr('secure_platform'),
+                                    subtitle: context.tr(
+                                      'secure_platform_desc',
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: SignInInfoChip(
+                                    icon: AppAssets.fast,
+                                    title: context.tr('fast_delivery'),
+                                    subtitle: context.tr(
+                                      'fast_delivery_desc',
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

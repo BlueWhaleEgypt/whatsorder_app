@@ -6,6 +6,7 @@ import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/routing/named_routes.dart';
 import 'package:whats_order/core/theme/app_colors.dart';
+import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/core/widgets/gradient_button.dart';
 import 'package:whats_order/features/auth/otp/presentation/bloc/otp_bloc.dart';
 import 'package:whats_order/features/auth/otp/presentation/bloc/otp_event.dart';
@@ -68,19 +69,12 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
         return Scaffold(
           backgroundColor: AppColors.scaffoldBg,
           appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            centerTitle: true,
             title: Text(
               context.tr('fp_otp_title'),
-              style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textDark,
-              ),
+              style: AppTextStyles.heading18,
             ),
           ),
+
           body: SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) => SingleChildScrollView(
