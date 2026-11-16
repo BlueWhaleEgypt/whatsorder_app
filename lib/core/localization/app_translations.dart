@@ -294,7 +294,7 @@ const Map<String, Map<String, String>> kTranslations = {
     "not_verified": "Not verified",
     "activation_status": "Activation Status",
     "active": "Active",
-    "inactive": "Inactive",
+    "inactive": "Inactive ,contact the support with 01556132000",
     "whatsapp_notifications": "WhatsApp Notifications",
     "enabled": "Enabled",
     "disabled": "Disabled",
@@ -386,7 +386,11 @@ const Map<String, Map<String, String>> kTranslations = {
     'call_customer': 'Call customer',
     'no_phone_in_message': 'No phone number found in this message',
     'cannot_open_dialer': 'Could not open the phone dialer',
-
+    //products
+    'description_hint':
+        'Enter a brief description of the product. This can be anything from its components to its features or any other information.',
+    'delivery_time_hint': 'Enter the time',
+    'product_name_hint': 'Enter the product name',
     // Bottom nav
     'nav_orders': 'Orders',
     'nav_wallet': 'Wallet',
@@ -663,7 +667,7 @@ const Map<String, Map<String, String>> kTranslations = {
     "not_verified": "لم يتم التحقق",
     "activation_status": "حالة التفعيل",
     "active": "نشط",
-    "inactive": "غير نشط",
+    "inactive": "غير نشط ,تواصل مع الدعم على 01556132000",
     "whatsapp_notifications": "إشعارات واتساب",
     "enabled": "مفعّلة",
     "disabled": "معطّلة",
@@ -759,6 +763,11 @@ const Map<String, Map<String, String>> kTranslations = {
     'call_customer': 'اتصل بالعميل',
     'no_phone_in_message': 'لا يوجد رقم هاتف في هذه الرسالة',
     'cannot_open_dialer': 'تعذر فتح تطبيق الاتصال',
+    //products
+    'description_hint':
+        'أدخل وصفًا موجزًا للمنتج. يمكن أن يكون هذا أي شيء من مكوناته إلى ميزاته أو أي معلومات أخرى.',
+    'delivery_time_hint': 'أدخل الوقت',
+    'product_name_hint': 'أدخل اسم المنتج',
 
     // Bottom nav
     'nav_orders': 'الطلبات',

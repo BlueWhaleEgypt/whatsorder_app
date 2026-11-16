@@ -47,12 +47,13 @@ class SectorDropdown extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Text(
-              context.tr('your_sector'),
+              context.tr('your_sector').toUpperCase(),
               style: const TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: 13,
+                fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textGrey,
+                letterSpacing: 0.3,
               ),
             ),
             const SizedBox(width: 4),
@@ -60,7 +61,7 @@ class SectorDropdown extends StatelessWidget {
               '*',
               style: TextStyle(
                 color: AppColors.danger,
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
             ),

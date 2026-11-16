@@ -40,7 +40,9 @@ class ProductsResponse extends Equatable implements BaseRepository {
         url: '${EndPoints.baseUrl}${EndPoints.epVendorProducts}',
         query: {'vendorId': request.vendorId},
       );
-
+      // logger.i(
+      //   'Products API response:\n${AppLogPrinter.formatJson(response.data)}',
+      // );
       final statusCode = response.statusCode ?? 0;
       if (statusCode >= 200 && statusCode < 300 && response.data is Map) {
         return Right(

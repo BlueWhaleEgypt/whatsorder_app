@@ -4,7 +4,6 @@ import '../../../../base/base_repository.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/network/dio_helper.dart';
 import '../../../../core/network/end_points.dart';
-import '../../../../core/utils/logger.dart';
 import 'sector_model.dart';
 
 /*
@@ -33,7 +32,7 @@ class SectorResponse extends Equatable implements BaseRepository {
         query: {'isView': 'true', 'page': '0', 'size': '20'},
       );
 
-      logger.i('<<<<<<<<<< Sectors >>>>>>>>>>>> ${response.data}');
+      // logger.i('<<<<<<<<<< Sectors >>>>>>>>>>>> ${response.data}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final List<dynamic> content =

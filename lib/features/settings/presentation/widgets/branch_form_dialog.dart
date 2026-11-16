@@ -243,8 +243,14 @@ class _BranchFormDialogState extends State<BranchFormDialog> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: _submit,
+
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryGreen,
+                          backgroundColor: const Color.fromARGB(
+                            255,
+                            47,
+                            144,
+                            87,
+                          ),
                           foregroundColor: Colors.white,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(vertical: 14),

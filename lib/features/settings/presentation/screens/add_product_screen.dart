@@ -232,6 +232,7 @@ class _AddProductViewState extends State<_AddProductView> {
               ProductFormField(
                 label: context.tr('product_name'),
                 controller: _name,
+                prefixText: context.tr('product_name_hint'),
                 validator: _validateRequired,
               ),
               _fieldSpacing,
@@ -240,13 +241,47 @@ class _AddProductViewState extends State<_AddProductView> {
                     previous.sectors != current.sectors ||
                     previous.sectorsLoading != current.sectorsLoading ||
                     previous.sectorsError != current.sectorsError,
-                builder: (context, state) => SectorDropdown(
-                  sectors: state.sectors,
-                  loading: state.sectorsLoading,
-                  error: state.sectorsError,
-                  value: _sectorId,
-                  onChanged: (v) => setState(() => _sectorId = v),
-                  onRetry: () => context.read<OnboardingCubit>().loadSectors(),
+                builder: (context, state) => FormField<String>(
+                  initialValue: _sectorId,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return context.tr('field_required');
+                    }
+                    return null;
+                  },
+                  builder: (field) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectorDropdown(
+                          sectors: state.sectors,
+                          loading: state.sectorsLoading,
+                          error: state.sectorsError,
+                          value: field.value,
+                          onChanged: (value) {
+                            field.didChange(value);
+                            setState(() => _sectorId = value);
+                          },
+                          onRetry: () =>
+                              context.read<OnboardingCubit>().loadSectors(),
+                        ),
+
+                        if (field.hasError) ...[
+                          const SizedBox(height: 6),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text(
+                              field.errorText!,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    );
+                  },
                 ),
               ),
               _fieldSpacing,
@@ -269,6 +304,7 @@ class _AddProductViewState extends State<_AddProductView> {
                     child: ProductFormField(
                       label: context.tr('delivery_time'),
                       controller: _delivery,
+                      prefixText: context.tr('delivery_time_hint'),
                       validator: _validateRequired,
                     ),
                   ),
@@ -279,6 +315,7 @@ class _AddProductViewState extends State<_AddProductView> {
                 label: context.tr('description'),
                 controller: _note,
                 maxLines: 4,
+                prefixText: context.tr('description_hint'),
                 validator: _validateRequired,
               ),
               const SizedBox(height: 24),

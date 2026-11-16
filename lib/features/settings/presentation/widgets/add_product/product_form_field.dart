@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:whats_order/features/settings/presentation/widgets/add_product/add_product_input_decoration.dart';
-import 'package:whats_order/features/settings/presentation/widgets/add_product/product_form_label.dart';
-
+import 'package:whats_order/core/widgets/app_text_field.dart';
 /// A labelled text input of the add-product form.
 class ProductFormField extends StatelessWidget {
   final String label;
@@ -26,14 +24,12 @@ class ProductFormField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ProductFormLabel(label),
-        TextFormField(
+        AppTextField(
           controller: controller,
           keyboardType: keyboardType,
           maxLines: maxLines,
-          decoration: prefixText == null
-              ? AddProductInputDecoration.plain
-              : AddProductInputDecoration.withPrefix(prefixText!),
+          label: label,
+          hint: prefixText,
           validator: validator,
         ),
       ],
