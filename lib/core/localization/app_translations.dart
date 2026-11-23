@@ -392,6 +392,7 @@ const Map<String, Map<String, String>> kTranslations = {
         "WhatsOrder sends this when a customer opens your store.",
     "sp_save": "Save changes",
     "sp_saved": "Changes saved",
+    "sp_sectors": "Sectors",
     "sp_days_required": "Select at least one working day",
     "products": "Products",
     "products_summary":
@@ -840,6 +841,7 @@ const Map<String, Map<String, String>> kTranslations = {
     "sp_welcome_hint": "يرسلها WhatsOrder عندما يفتح العميل متجرك.",
     "sp_save": "حفظ التغييرات",
     "sp_saved": "تم حفظ التغييرات",
+    "sp_sectors": "القطاعات",
     "sp_days_required": "اختر يوم عمل واحد على الأقل",
     "products": "المنتجات",
     "products_summary": "{total} منتج · {visible} ظاهر في كتالوج واتساب",

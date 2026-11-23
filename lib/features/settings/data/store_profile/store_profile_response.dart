@@ -27,6 +27,7 @@ class StoreProfile extends Equatable {
   final num deliveryFee;
   final List<String> workingDays; // e.g. SUNDAY
   final List<String> deliveryAreas;
+  final List<String> sectors; // vendor sector names (read-only)
   final bool acceptNewOrders;
   final bool showPrices;
   final bool askForDeliveryAddress;
@@ -46,6 +47,7 @@ class StoreProfile extends Equatable {
     this.deliveryFee = 0,
     this.workingDays = const [],
     this.deliveryAreas = const [],
+    this.sectors = const [],
     this.acceptNewOrders = true,
     this.showPrices = true,
     this.askForDeliveryAddress = true,
@@ -56,6 +58,19 @@ class StoreProfile extends Equatable {
   static String _hhmm(dynamic v, String fallback) {
     final s = v?.toString() ?? '';
     return s.length >= 5 ? s.substring(0, 5) : fallback;
+  }
+
+  /// The server returns no dedicated store address, so fall back to the
+  /// vendor's location fields (building, street, city, state).
+  static String _address(Map<String, dynamic> j) {
+    for (final k in ['storeAddress', 'address']) {
+      final v = j[k]?.toString().trim() ?? '';
+      if (v.isNotEmpty) return v;
+    }
+    return [
+      for (final k in ['building', 'street', 'city', 'state'])
+        if ((j[k]?.toString().trim() ?? '').isNotEmpty) j[k].toString().trim(),
+    ].join('، ');
   }
 
   factory StoreProfile.fromJson(Map<String, dynamic> j) {
@@ -69,7 +84,7 @@ class StoreProfile extends Equatable {
       photo: photo.isEmpty ? null : photo,
       slug: (j['storeSlug'] ?? '').toString(),
       about: (j['storeAbout'] ?? '').toString(),
-      address: (j['street'] ?? '').toString(),
+      address: _address(j),
       opensAt: _hhmm(j['storeOpensAt'], '10:00'),
       closesAt: _hhmm(j['storeClosesAt'], '23:00'),
       deliveryFee: (j['storeDeliveryFee'] as num?) ?? 0,
@@ -80,6 +95,11 @@ class StoreProfile extends Equatable {
       deliveryAreas: [
         for (final a in (j['deliveryAreas'] as List?) ?? const [])
           if (a is Map && a['name'] != null) a['name'].toString(),
+      ],
+      sectors: [
+        for (final x in (j['sectors'] as List?) ?? const [])
+          if (x is Map && (x['name']?.toString().trim() ?? '').isNotEmpty)
+            x['name'].toString().trim(),
       ],
       acceptNewOrders: j['acceptNewOrders'] != false,
       showPrices: j['showPrices'] != false,
@@ -103,6 +123,7 @@ class StoreProfile extends Equatable {
     deliveryFee,
     workingDays,
     deliveryAreas,
+    sectors,
     acceptNewOrders,
     showPrices,
     askForDeliveryAddress,
@@ -125,8 +146,8 @@ class SaveStoreProfileRequest extends StoreProfileRequest {
   const SaveStoreProfileRequest(this.profile, {this.newPhoto});
 }
 
-/// Talks to `GET /api/auth/vendors/{id}`, `PUT /api/auth/storeProfile/{id}`,
-/// `PATCH /api/auth/storeOrdering/{id}` and `PUT /api/auth/deliveryAreas/{id}`.
+/// Talks to `GET /api/auth/vendors/{id}` (load) and
+/// `PUT /api/auth/storeProfile/{id}` (save).
 class StoreProfileResponse extends Equatable implements BaseRepository {
   final StoreProfile? profile;
 
@@ -158,6 +179,9 @@ class StoreProfileResponse extends Equatable implements BaseRepository {
       final res = await DioHelper.getData(
         url: '${EndPoints.baseUrl}${EndPoints.epGetVendorById}/$id',
       );
+      // logger.i(
+      //   'profile store API response:\n${AppLogPrinter.formatJson(res.data)}',
+      // );
       return Right(
         StoreProfileResponse(
           profile: StoreProfile.fromJson(
@@ -203,29 +227,13 @@ class StoreProfileResponse extends Equatable implements BaseRepository {
       );
     }
 
-    await DioHelper.putData(
+    final res = await DioHelper.putData(
       url: '$base${EndPoints.epStoreProfile}/$id',
       formDataOverride: form,
     );
-
-    await DioHelper.patchData(
-      url: '$base${EndPoints.epStoreOrdering}/$id',
-      body: {
-        'acceptNewOrders': p.acceptNewOrders,
-        'showPrices': p.showPrices,
-        'askForDeliveryAddress': p.askForDeliveryAddress,
-        'cashOnDelivery': p.cashOnDelivery,
-        'onlinePayment': p.onlinePayment,
-      },
-    );
-
-    final res = await DioHelper.putJson(
-      url: '$base${EndPoints.epDeliveryAreas}/$id',
-      data: [
-        for (final a in p.deliveryAreas) {'name': a},
-      ],
-    );
-
+    // logger.w(
+    //   'StoreProfile PUT response::\n${AppLogPrinter.formatJson(res.data)}',
+    // );
     return Right(
       StoreProfileResponse(
         profile: res.data is Map

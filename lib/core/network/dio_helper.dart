@@ -125,35 +125,6 @@ class DioHelper {
     );
   }
 
-  static Future<Response> patchData({
-    required String url,
-    Map<String, dynamic>? body,
-    String? token,
-  }) async {
-    dio.options.headers = {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'Authorization':
-          "Bearer ${token ?? CacheHelper.getDataFromSharedPreference(key: CacheKeys.accessToken)}",
-    };
-    return await dio.patch(url, data: body);
-  }
-
-  /// PUT with a raw JSON body (e.g. a top-level array).
-  static Future<Response> putJson({
-    required String url,
-    required Object data,
-    String? token,
-  }) async {
-    dio.options.headers = {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'Authorization':
-          "Bearer ${token ?? CacheHelper.getDataFromSharedPreference(key: CacheKeys.accessToken)}",
-    };
-    return await dio.put(url, data: data);
-  }
-
   static Future<Response> getData({
     required String url,
     Map<String, dynamic>? query,

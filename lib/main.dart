@@ -69,9 +69,9 @@ Future<void> getFirebaseToken() async {
   // Required on iOS and Android 13+
   await messaging.requestPermission(alert: true, badge: true, sound: true);
 
-  final token = await messaging.getToken();
+  //final token = await messaging.getToken();
 
-  logger.w('FCM Token: $token');
+  //logger.w('FCM Token: $token');
 }
 
 class MyApp extends StatelessWidget {

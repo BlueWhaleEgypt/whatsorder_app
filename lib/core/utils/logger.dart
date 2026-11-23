@@ -10,9 +10,9 @@ import 'dart:convert';
 /*
 | لتنظيم سجلات التطبيق بشكل أفضل، يمكن استخدام AppLogPrinter لتنسيق JSON بشكل جميل عند تسجيل الاستجابات من واجهة برمجة التطبيقات.
 |
-|logger.i(
-|  'Products API response:\n${AppLogPrinter.formatJson(response.data)}',
-|);
+logger.i(
+  'Products API response:\n${AppLogPrinter.formatJson(response.data)}',
+);
 */
 
 class AppLogPrinter extends LogPrinter {

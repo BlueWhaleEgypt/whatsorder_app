@@ -7,10 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/network/end_points.dart';
 import 'package:whats_order/features/settings/data/store_profile/store_profile_response.dart';
+import 'package:whats_order/features/settings/presentation/bloc/event/store_profile_event.dart';
+import 'package:whats_order/features/settings/presentation/bloc/states/store_profile_state.dart';
 import 'package:whats_order/features/settings/presentation/bloc/store_profile_bloc.dart';
 import 'package:whats_order/core/theme/app_colors.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
-import 'package:whats_order/core/widgets/dashed_upload_box.dart';
+import 'package:whats_order/core/widgets/app_text_field.dart';
 import 'package:whats_order/core/widgets/gradient_button.dart';
 
 /*
@@ -59,6 +61,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
   TimeOfDay _closesAt = const TimeOfDay(hour: 23, minute: 0);
   final Set<String> _days = {};
   final List<String> _areas = [];
+  List<String> _sectors = const [];
 
   bool _acceptOrders = true;
   bool _showPrices = true;
@@ -101,6 +104,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
     _areas
       ..clear()
       ..addAll(p.deliveryAreas);
+    _sectors = p.sectors;
     _acceptOrders = p.acceptNewOrders;
     _showPrices = p.showPrices;
     _askAddress = p.askForDeliveryAddress;
@@ -134,36 +138,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
     );
     if (t == null) return;
     setState(() => opens ? _opensAt = t : _closesAt = t);
-  }
-
-  Future<void> _addArea() async {
-    final ctrl = TextEditingController();
-    final area = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(ctx.tr('sp_add_area')),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          decoration: InputDecoration(hintText: ctx.tr('sp_area_hint')),
-          onSubmitted: (v) => Navigator.pop(ctx, v),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(ctx.tr('cancel')),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, ctrl.text),
-            child: Text(ctx.tr('sp_add')),
-          ),
-        ],
-      ),
-    );
-    ctrl.dispose();
-    final v = area?.trim() ?? '';
-    if (v.isEmpty || _areas.contains(v)) return;
-    setState(() => _areas.add(v));
   }
 
   void _save() {
@@ -277,39 +251,19 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                         onRemove: () => setState(() => _logo = null),
                       ),
                       const SizedBox(height: 16),
-                      _Field(
+                      AppTextField(
                         label: context.tr('sp_store_name'),
                         required: true,
-                        child: TextFormField(
-                          controller: _name,
-                          validator: _required,
-                          maxLength: 100,
-                          buildCounter:
-                              (
-                                _, {
-                                required currentLength,
-                                required isFocused,
-                                maxLength,
-                              }) => null,
-                          decoration: _decoration(),
-                        ),
+                        controller: _name,
+                        validator: _required,
+                        maxLength: 100,
                       ),
                       const SizedBox(height: 14),
-                      _Field(
+                      AppTextField(
                         label: context.tr('sp_about'),
-                        child: TextFormField(
-                          controller: _about,
-                          maxLines: 4,
-                          maxLength: _maxAbout,
-                          buildCounter:
-                              (
-                                _, {
-                                required currentLength,
-                                required isFocused,
-                                maxLength,
-                              }) => null,
-                          decoration: _decoration(),
-                        ),
+                        controller: _about,
+                        maxLines: 4,
+                        maxLength: _maxAbout,
                       ),
                       const SizedBox(height: 6),
                       Text(
@@ -321,6 +275,20 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                           fontSize: 11.5,
                         ),
                       ),
+                      if (_sectors.isNotEmpty) ...[
+                        const SizedBox(height: 14),
+                        _Field(
+                          label: context.tr('sp_sectors'),
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              for (final name in _sectors)
+                                _Chip(label: name, selected: true),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -330,67 +298,25 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                     title: context.tr('sp_contact'),
                     subtitle: context.tr('sp_contact_sub'),
                     children: [
-                      _Field(
+                      AppTextField(
                         label: context.tr('sp_phone'),
-                        child: TextFormField(
-                          controller: _phone,
-                          readOnly: true,
-                          textDirection: TextDirection.ltr,
-                          decoration: _decoration(
-                            suffix: _verified ? const _VerifiedBadge() : null,
-                          ),
-                        ),
+                        controller: _phone,
+                        enabled: false,
+                        keyboardType: TextInputType.phone,
+                        suffixIcon: _verified ? const _VerifiedBadge() : null,
                       ),
-                      const SizedBox(height: 14),
-                      _Field(
-                        label: context.tr('sp_store_link'),
-                        required: true,
-                        child: TextFormField(
-                          controller: _slug,
-                          validator: _required,
-                          textDirection: TextDirection.ltr,
-                          decoration: _decoration(
-                            prefix: const _Prefix('whatsorder.app/'),
-                            suffix: IconButton(
-                              icon: const Icon(Icons.copy_rounded, size: 18),
-                              color: AppColors.textGrey,
-                              onPressed: () {
-                                Clipboard.setData(
-                                  ClipboardData(
-                                    text: 'whatsorder.app/${_slug.text.trim()}',
-                                  ),
-                                );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(context.tr('sp_copied')),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
+
                       const SizedBox(height: 6),
-                      Text(
-                        context.tr('sp_store_link_hint'),
-                        style: AppTextStyles.cellMuted13.copyWith(
-                          fontSize: 11.5,
-                        ),
-                      ),
+
                       const SizedBox(height: 14),
-                      _Field(
+                      AppTextField(
                         label: context.tr('sp_address'),
-                        required: true,
-                        child: TextFormField(
-                          controller: _address,
-                          validator: _required,
-                          decoration: _decoration(
-                            prefixIcon: const Icon(
-                              Icons.location_on_outlined,
-                              size: 20,
-                              color: AppColors.textGrey,
-                            ),
-                          ),
+                        controller: _address,
+                        enabled: false,
+                        suffixIcon: const Icon(
+                          Icons.location_on_outlined,
+                          size: 20,
+                          color: AppColors.textGrey,
                         ),
                       ),
                       const SizedBox(height: 14),
@@ -425,16 +351,20 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: _Field(
+                            child: AppTextField(
                               label: context.tr('sp_delivery_fee'),
-                              child: TextFormField(
-                                controller: _fee,
-                                keyboardType: TextInputType.number,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                ],
-                                decoration: _decoration(
-                                  prefix: _Prefix(context.tr('sp_egp')),
+                              controller: _fee,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              suffixIcon: Center(
+                                widthFactor: 1,
+                                child: Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                    end: 14,
+                                  ),
+                                  child: _Prefix(context.tr('sp_egp')),
                                 ),
                               ),
                             ),
@@ -461,70 +391,9 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                         ),
                       ),
                       const SizedBox(height: 14),
-                      _Field(
-                        label: context.tr('sp_delivery_areas'),
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            for (final a in _areas)
-                              _Chip(
-                                label: a,
-                                selected: true,
-                                onRemove: () =>
-                                    setState(() => _areas.remove(a)),
-                              ),
-                            _Chip(
-                              label: context.tr('sp_add_area'),
-                              icon: Icons.add,
-                              dashed: true,
-                              onTap: _addArea,
-                            ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
-
-                  // ── Ordering on WhatsApp ────────────────────────────────────
-                  _SectionCard(
-                    title: context.tr('sp_ordering'),
-                    subtitle: context.tr('sp_ordering_sub'),
-                    children: [
-                      _SwitchRow(
-                        title: context.tr('sp_accept_orders'),
-                        subtitle: context.tr('sp_accept_orders_sub'),
-                        value: _acceptOrders,
-                        onChanged: (v) => setState(() => _acceptOrders = v),
-                      ),
-                      _SwitchRow(
-                        title: context.tr('sp_show_prices'),
-                        subtitle: context.tr('sp_show_prices_sub'),
-                        value: _showPrices,
-                        onChanged: (v) => setState(() => _showPrices = v),
-                      ),
-                      _SwitchRow(
-                        title: context.tr('sp_ask_address'),
-                        subtitle: context.tr('sp_ask_address_sub'),
-                        value: _askAddress,
-                        onChanged: (v) => setState(() => _askAddress = v),
-                      ),
-                      _SwitchRow(
-                        title: context.tr('sp_cod'),
-                        subtitle: context.tr('sp_cod_sub'),
-                        value: _cod,
-                        onChanged: (v) => setState(() => _cod = v),
-                      ),
-                      _SwitchRow(
-                        title: context.tr('sp_online_payment'),
-                        subtitle: context.tr('sp_online_payment_sub'),
-                        value: _online,
-                        onChanged: null,
-                        last: true,
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 20),
                   GradientButton(
                     label: context.tr('sp_save'),
@@ -543,37 +412,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
 }
 
 // ───────────────────────────── helpers ─────────────────────────────────────
-
-InputDecoration _decoration({
-  Widget? prefix,
-  Widget? suffix,
-  Widget? prefixIcon,
-}) {
-  OutlineInputBorder b(Color c, [double w = 1]) => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(12),
-    borderSide: BorderSide(color: c, width: w),
-  );
-  return InputDecoration(
-    isDense: true,
-    filled: true,
-    fillColor: AppColors.surface,
-    prefix: null,
-    prefixIcon: prefix != null
-        ? Padding(
-            padding: const EdgeInsetsDirectional.only(start: 12, end: 4),
-            child: prefix,
-          )
-        : prefixIcon,
-    prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-    suffixIcon: suffix,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-    enabledBorder: b(AppColors.border),
-    border: b(AppColors.border),
-    focusedBorder: b(AppColors.primaryGreen, 1.4),
-    errorBorder: b(AppColors.danger),
-    focusedErrorBorder: b(AppColors.danger, 1.4),
-  );
-}
 
 class _SectionCard extends StatelessWidget {
   final String title;
@@ -610,31 +448,16 @@ class _SectionCard extends StatelessWidget {
 
 class _Field extends StatelessWidget {
   final String label;
-  final bool required;
   final Widget child;
-  const _Field({
-    required this.label,
-    required this.child,
-    this.required = false,
-  });
+  const _Field({required this.label, required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text.rich(
-          TextSpan(
-            text: label,
-            children: required
-                ? const [
-                    TextSpan(
-                      text: ' *',
-                      style: TextStyle(color: AppColors.danger),
-                    ),
-                  ]
-                : null,
-          ),
+        Text(
+          label,
           style: AppTextStyles.cellText13.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
@@ -728,70 +551,30 @@ class _PickerBox extends StatelessWidget {
 class _Chip extends StatelessWidget {
   final String label;
   final bool selected;
-  final bool dashed;
-  final IconData? icon;
   final VoidCallback? onTap;
-  final VoidCallback? onRemove;
-  const _Chip({
-    required this.label,
-    this.selected = false,
-    this.dashed = false,
-    this.icon,
-    this.onTap,
-    this.onRemove,
-  });
+  const _Chip({required this.label, this.selected = false, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final fg = selected || dashed ? AppColors.primaryGreen : AppColors.textGrey;
-    final content = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 16, color: fg),
-            const SizedBox(width: 4),
-          ],
-          Text(
-            label,
-            style: AppTextStyles.cellText13.copyWith(
-              color: fg,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          if (onRemove != null) ...[
-            const SizedBox(width: 6),
-            GestureDetector(
-              onTap: onRemove,
-              child: Icon(Icons.close, size: 15, color: fg),
-            ),
-          ],
-        ],
-      ),
-    );
-
+    final fg = selected ? AppColors.primaryGreen : AppColors.textGrey;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(30),
-      child: dashed
-          ? CustomPaint(
-              painter: DashedBorderPainter(
-                color: AppColors.textFaint,
-                radius: 30,
-                dashWidth: 4,
-                dashGap: 3,
-              ),
-              child: content,
-            )
-          : Container(
-              decoration: BoxDecoration(
-                color: selected ? AppColors.editIconBg : AppColors.surface,
-                borderRadius: BorderRadius.circular(30),
-                border: selected ? null : Border.all(color: AppColors.border),
-              ),
-              child: content,
-            ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.editIconBg : AppColors.surface,
+          borderRadius: BorderRadius.circular(30),
+          border: selected ? null : Border.all(color: AppColors.border),
+        ),
+        child: Text(
+          label,
+          style: AppTextStyles.cellText13.copyWith(
+            color: fg,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -876,64 +659,6 @@ class _LogoRow extends StatelessWidget {
             child: Text(context.tr('sp_remove')),
           ),
       ],
-    );
-  }
-}
-
-class _SwitchRow extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final bool value;
-  final ValueChanged<bool>? onChanged;
-  final bool last;
-  const _SwitchRow({
-    required this.title,
-    required this.subtitle,
-    required this.value,
-    required this.onChanged,
-    this.last = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        border: Border(
-          top: const BorderSide(color: AppColors.border),
-          bottom: last
-              ? const BorderSide(color: AppColors.border)
-              : BorderSide.none,
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyles.cellText13.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: AppTextStyles.cellMuted13.copyWith(fontSize: 11.5),
-                ),
-              ],
-            ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeThumbColor: Colors.white,
-            activeTrackColor: AppColors.primaryGreen,
-          ),
-        ],
-      ),
     );
   }
 }
