@@ -14,6 +14,7 @@ import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
 import 'package:whats_order/features/orders/presentation/screens/order_details_screen.dart';
 import 'package:whats_order/features/settings/presentation/bloc/branches_bloc.dart';
 import 'package:whats_order/features/settings/presentation/screens/products_screen.dart';
+import 'package:whats_order/features/settings/presentation/bloc/store_profile_bloc.dart';
 import 'package:whats_order/features/settings/presentation/screens/store_profile_screen.dart';
 import 'package:whats_order/features/settings/presentation/screens/profile_screen.dart';
 import 'package:whats_order/features/settings/presentation/taps/branches_tab.dart';
@@ -43,7 +44,12 @@ class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case NamedRoutes.storeProfile:
-        return MaterialPageRoute(builder: (_) => const StoreProfileScreen());
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => sl<StoreProfileBloc>(),
+            child: const StoreProfileScreen(),
+          ),
+        );
       case NamedRoutes.products:
         return MaterialPageRoute(builder: (_) => const ProductsScreen());
       case NamedRoutes.splash:

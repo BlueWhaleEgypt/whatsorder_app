@@ -169,7 +169,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'account_not_verified': 'Your account is not verified',
     'account_verified': 'Your account is verified',
     'account_inactive_banner':
-        "Account is inactive. You won't receive orders. Contact support at 01556132000",
+        "Account is inactive. You won't receive orders. Contact support at 01031000032",
     //Order Details
     'order_details': 'Order Details',
     'loading_location': 'Loading location…',
@@ -294,7 +294,7 @@ const Map<String, Map<String, String>> kTranslations = {
     "not_verified": "Not verified",
     "activation_status": "Activation Status",
     "active": "Active",
-    "inactive": "Inactive ,contact the support with 01556132000",
+    "inactive": "Inactive ,contact the support with 01031000032",
     "whatsapp_notifications": "WhatsApp Notifications",
     "enabled": "Enabled",
     "disabled": "Disabled",
@@ -392,6 +392,7 @@ const Map<String, Map<String, String>> kTranslations = {
         "WhatsOrder sends this when a customer opens your store.",
     "sp_save": "Save changes",
     "sp_saved": "Changes saved",
+    "sp_days_required": "Select at least one working day",
     "products": "Products",
     "products_summary":
         "{total} products · {visible} visible in your WhatsApp catalog",
@@ -419,7 +420,8 @@ const Map<String, Map<String, String>> kTranslations = {
     "product_delete_failed": "Failed to delete the product",
     "photos_required": "Add at least one product photo",
     "verify_to_upload_photos": "Verify your account to upload product photos",
-    "store_profile_requires_verification": "You need to verify your account to access the store profile.",
+    "store_profile_requires_verification":
+        "You need to verify your account to access the store profile.",
     "verify_account": "Verify account",
     "products_count": "{total} products in your catalog",
     "categories": "Categories",
@@ -622,7 +624,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'account_not_verified': 'حسابك غير موثق',
     'account_verified': 'تم توثيق حسابك',
     'account_inactive_banner':
-        'الحساب غير مفعل. لن تصلك طلبات جديدة. تواصل مع الدعم على 01556132000',
+        'الحساب غير مفعل. لن تصلك طلبات جديدة. تواصل مع الدعم على 01031000032',
     //Order Details
     'order_details': 'تفاصيل الطلب',
     'loading_location': 'جاري تحميل الموقع…',
@@ -738,7 +740,7 @@ const Map<String, Map<String, String>> kTranslations = {
     "not_verified": "لم يتم التحقق",
     "activation_status": "حالة التفعيل",
     "active": "نشط",
-    "inactive": "غير نشط ,تواصل مع الدعم على 01556132000",
+    "inactive": "غير نشط ,تواصل مع الدعم على 01031000032",
     "whatsapp_notifications": "إشعارات واتساب",
     "enabled": "مفعّلة",
     "disabled": "معطّلة",
@@ -838,6 +840,7 @@ const Map<String, Map<String, String>> kTranslations = {
     "sp_welcome_hint": "يرسلها WhatsOrder عندما يفتح العميل متجرك.",
     "sp_save": "حفظ التغييرات",
     "sp_saved": "تم حفظ التغييرات",
+    "sp_days_required": "اختر يوم عمل واحد على الأقل",
     "products": "المنتجات",
     "products_summary": "{total} منتج · {visible} ظاهر في كتالوج واتساب",
     "import_from_excel": "استيراد من إكسل",
@@ -864,7 +867,8 @@ const Map<String, Map<String, String>> kTranslations = {
     "product_delete_failed": "تعذر حذف المنتج",
     "photos_required": "أضف صورة واحدة على الأقل للمنتج",
     "verify_to_upload_photos": "وثّق حسابك لتتمكن من رفع صور المنتج",
-    "store_profile_requires_verification": "تحتاج إلى توثيق حسابك أولاً للوصول إلى ملف المتجر.",
+    "store_profile_requires_verification":
+        "تحتاج إلى توثيق حسابك أولاً للوصول إلى ملف المتجر.",
     "verify_account": "توثيق الحساب",
     "products_count": "{total} منتج في الكتالوج",
     "categories": "الفئات",

@@ -1,9 +1,13 @@
 import 'dart:io';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
+import 'package:whats_order/core/network/end_points.dart';
+import 'package:whats_order/features/settings/data/store_profile/store_profile_response.dart';
+import 'package:whats_order/features/settings/presentation/bloc/store_profile_bloc.dart';
 import 'package:whats_order/core/theme/app_colors.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/core/widgets/dashed_upload_box.dart';
@@ -27,13 +31,15 @@ class StoreProfileScreen extends StatefulWidget {
 
 class _StoreProfileScreenState extends State<StoreProfileScreen> {
   static const _maxAbout = 300;
-  static const _dayKeys = ['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri'];
-  static const _deliveryTimes = [
-    'within_1_hour',
-    'within_3_hours',
-    'within_24_hours',
-    'within_2_days',
-  ];
+  static const _dayKeys = {
+    'sat': 'SATURDAY',
+    'sun': 'SUNDAY',
+    'mon': 'MONDAY',
+    'tue': 'TUESDAY',
+    'wed': 'WEDNESDAY',
+    'thu': 'THURSDAY',
+    'fri': 'FRIDAY',
+  };
 
   final _formKey = GlobalKey<FormState>();
   final _picker = ImagePicker();
@@ -44,43 +50,81 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
   final _slug = TextEditingController();
   final _address = TextEditingController();
   final _fee = TextEditingController();
-  final _welcome = TextEditingController();
 
-  File? _cover;
-  File? _logo;
-  String? _category;
+  File? _logo; // newly picked, not yet uploaded
+  String? _photoUrl; // current logo on the server
+  bool _verified = false;
+  bool _loaded = false;
   TimeOfDay _opensAt = const TimeOfDay(hour: 10, minute: 0);
   TimeOfDay _closesAt = const TimeOfDay(hour: 23, minute: 0);
-  String _deliveryTime = 'within_24_hours';
-  final Set<String> _days = {'sat', 'sun', 'mon', 'tue', 'wed', 'thu'};
+  final Set<String> _days = {};
   final List<String> _areas = [];
 
   bool _acceptOrders = true;
   bool _showPrices = true;
   bool _askAddress = true;
   bool _cod = true;
+  bool _online = false;
 
   @override
   void initState() {
     super.initState();
     _about.addListener(() => setState(() {}));
+    context.read<StoreProfileBloc>().add(const LoadStoreProfileEvent());
+  }
+
+  static TimeOfDay _parseTime(String v) {
+    final p = v.split(':');
+    return TimeOfDay(
+      hour: int.tryParse(p[0]) ?? 0,
+      minute: p.length > 1 ? int.tryParse(p[1]) ?? 0 : 0,
+    );
+  }
+
+  static String _fmtTime(TimeOfDay t) =>
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
+  void _fill(StoreProfile p) {
+    _name.text = p.name;
+    _about.text = p.about;
+    _phone.text = p.phone;
+    _slug.text = p.slug;
+    _address.text = p.address;
+    _fee.text = p.deliveryFee == 0 ? '' : p.deliveryFee.toString();
+    _photoUrl = p.photo;
+    _verified = p.verifiedPhone;
+    _opensAt = _parseTime(p.opensAt);
+    _closesAt = _parseTime(p.closesAt);
+    _days
+      ..clear()
+      ..addAll(p.workingDays);
+    _areas
+      ..clear()
+      ..addAll(p.deliveryAreas);
+    _acceptOrders = p.acceptNewOrders;
+    _showPrices = p.showPrices;
+    _askAddress = p.askForDeliveryAddress;
+    _cod = p.cashOnDelivery;
+    _online = p.onlinePayment;
+    _logo = null;
+    _loaded = true;
   }
 
   @override
   void dispose() {
-    for (final c in [_name, _about, _phone, _slug, _address, _fee, _welcome]) {
+    for (final c in [_name, _about, _phone, _slug, _address, _fee]) {
       c.dispose();
     }
     super.dispose();
   }
 
-  Future<void> _pickImage({required bool cover}) async {
+  Future<void> _pickLogo() async {
     final x = await _picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 85,
     );
     if (x == null) return;
-    setState(() => cover ? _cover = File(x.path) : _logo = File(x.path));
+    setState(() => _logo = File(x.path));
   }
 
   Future<void> _pickTime({required bool opens}) async {
@@ -124,13 +168,55 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
 
   void _save() {
     if (!_formKey.currentState!.validate()) return;
-    // TODO: dispatch a save event once the store-profile endpoint exists.
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.tr('sp_saved')),
-        backgroundColor: AppColors.primaryGreenTint,
+    if (_days.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.tr('sp_days_required'))));
+      return;
+    }
+    context.read<StoreProfileBloc>().add(
+      SaveStoreProfileEvent(
+        StoreProfile(
+          name: _name.text.trim(),
+          about: _about.text.trim(),
+          slug: _slug.text.trim(),
+          address: _address.text.trim(),
+          opensAt: _fmtTime(_opensAt),
+          closesAt: _fmtTime(_closesAt),
+          deliveryFee: num.tryParse(_fee.text.trim()) ?? 0,
+          workingDays: _days.toList(),
+          deliveryAreas: List.of(_areas),
+          acceptNewOrders: _acceptOrders,
+          showPrices: _showPrices,
+          askForDeliveryAddress: _askAddress,
+          cashOnDelivery: _cod,
+          onlinePayment: _online,
+        ),
+        newPhoto: _logo,
       ),
     );
+  }
+
+  void _onState(BuildContext context, StoreProfileState state) {
+    final messenger = ScaffoldMessenger.of(context);
+    if (state is StoreProfileLoaded) {
+      setState(() => _fill(state.profile));
+    } else if (state is StoreProfileSaved) {
+      setState(() => _fill(state.profile));
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(context.tr('sp_saved')),
+          backgroundColor: AppColors.primaryGreenTint,
+        ),
+      );
+    } else if (state is StoreProfileError && state.whileSaving) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(context.trMessage(state.message)),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    }
   }
 
   String? _required(String? v) =>
@@ -143,332 +229,314 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
       appBar: AppBar(
-        title: Text(context.tr('store_profile'), style: AppTextStyles.heading18),
+        title: Text(
+          context.tr('store_profile'),
+          style: AppTextStyles.heading18,
+        ),
       ),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              // ── Store identity ──────────────────────────────────────────
-              _SectionCard(
-                title: context.tr('sp_identity'),
-                subtitle: context.tr('sp_identity_sub'),
-                children: [
-                  DashedUploadBox(
-                    file: _cover,
-                    height: 140,
-                    onTap: () => _pickImage(cover: true),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    context.tr('sp_cover_hint'),
-                    style: AppTextStyles.cellMuted13.copyWith(fontSize: 11.5),
-                  ),
-                  const SizedBox(height: 16),
-                  _LogoRow(
-                    file: _logo,
-                    onChange: () => _pickImage(cover: false),
-                    onRemove: () => setState(() => _logo = null),
-                  ),
-                  const SizedBox(height: 16),
-                  _Field(
-                    label: context.tr('sp_store_name'),
-                    required: true,
-                    child: TextFormField(
-                      controller: _name,
-                      validator: _required,
-                      decoration: _decoration(),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  _Field(
-                    label: context.tr('sp_category'),
-                    required: true,
-                    child: DropdownButtonFormField<String>(
-                      initialValue: _category,
-                      isExpanded: true,
-                      validator: _required,
-                      decoration: _decoration(),
-                      items: const [
-                        'cat_home_appliances',
-                        'cat_fashion',
-                        'cat_food',
-                        'cat_electronics',
-                        'cat_beauty',
-                        'cat_other',
-                      ]
-                          .map(
-                            (k) => DropdownMenuItem(
-                              value: k,
-                              child: Text(context.tr(k)),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (v) => setState(() => _category = v),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  _Field(
-                    label: context.tr('sp_about'),
-                    child: TextFormField(
-                      controller: _about,
-                      maxLines: 4,
-                      maxLength: _maxAbout,
-                      buildCounter: (_, {required currentLength, required isFocused, maxLength}) =>
-                          null,
-                      decoration: _decoration(),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    context.tr('sp_about_hint', {
-                      'count': '${_about.text.length}',
-                      'max': '$_maxAbout',
-                    }),
-                    style: AppTextStyles.cellMuted13.copyWith(fontSize: 11.5),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // ── Contact & delivery ──────────────────────────────────────
-              _SectionCard(
-                title: context.tr('sp_contact'),
-                subtitle: context.tr('sp_contact_sub'),
-                children: [
-                  _Field(
-                    label: context.tr('sp_phone'),
-                    required: true,
-                    child: TextFormField(
-                      controller: _phone,
-                      keyboardType: TextInputType.phone,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      validator: _required,
-                      decoration: _decoration(
-                        prefix: const _Prefix('+20'),
-                        suffix: const _VerifiedBadge(),
+      body: BlocConsumer<StoreProfileBloc, StoreProfileState>(
+        listener: _onState,
+        builder: (context, state) {
+          if (!_loaded) {
+            if (state is StoreProfileError) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(context.trMessage(state.message)),
+                    TextButton(
+                      onPressed: () => context.read<StoreProfileBloc>().add(
+                        const LoadStoreProfileEvent(),
                       ),
+                      child: Text(context.tr('retry')),
                     ),
+                  ],
+                ),
+              );
+            }
+            return const Center(child: CircularProgressIndicator());
+          }
+          final saving = state is StoreProfileSaving;
+          return SafeArea(
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  // ── Store identity ──────────────────────────────────────────
+                  _SectionCard(
+                    title: context.tr('sp_identity'),
+                    subtitle: context.tr('sp_identity_sub'),
+                    children: [
+                      _LogoRow(
+                        file: _logo,
+                        url: _photoUrl == null
+                            ? null
+                            : '${EndPoints.baseUrl}/uploads/${Uri.encodeComponent(_photoUrl!)}',
+                        onChange: _pickLogo,
+                        onRemove: () => setState(() => _logo = null),
+                      ),
+                      const SizedBox(height: 16),
+                      _Field(
+                        label: context.tr('sp_store_name'),
+                        required: true,
+                        child: TextFormField(
+                          controller: _name,
+                          validator: _required,
+                          maxLength: 100,
+                          buildCounter:
+                              (
+                                _, {
+                                required currentLength,
+                                required isFocused,
+                                maxLength,
+                              }) => null,
+                          decoration: _decoration(),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      _Field(
+                        label: context.tr('sp_about'),
+                        child: TextFormField(
+                          controller: _about,
+                          maxLines: 4,
+                          maxLength: _maxAbout,
+                          buildCounter:
+                              (
+                                _, {
+                                required currentLength,
+                                required isFocused,
+                                maxLength,
+                              }) => null,
+                          decoration: _decoration(),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        context.tr('sp_about_hint', {
+                          'count': '${_about.text.length}',
+                          'max': '$_maxAbout',
+                        }),
+                        style: AppTextStyles.cellMuted13.copyWith(
+                          fontSize: 11.5,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 14),
-                  _Field(
-                    label: context.tr('sp_store_link'),
-                    child: TextFormField(
-                      controller: _slug,
-                      textDirection: TextDirection.ltr,
-                      decoration: _decoration(
-                        prefix: const _Prefix('whatsorder.app/'),
-                        suffix: IconButton(
-                          icon: const Icon(Icons.copy_rounded, size: 18),
-                          color: AppColors.textGrey,
-                          onPressed: () {
-                            Clipboard.setData(
-                              ClipboardData(
-                                text: 'whatsorder.app/${_slug.text.trim()}',
+                  const SizedBox(height: 16),
+
+                  // ── Contact & delivery ──────────────────────────────────────
+                  _SectionCard(
+                    title: context.tr('sp_contact'),
+                    subtitle: context.tr('sp_contact_sub'),
+                    children: [
+                      _Field(
+                        label: context.tr('sp_phone'),
+                        child: TextFormField(
+                          controller: _phone,
+                          readOnly: true,
+                          textDirection: TextDirection.ltr,
+                          decoration: _decoration(
+                            suffix: _verified ? const _VerifiedBadge() : null,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      _Field(
+                        label: context.tr('sp_store_link'),
+                        required: true,
+                        child: TextFormField(
+                          controller: _slug,
+                          validator: _required,
+                          textDirection: TextDirection.ltr,
+                          decoration: _decoration(
+                            prefix: const _Prefix('whatsorder.app/'),
+                            suffix: IconButton(
+                              icon: const Icon(Icons.copy_rounded, size: 18),
+                              color: AppColors.textGrey,
+                              onPressed: () {
+                                Clipboard.setData(
+                                  ClipboardData(
+                                    text: 'whatsorder.app/${_slug.text.trim()}',
+                                  ),
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(context.tr('sp_copied')),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        context.tr('sp_store_link_hint'),
+                        style: AppTextStyles.cellMuted13.copyWith(
+                          fontSize: 11.5,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      _Field(
+                        label: context.tr('sp_address'),
+                        required: true,
+                        child: TextFormField(
+                          controller: _address,
+                          validator: _required,
+                          decoration: _decoration(
+                            prefixIcon: const Icon(
+                              Icons.location_on_outlined,
+                              size: 20,
+                              color: AppColors.textGrey,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: _Field(
+                              label: context.tr('sp_opens_at'),
+                              child: _PickerBox(
+                                icon: Icons.access_time_rounded,
+                                label: timeLabel(_opensAt),
+                                onTap: () => _pickTime(opens: true),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _Field(
+                              label: context.tr('sp_closes_at'),
+                              child: _PickerBox(
+                                icon: Icons.access_time_rounded,
+                                label: timeLabel(_closesAt),
+                                onTap: () => _pickTime(opens: false),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: _Field(
+                              label: context.tr('sp_delivery_fee'),
+                              child: TextFormField(
+                                controller: _fee,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                decoration: _decoration(
+                                  prefix: _Prefix(context.tr('sp_egp')),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      _Field(
+                        label: context.tr('sp_working_days'),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: _dayKeys.entries.map((e) {
+                            final d = e.value;
+                            final on = _days.contains(d);
+                            return _Chip(
+                              label: context.tr('day_${e.key}'),
+                              selected: on,
+                              onTap: () => setState(
+                                () => on ? _days.remove(d) : _days.add(d),
                               ),
                             );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(context.tr('sp_copied'))),
-                            );
-                          },
+                          }).toList(),
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    context.tr('sp_store_link_hint'),
-                    style: AppTextStyles.cellMuted13.copyWith(fontSize: 11.5),
-                  ),
-                  const SizedBox(height: 14),
-                  _Field(
-                    label: context.tr('sp_address'),
-                    child: TextFormField(
-                      controller: _address,
-                      decoration: _decoration(
-                        prefixIcon: const Icon(
-                          Icons.location_on_outlined,
-                          size: 20,
-                          color: AppColors.textGrey,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: _Field(
-                          label: context.tr('sp_opens_at'),
-                          child: _PickerBox(
-                            icon: Icons.access_time_rounded,
-                            label: timeLabel(_opensAt),
-                            onTap: () => _pickTime(opens: true),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _Field(
-                          label: context.tr('sp_closes_at'),
-                          child: _PickerBox(
-                            icon: Icons.access_time_rounded,
-                            label: timeLabel(_closesAt),
-                            onTap: () => _pickTime(opens: false),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: _Field(
-                          label: context.tr('sp_delivery_fee'),
-                          child: TextFormField(
-                            controller: _fee,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            decoration: _decoration(
-                              prefix: _Prefix(context.tr('sp_egp')),
+                      const SizedBox(height: 14),
+                      _Field(
+                        label: context.tr('sp_delivery_areas'),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final a in _areas)
+                              _Chip(
+                                label: a,
+                                selected: true,
+                                onRemove: () =>
+                                    setState(() => _areas.remove(a)),
+                              ),
+                            _Chip(
+                              label: context.tr('sp_add_area'),
+                              icon: Icons.add,
+                              dashed: true,
+                              onTap: _addArea,
                             ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _Field(
-                          label: context.tr('sp_delivery_time'),
-                          child: DropdownButtonFormField<String>(
-                            initialValue: _deliveryTime,
-                            isExpanded: true,
-                            decoration: _decoration(),
-                            items: _deliveryTimes
-                                .map(
-                                  (k) => DropdownMenuItem(
-                                    value: k,
-                                    child: Text(
-                                      context.tr(k),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (v) =>
-                                setState(() => _deliveryTime = v!),
-                          ),
+                          ],
                         ),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 14),
-                  _Field(
-                    label: context.tr('sp_working_days'),
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _dayKeys.map((d) {
-                        final on = _days.contains(d);
-                        return _Chip(
-                          label: context.tr('day_$d'),
-                          selected: on,
-                          onTap: () =>
-                              setState(() => on ? _days.remove(d) : _days.add(d)),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  _Field(
-                    label: context.tr('sp_delivery_areas'),
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final a in _areas)
-                          _Chip(
-                            label: a,
-                            selected: true,
-                            onRemove: () => setState(() => _areas.remove(a)),
-                          ),
-                        _Chip(
-                          label: context.tr('sp_add_area'),
-                          icon: Icons.add,
-                          dashed: true,
-                          onTap: _addArea,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // ── Ordering on WhatsApp ────────────────────────────────────
-              _SectionCard(
-                title: context.tr('sp_ordering'),
-                subtitle: context.tr('sp_ordering_sub'),
-                children: [
-                  _SwitchRow(
-                    title: context.tr('sp_accept_orders'),
-                    subtitle: context.tr('sp_accept_orders_sub'),
-                    value: _acceptOrders,
-                    onChanged: (v) => setState(() => _acceptOrders = v),
-                  ),
-                  _SwitchRow(
-                    title: context.tr('sp_show_prices'),
-                    subtitle: context.tr('sp_show_prices_sub'),
-                    value: _showPrices,
-                    onChanged: (v) => setState(() => _showPrices = v),
-                  ),
-                  _SwitchRow(
-                    title: context.tr('sp_ask_address'),
-                    subtitle: context.tr('sp_ask_address_sub'),
-                    value: _askAddress,
-                    onChanged: (v) => setState(() => _askAddress = v),
-                  ),
-                  _SwitchRow(
-                    title: context.tr('sp_cod'),
-                    subtitle: context.tr('sp_cod_sub'),
-                    value: _cod,
-                    onChanged: (v) => setState(() => _cod = v),
-                  ),
-                  _SwitchRow(
-                    title: context.tr('sp_online_payment'),
-                    subtitle: context.tr('sp_online_payment_sub'),
-                    value: false,
-                    onChanged: null,
-                    last: true,
                   ),
                   const SizedBox(height: 16),
-                  _Field(
-                    label: context.tr('sp_welcome'),
-                    child: TextFormField(
-                      controller: _welcome,
-                      maxLines: 3,
-                      decoration: _decoration(),
-                    ),
+
+                  // ── Ordering on WhatsApp ────────────────────────────────────
+                  _SectionCard(
+                    title: context.tr('sp_ordering'),
+                    subtitle: context.tr('sp_ordering_sub'),
+                    children: [
+                      _SwitchRow(
+                        title: context.tr('sp_accept_orders'),
+                        subtitle: context.tr('sp_accept_orders_sub'),
+                        value: _acceptOrders,
+                        onChanged: (v) => setState(() => _acceptOrders = v),
+                      ),
+                      _SwitchRow(
+                        title: context.tr('sp_show_prices'),
+                        subtitle: context.tr('sp_show_prices_sub'),
+                        value: _showPrices,
+                        onChanged: (v) => setState(() => _showPrices = v),
+                      ),
+                      _SwitchRow(
+                        title: context.tr('sp_ask_address'),
+                        subtitle: context.tr('sp_ask_address_sub'),
+                        value: _askAddress,
+                        onChanged: (v) => setState(() => _askAddress = v),
+                      ),
+                      _SwitchRow(
+                        title: context.tr('sp_cod'),
+                        subtitle: context.tr('sp_cod_sub'),
+                        value: _cod,
+                        onChanged: (v) => setState(() => _cod = v),
+                      ),
+                      _SwitchRow(
+                        title: context.tr('sp_online_payment'),
+                        subtitle: context.tr('sp_online_payment_sub'),
+                        value: _online,
+                        onChanged: null,
+                        last: true,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    context.tr('sp_welcome_hint'),
-                    style: AppTextStyles.cellMuted13.copyWith(fontSize: 11.5),
+                  const SizedBox(height: 20),
+                  GradientButton(
+                    label: context.tr('sp_save'),
+                    loading: saving,
+                    onPressed: _save,
                   ),
+                  const SizedBox(height: 24),
                 ],
               ),
-              const SizedBox(height: 20),
-              GradientButton(label: context.tr('sp_save'), onPressed: _save),
-              const SizedBox(height: 24),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -544,7 +612,11 @@ class _Field extends StatelessWidget {
   final String label;
   final bool required;
   final Widget child;
-  const _Field({required this.label, required this.child, this.required = false});
+  const _Field({
+    required this.label,
+    required this.child,
+    this.required = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -726,10 +798,12 @@ class _Chip extends StatelessWidget {
 
 class _LogoRow extends StatelessWidget {
   final File? file;
+  final String? url;
   final VoidCallback onChange;
   final VoidCallback onRemove;
   const _LogoRow({
     required this.file,
+    required this.url,
     required this.onChange,
     required this.onRemove,
   });
@@ -748,6 +822,16 @@ class _LogoRow extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: file != null
               ? Image.file(file!, fit: BoxFit.cover)
+              : url != null
+              ? Image.network(
+                  url!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => const Icon(
+                    Icons.storefront_outlined,
+                    color: AppColors.primaryGreen,
+                    size: 28,
+                  ),
+                )
               : const Icon(
                   Icons.storefront_outlined,
                   color: AppColors.primaryGreen,

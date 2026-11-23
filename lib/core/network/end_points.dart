@@ -52,6 +52,10 @@ class EndPoints {
   static const String epChangePhoneNumber = '/api/auth/changePhoneNumber';
   static const String epSaveNewPassword = '/api/auth/saveNewPassword';
   static const String epUpdateProfile = '/api/auth/updateProfile';
+  // Store profile (all take `/{userId}`)
+  static const String epStoreProfile = '/api/auth/storeProfile';
+  static const String epStoreOrdering = '/api/auth/storeOrdering';
+  static const String epDeliveryAreas = '/api/auth/deliveryAreas';
   // Branches
   static const String epAllBranches = '/api/branch/all';
   static const String epAddBranch = '/api/branch/add';

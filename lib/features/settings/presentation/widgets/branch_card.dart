@@ -43,7 +43,7 @@ class BranchCard extends StatefulWidget {
 class _BranchCardState extends State<BranchCard> {
   BranchModel get branch => widget.branch;
   bool get isBusy => widget.isBusy;
-final Geocoding geocoding = Geocoding();
+  final Geocoding geocoding = Geocoding();
 
   String? _geoCity;
   String? _geoArea;

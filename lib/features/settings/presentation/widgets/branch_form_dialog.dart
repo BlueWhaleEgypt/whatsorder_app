@@ -30,7 +30,7 @@ class _BranchFormDialogState extends State<BranchFormDialog> {
   late final TextEditingController _nameController;
   late final TextEditingController _nameEnController;
   late final TextEditingController _addressController;
-final Geocoding geocoding = Geocoding();
+  final Geocoding geocoding = Geocoding();
 
   double? _lat;
   double? _lng;
