@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:whats_order/core/widgets/app_text_field.dart';
 /// A labelled text input of the add-product form.
 class ProductFormField extends StatelessWidget {

@@ -1,17 +1,15 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:whats_order/core/cache/cache_helper.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/base/base_repository.dart';
-import 'package:whats_order/core/cache/session_cleaner.dart';
 import 'package:whats_order/features/settings/data/logout/logout_response.dart';
 import 'package:whats_order/core/error/failures.dart';
 import 'package:whats_order/core/network/network_info.dart';
-import 'package:whats_order/features/settings/presentation/bloc/logout_bloc.dart';
-import 'package:whats_order/injection/injection_container.dart';
+
 import 'package:whats_order/features/orders/presentation/bloc/make_offer_event.dart';
 import 'package:whats_order/features/orders/presentation/bloc/orders_bloc.dart';
 import 'package:whats_order/features/orders/presentation/bloc/orders_event.dart';
@@ -129,9 +127,8 @@ Widget localizedApp(
   return MaterialApp(
     localizationsDelegates: const [
       AppLocalizations.delegate,
-      GlobalMaterialLocalizations.delegate,
+     
       GlobalWidgetsLocalizations.delegate,
-      GlobalCupertinoLocalizations.delegate,
     ],
     supportedLocales: AppLocalizations.supportedLocales,
     locale: Locale(locale),

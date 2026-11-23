@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The three stages of the password-recovery flow, in order.
 enum ForgotPasswordStep {

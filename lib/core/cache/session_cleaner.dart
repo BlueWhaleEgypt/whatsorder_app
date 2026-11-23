@@ -23,6 +23,7 @@ class LocalSessionCleaner implements SessionCleaner {
   @override
   Future<void> clear() async {
     await CacheHelper.removeData(key: CacheKeys.userModel);
+    await CacheHelper.removeData(key: CacheKeys.verificationStatus);
     await CacheHelper.removeData(key: CacheKeys.accessToken);
     await CacheHelper.removeData(key: CacheKeys.refreshToken);
     ProfileName.clear();

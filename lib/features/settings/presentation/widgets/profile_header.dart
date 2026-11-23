@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:whats_order/core/cache/profile_name.dart';
 import 'package:whats_order/core/constants/app_assets.dart';

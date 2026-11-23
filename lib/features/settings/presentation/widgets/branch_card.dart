@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:whats_order/core/constants/app_assets.dart';
@@ -43,6 +43,7 @@ class BranchCard extends StatefulWidget {
 class _BranchCardState extends State<BranchCard> {
   BranchModel get branch => widget.branch;
   bool get isBusy => widget.isBusy;
+final Geocoding geocoding = Geocoding();
 
   String? _geoCity;
   String? _geoArea;
@@ -104,7 +105,7 @@ class _BranchCardState extends State<BranchCard> {
     }
 
     try {
-      final places = await placemarkFromCoordinates(lat, lng);
+      final places = await geocoding.placemarkFromCoordinates(lat, lng);
       if (places.isEmpty) return;
       final resolved = _extract(places.first);
       BranchCard._geoCache[key] = resolved;

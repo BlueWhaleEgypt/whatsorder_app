@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whats_order/features/auth/otp/presentation/bloc/otp_bloc.dart';
 import 'package:whats_order/features/auth/otp/presentation/screens/forgot_password_screen.dart';
@@ -14,6 +14,7 @@ import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
 import 'package:whats_order/features/orders/presentation/screens/order_details_screen.dart';
 import 'package:whats_order/features/settings/presentation/bloc/branches_bloc.dart';
 import 'package:whats_order/features/settings/presentation/screens/products_screen.dart';
+import 'package:whats_order/features/settings/presentation/screens/store_profile_screen.dart';
 import 'package:whats_order/features/settings/presentation/screens/profile_screen.dart';
 import 'package:whats_order/features/settings/presentation/taps/branches_tab.dart';
 
@@ -41,6 +42,8 @@ import 'named_routes.dart';
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case NamedRoutes.storeProfile:
+        return MaterialPageRoute(builder: (_) => const StoreProfileScreen());
       case NamedRoutes.products:
         return MaterialPageRoute(builder: (_) => const ProductsScreen());
       case NamedRoutes.splash:

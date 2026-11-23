@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geocoding/geocoding.dart';
@@ -39,6 +39,7 @@ class _LocationStepState extends State<LocationStep> {
   ServiceArea? _serviceArea;
   double? _lat;
   double? _lng;
+  final Geocoding geocoding = Geocoding();
 
   @override
   void initState() {
@@ -143,7 +144,7 @@ class _LocationStepState extends State<LocationStep> {
               });
 
               try {
-                final placemarks = await placemarkFromCoordinates(
+                final placemarks = await geocoding.placemarkFromCoordinates(
                   location.latitude,
                   location.longitude,
                 );

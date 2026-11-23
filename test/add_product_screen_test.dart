@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:whats_order/core/cache/cache_keys.dart';
@@ -234,7 +234,11 @@ void main() {
       useTallScreen(tester);
       await tester.pumpWidget(
         localizedApp(
-          AddProductScreen(product: product, pickPhotos: pickPhotos),
+          AddProductScreen(
+            product: product,
+            pickPhotos: pickPhotos,
+            isVerified: true,
+          ),
           locale: locale,
         ),
       );
@@ -452,7 +456,10 @@ void main() {
                   result = await Navigator.push<bool>(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => AddProductScreen(pickPhotos: pickPhotos),
+                      builder: (_) => AddProductScreen(
+                        pickPhotos: pickPhotos,
+                        isVerified: true,
+                      ),
                     ),
                   );
                 },

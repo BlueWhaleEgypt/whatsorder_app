@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/utils/logger.dart';
 import '../../../../../core/routing/named_routes.dart';

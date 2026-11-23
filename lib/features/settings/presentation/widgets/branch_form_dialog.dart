@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'; // LatLng
@@ -30,6 +30,7 @@ class _BranchFormDialogState extends State<BranchFormDialog> {
   late final TextEditingController _nameController;
   late final TextEditingController _nameEnController;
   late final TextEditingController _addressController;
+final Geocoding geocoding = Geocoding();
 
   double? _lat;
   double? _lng;
@@ -71,7 +72,7 @@ class _BranchFormDialogState extends State<BranchFormDialog> {
     });
 
     try {
-      final placemarks = await placemarkFromCoordinates(
+      final placemarks = await geocoding.placemarkFromCoordinates(
         location.latitude,
         location.longitude,
       );

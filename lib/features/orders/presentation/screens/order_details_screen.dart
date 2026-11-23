@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
@@ -47,6 +47,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   String? _address;
   late bool _loadingAddress;
+  final Geocoding geocoding = Geocoding();
 
   /// Selected execution-time translation key (see [ExecutionTimeSelector]).
   String? _executionTimeKey;
@@ -70,7 +71,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   Future<void> _resolveAddress() async {
     String? resolved;
     try {
-      final places = await placemarkFromCoordinates(
+      final places = await geocoding.placemarkFromCoordinates(
         widget.latitude!,
         widget.longitude!,
       );

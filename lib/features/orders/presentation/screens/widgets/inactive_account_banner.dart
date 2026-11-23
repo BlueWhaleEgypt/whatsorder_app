@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 
 /// Red warning shown when the vendor account is explicitly inactive

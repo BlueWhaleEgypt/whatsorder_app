@@ -30,11 +30,23 @@ class AddProductRequest {
     this.keptPhotoFileNames = const [],
   });
 
+  @override
+  String toString() =>
+      'AddProductRequest(name: $name, price: $price, '
+      'delivaryTime: $deliveryTime, sectorId: $sectorId, '
+      'vendorId: $vendorId, note: $note, '
+      'photos: $photoPaths, '
+      'keptPhotos: $keptPhotoFileNames)';
+
   /// The multipart body of POST / PUT /api/auth/vendor-services. The API
   /// spells the delivery field `delivaryTime`.
   Future<FormData> toFormData() async {
     // Kept photos first so the cover stays the first photo.
     final kept = await Future.wait(keptPhotoFileNames.map(_download));
+    final photos = [
+      ...kept,
+      for (final path in photoPaths) await MultipartFile.fromFile(path),
+    ];
     return FormData.fromMap({
       'name': name,
       'price': price,
@@ -42,10 +54,8 @@ class AddProductRequest {
       'sectorId': sectorId,
       'vendorId': vendorId,
       'note': note,
-      'photos': [
-        ...kept,
-        for (final path in photoPaths) await MultipartFile.fromFile(path),
-      ],
+      // Omitted when there are no photos; never a placeholder string.
+      if (photos.isNotEmpty) 'photos': photos,
     });
   }
 

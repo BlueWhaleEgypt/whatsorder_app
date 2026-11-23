@@ -26,6 +26,7 @@ class AddProductResponse extends Equatable implements BaseRepository {
     if (request is! AddProductRequest) {
       return const Left(ServerFailure('invalid_request'));
     }
+    logger.i('Sending add product request: $request');
 
     try {
       final response = await DioHelper.postData(
@@ -35,6 +36,7 @@ class AddProductResponse extends Equatable implements BaseRepository {
 
       final statusCode = response.statusCode ?? 0;
       if (statusCode >= 200 && statusCode < 300) {
+        logger.i('Add product API response: ${response.data}');
         final data = response.data;
         return Right(
           data is Map

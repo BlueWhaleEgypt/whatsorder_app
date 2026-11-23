@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:whats_order/core/cache/cache_helper.dart';
@@ -47,11 +47,24 @@ class AddProductScreen extends StatelessWidget {
   final ProductModel? product;
   final PickPhotos pickPhotos;
 
+  /// Whether the vendor is verified. Only verified vendors may upload photos;
+  /// others send no photos. Null uses the cached status.
+  final bool? isVerified;
+
   const AddProductScreen({
     super.key,
     this.product,
     this.pickPhotos = _pickFromGallery,
+    this.isVerified,
   });
+
+  /// Whether the vendor is verified, from the status saved by the last vendor
+  /// fetch. Unverified when none is saved.
+  static bool _cachedIsVerified() =>
+      CacheHelper.getDataFromSharedPreference(
+        key: CacheKeys.verificationStatus,
+      ) ==
+      'Verified';
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +73,11 @@ class AddProductScreen extends StatelessWidget {
         BlocProvider(create: (_) => sl<AddProductBloc>()),
         BlocProvider(create: (_) => sl<OnboardingCubit>()..loadSectors()),
       ],
-      child: _AddProductView(product: product, pickPhotos: pickPhotos),
+      child: _AddProductView(
+        product: product,
+        pickPhotos: pickPhotos,
+        isVerified: isVerified ?? _cachedIsVerified(),
+      ),
     );
   }
 }
@@ -68,8 +85,13 @@ class AddProductScreen extends StatelessWidget {
 class _AddProductView extends StatefulWidget {
   final ProductModel? product;
   final PickPhotos pickPhotos;
+  final bool isVerified;
 
-  const _AddProductView({required this.product, required this.pickPhotos});
+  const _AddProductView({
+    required this.product,
+    required this.pickPhotos,
+    required this.isVerified,
+  });
 
   @override
   State<_AddProductView> createState() => _AddProductViewState();
@@ -106,6 +128,10 @@ class _AddProductViewState extends State<_AddProductView> {
   bool _isPickingPhotos = false;
 
   bool get _isEditing => widget.product != null;
+
+  /// Unverified vendors can't upload or change photos, when adding or
+  /// editing; no photos are sent for them.
+  bool get _photosLocked => !widget.isVerified;
 
   String? get _initialPrice {
     final price = widget.product?.price;
@@ -144,7 +170,7 @@ class _AddProductViewState extends State<_AddProductView> {
     if (_isSubmitting) return;
 
     final formValid = _formKey.currentState!.validate();
-    final photosValid = _photos.validate();
+    final photosValid = _photosLocked || _photos.validate();
     if (!formValid || !photosValid) return;
     if (_sectorId == null) {
       _snack(context.tr('field_required'));
@@ -160,7 +186,6 @@ class _AddProductViewState extends State<_AddProductView> {
       _snack(context.tr('user_id_missing'));
       return;
     }
-
     final request = AddProductRequest(
       name: _name.text.trim(),
       price: AddProductFormRules.parsePrice(_price.text)!,
@@ -168,7 +193,7 @@ class _AddProductViewState extends State<_AddProductView> {
       sectorId: _sectorId!,
       vendorId: vendorId,
       note: _note.text.trim(),
-      photoPaths: _photos.paths,
+      photoPaths: _photosLocked ? const [] : _photos.paths,
       // Only touch the photos when they changed; see keptPhotoFileNames.
       keptPhotoFileNames: _photos.hasChanges
           ? _photos.existingPhotos.toList()
@@ -224,10 +249,39 @@ class _AddProductViewState extends State<_AddProductView> {
           child: ListView(
             padding: _pagePadding,
             children: [
-              ProductPhotosPicker(
-                controller: _photos,
-                onAddPressed: _pickPhotos,
+              // Unverified vendors still see the photo area, but it is
+              // disabled and explained.
+              IgnorePointer(
+                ignoring: _photosLocked,
+                child: Opacity(
+                  opacity: _photosLocked ? 0.5 : 1,
+                  child: ProductPhotosPicker(
+                    controller: _photos,
+                    onAddPressed: _pickPhotos,
+                  ),
+                ),
               ),
+              if (_photosLocked) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: AppColors.danger,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        context.tr('verify_to_upload_photos'),
+                        style: AppTextStyles.subtitle13.copyWith(
+                          color: AppColors.danger,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               _fieldSpacing,
               ProductFormField(
                 label: context.tr('product_name'),

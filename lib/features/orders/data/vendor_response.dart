@@ -60,6 +60,11 @@ class VendorResponse extends Equatable implements BaseRepository {
           key: CacheKeys.vendorId,
           value: vendorResponse.vendor?.id ?? '',
         );
+        // Cached so screens can read the verification status instantly.
+        await CacheHelper.saveDataSharedPreference(
+          key: CacheKeys.verificationStatus,
+          value: vendorResponse.vendor?.verificationStatus ?? '',
+        );
         final vendor = VendorResponse.fromJson(response.data);
         await ProfileName.update(
           firstName: vendor.vendor?.firstName,

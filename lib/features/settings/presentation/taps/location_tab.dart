@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -37,6 +37,7 @@ class _LocationTabState extends State<LocationTab> {
   late bool availableInAllRegions;
 
   bool _isEditing = false;
+  final Geocoding geocoding = Geocoding();
 
   // Last saved values, restored when the user cancels.
   late Map<String, String> _savedTexts;
@@ -151,7 +152,7 @@ class _LocationTabState extends State<LocationTab> {
     });
 
     try {
-      final placemarks = await placemarkFromCoordinates(
+      final placemarks = await geocoding.placemarkFromCoordinates(
         location.latitude,
         location.longitude,
       );

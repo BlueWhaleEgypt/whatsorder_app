@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whats_order/core/cache/cache_helper.dart';
 import 'package:whats_order/core/cache/cache_keys.dart';
@@ -239,8 +239,8 @@ class _WalletScreenState extends State<WalletScreen> {
                   hintText: context.tr("enter_amount"),
                   errorText:
                       controller.text.isNotEmpty &&
-                          (double.tryParse(controller.text) ?? 0) < 250
-                      ? context.tr("less_than_250")
+                          (double.tryParse(controller.text) ?? 0) < 100
+                      ? context.tr("less_than_100")
                       : null,
                 ),
               ),
@@ -254,7 +254,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   onPressed: () {
                     final value = num.tryParse(controller.text.trim());
 
-                    if (value == null || value < 250) {
+                    if (value == null || value < 100) {
                       setState(() {}); // لإظهار رسالة الخطأ
                       return;
                     }
