@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/network/end_points.dart';
 import 'package:whats_order/features/settings/data/store_profile/store_profile_response.dart';
@@ -17,10 +16,11 @@ import 'package:whats_order/core/widgets/gradient_button.dart';
 
 /*
 |--------------------------------------------------------------------------
-| StoreProfileScreen — edit the store's public page: identity, contact &
-| delivery, and WhatsApp ordering options.
+| StoreProfileScreen — edit the store's logo, name and "about" text.
 |
-| State is local for now; wire [_save] to a Bloc once the endpoint exists.
+| The save endpoint needs the whole store record (slug, address, hours,
+| fee, days), so the loaded profile is kept and only the edited fields are
+| replaced before sending.
 |--------------------------------------------------------------------------
 */
 
@@ -33,41 +33,15 @@ class StoreProfileScreen extends StatefulWidget {
 
 class _StoreProfileScreenState extends State<StoreProfileScreen> {
   static const _maxAbout = 300;
-  static const _dayKeys = {
-    'sat': 'SATURDAY',
-    'sun': 'SUNDAY',
-    'mon': 'MONDAY',
-    'tue': 'TUESDAY',
-    'wed': 'WEDNESDAY',
-    'thu': 'THURSDAY',
-    'fri': 'FRIDAY',
-  };
 
   final _formKey = GlobalKey<FormState>();
   final _picker = ImagePicker();
 
   final _name = TextEditingController();
   final _about = TextEditingController();
-  final _phone = TextEditingController();
-  final _slug = TextEditingController();
-  final _address = TextEditingController();
-  final _fee = TextEditingController();
 
+  StoreProfile? _profile; // last loaded / saved record
   File? _logo; // newly picked, not yet uploaded
-  String? _photoUrl; // current logo on the server
-  bool _verified = false;
-  bool _loaded = false;
-  TimeOfDay _opensAt = const TimeOfDay(hour: 10, minute: 0);
-  TimeOfDay _closesAt = const TimeOfDay(hour: 23, minute: 0);
-  final Set<String> _days = {};
-  final List<String> _areas = [];
-  List<String> _sectors = const [];
-
-  bool _acceptOrders = true;
-  bool _showPrices = true;
-  bool _askAddress = true;
-  bool _cod = true;
-  bool _online = false;
 
   @override
   void initState() {
@@ -76,47 +50,16 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
     context.read<StoreProfileBloc>().add(const LoadStoreProfileEvent());
   }
 
-  static TimeOfDay _parseTime(String v) {
-    final p = v.split(':');
-    return TimeOfDay(
-      hour: int.tryParse(p[0]) ?? 0,
-      minute: p.length > 1 ? int.tryParse(p[1]) ?? 0 : 0,
-    );
-  }
-
-  static String _fmtTime(TimeOfDay t) =>
-      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
-
   void _fill(StoreProfile p) {
+    _profile = p;
     _name.text = p.name;
     _about.text = p.about;
-    _phone.text = p.phone;
-    _slug.text = p.slug;
-    _address.text = p.address;
-    _fee.text = p.deliveryFee == 0 ? '' : p.deliveryFee.toString();
-    _photoUrl = p.photo;
-    _verified = p.verifiedPhone;
-    _opensAt = _parseTime(p.opensAt);
-    _closesAt = _parseTime(p.closesAt);
-    _days
-      ..clear()
-      ..addAll(p.workingDays);
-    _areas
-      ..clear()
-      ..addAll(p.deliveryAreas);
-    _sectors = p.sectors;
-    _acceptOrders = p.acceptNewOrders;
-    _showPrices = p.showPrices;
-    _askAddress = p.askForDeliveryAddress;
-    _cod = p.cashOnDelivery;
-    _online = p.onlinePayment;
     _logo = null;
-    _loaded = true;
   }
 
   @override
   void dispose() {
-    for (final c in [_name, _about, _phone, _slug, _address, _fee]) {
+    for (final c in [_name, _about]) {
       c.dispose();
     }
     super.dispose();
@@ -131,41 +74,12 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
     setState(() => _logo = File(x.path));
   }
 
-  Future<void> _pickTime({required bool opens}) async {
-    final t = await showTimePicker(
-      context: context,
-      initialTime: opens ? _opensAt : _closesAt,
-    );
-    if (t == null) return;
-    setState(() => opens ? _opensAt = t : _closesAt = t);
-  }
-
   void _save() {
-    if (!_formKey.currentState!.validate()) return;
-    if (_days.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(context.tr('sp_days_required'))));
-      return;
-    }
+    final profile = _profile;
+    if (profile == null || !_formKey.currentState!.validate()) return;
     context.read<StoreProfileBloc>().add(
       SaveStoreProfileEvent(
-        StoreProfile(
-          name: _name.text.trim(),
-          about: _about.text.trim(),
-          slug: _slug.text.trim(),
-          address: _address.text.trim(),
-          opensAt: _fmtTime(_opensAt),
-          closesAt: _fmtTime(_closesAt),
-          deliveryFee: num.tryParse(_fee.text.trim()) ?? 0,
-          workingDays: _days.toList(),
-          deliveryAreas: List.of(_areas),
-          acceptNewOrders: _acceptOrders,
-          showPrices: _showPrices,
-          askForDeliveryAddress: _askAddress,
-          cashOnDelivery: _cod,
-          onlinePayment: _online,
-        ),
+        profile.copyWith(name: _name.text.trim(), about: _about.text.trim()),
         newPhoto: _logo,
       ),
     );
@@ -198,8 +112,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final timeLabel = MaterialLocalizations.of(context).formatTimeOfDay;
-
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
       appBar: AppBar(
@@ -211,7 +123,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
       body: BlocConsumer<StoreProfileBloc, StoreProfileState>(
         listener: _onState,
         builder: (context, state) {
-          if (!_loaded) {
+          if (_profile == null) {
             if (state is StoreProfileError) {
               return Center(
                 child: Column(
@@ -244,9 +156,9 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                     children: [
                       _LogoRow(
                         file: _logo,
-                        url: _photoUrl == null
+                        url: _profile!.photo == null
                             ? null
-                            : '${EndPoints.baseUrl}/uploads/${Uri.encodeComponent(_photoUrl!)}',
+                            : '${EndPoints.baseUrl}/uploads/${Uri.encodeComponent(_profile!.photo!)}',
                         onChange: _pickLogo,
                         onRemove: () => setState(() => _logo = null),
                       ),
@@ -275,125 +187,9 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                           fontSize: 11.5,
                         ),
                       ),
-                      if (_sectors.isNotEmpty) ...[
-                        const SizedBox(height: 14),
-                        _Field(
-                          label: context.tr('sp_sectors'),
-                          child: Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              for (final name in _sectors)
-                                _Chip(label: name, selected: true),
-                            ],
-                          ),
-                        ),
-                      ],
                     ],
                   ),
-                  const SizedBox(height: 16),
 
-                  // ── Contact & delivery ──────────────────────────────────────
-                  _SectionCard(
-                    title: context.tr('sp_contact'),
-                    subtitle: context.tr('sp_contact_sub'),
-                    children: [
-                      AppTextField(
-                        label: context.tr('sp_phone'),
-                        controller: _phone,
-                        enabled: false,
-                        keyboardType: TextInputType.phone,
-                        suffixIcon: _verified ? const _VerifiedBadge() : null,
-                      ),
-
-                      const SizedBox(height: 6),
-
-                      const SizedBox(height: 14),
-                      AppTextField(
-                        label: context.tr('sp_address'),
-                        controller: _address,
-                        enabled: false,
-                        suffixIcon: const Icon(
-                          Icons.location_on_outlined,
-                          size: 20,
-                          color: AppColors.textGrey,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: _Field(
-                              label: context.tr('sp_opens_at'),
-                              child: _PickerBox(
-                                icon: Icons.access_time_rounded,
-                                label: timeLabel(_opensAt),
-                                onTap: () => _pickTime(opens: true),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _Field(
-                              label: context.tr('sp_closes_at'),
-                              child: _PickerBox(
-                                icon: Icons.access_time_rounded,
-                                label: timeLabel(_closesAt),
-                                onTap: () => _pickTime(opens: false),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: AppTextField(
-                              label: context.tr('sp_delivery_fee'),
-                              controller: _fee,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              suffixIcon: Center(
-                                widthFactor: 1,
-                                child: Padding(
-                                  padding: const EdgeInsetsDirectional.only(
-                                    end: 14,
-                                  ),
-                                  child: _Prefix(context.tr('sp_egp')),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-                      _Field(
-                        label: context.tr('sp_working_days'),
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: _dayKeys.entries.map((e) {
-                            final d = e.value;
-                            final on = _days.contains(d);
-                            return _Chip(
-                              label: context.tr('day_${e.key}'),
-                              selected: on,
-                              onTap: () => setState(
-                                () => on ? _days.remove(d) : _days.add(d),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
                   const SizedBox(height: 20),
                   GradientButton(
                     label: context.tr('sp_save'),
@@ -441,139 +237,6 @@ class _SectionCard extends StatelessWidget {
           const SizedBox(height: 18),
           ...children,
         ],
-      ),
-    );
-  }
-}
-
-class _Field extends StatelessWidget {
-  final String label;
-  final Widget child;
-  const _Field({required this.label, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: AppTextStyles.cellText13.copyWith(fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 8),
-        child,
-      ],
-    );
-  }
-}
-
-class _Prefix extends StatelessWidget {
-  final String text;
-  const _Prefix(this.text);
-
-  @override
-  Widget build(BuildContext context) => Text(
-    text,
-    textDirection: TextDirection.ltr,
-    style: AppTextStyles.cellMuted13,
-  );
-}
-
-class _VerifiedBadge extends StatelessWidget {
-  const _VerifiedBadge();
-
-  @override
-  Widget build(BuildContext context) => Center(
-    widthFactor: 1,
-    child: Container(
-      margin: const EdgeInsetsDirectional.only(end: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.editIconBg,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.check, size: 14, color: AppColors.primaryGreenTint),
-          const SizedBox(width: 4),
-          Text(
-            context.tr('sp_verified'),
-            style: AppTextStyles.cellText13.copyWith(
-              fontSize: 12,
-              color: AppColors.primaryGreenTint,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-class _PickerBox extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  const _PickerBox({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(12),
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: AppColors.textGrey),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              label,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.cellText13,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-class _Chip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback? onTap;
-  const _Chip({required this.label, this.selected = false, this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final fg = selected ? AppColors.primaryGreen : AppColors.textGrey;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(30),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.editIconBg : AppColors.surface,
-          borderRadius: BorderRadius.circular(30),
-          border: selected ? null : Border.all(color: AppColors.border),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.cellText13.copyWith(
-            color: fg,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
       ),
     );
   }

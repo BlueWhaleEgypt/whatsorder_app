@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-// import 'package:geolocator/geolocator.dart';
-import 'package:location/location.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/utils/logger.dart';
 
 class MapPickerPage extends StatefulWidget {
@@ -20,6 +20,9 @@ class _MapPickerPageState extends State<MapPickerPage>
   GoogleMapController? controller;
 
   LatLng? selectedLocation;
+
+  bool _isServiceDialogShowing = false;
+  bool _waitingForSettings = false;
 
   @override
   void initState() {
@@ -40,62 +43,87 @@ class _MapPickerPageState extends State<MapPickerPage>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && widget.initialLocation == null) {
       logger.i("App resumed");
+      _waitingForSettings = false;
       _loadCurrentLocation();
     }
   }
 
   Future<void> _loadCurrentLocation() async {
     try {
-      final location = Location();
-
       // هل خدمة الموقع شغالة؟
-      bool serviceEnabled = await location.serviceEnabled();
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
       logger.i("Service Enabled: $serviceEnabled");
 
       if (!serviceEnabled) {
-        // هيظهر Dialog للمستخدم
-        serviceEnabled = await location.requestService();
-
-        logger.i("After Request Service: $serviceEnabled");
-
-        if (!serviceEnabled) {
-          logger.w("User refused to enable location service");
-          return;
+        logger.w("Location service is disabled");
+        // Don't stack dialogs, and don't re-prompt while the user is in settings.
+        if (!_isServiceDialogShowing && !_waitingForSettings) {
+          await _showLocationServiceDialog();
         }
+        return;
       }
 
       // التحقق من البرمشن
-      PermissionStatus permission = await location.hasPermission();
+      LocationPermission permission = await Geolocator.checkPermission();
 
       logger.i("Permission: $permission");
 
-      if (permission == PermissionStatus.denied) {
-        permission = await location.requestPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
 
         logger.i("After Permission Request: $permission");
       }
 
-      if (permission != PermissionStatus.granted) {
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
         logger.w("Location permission denied");
         return;
       }
 
-      final locationData = await location.getLocation();
+      final position = await Geolocator.getCurrentPosition();
 
-      logger.i("Lat: ${locationData.latitude}, Lng: ${locationData.longitude}");
+      logger.i("Lat: ${position.latitude}, Lng: ${position.longitude}");
 
       if (!mounted) return;
 
       setState(() {
-        selectedLocation = LatLng(
-          locationData.latitude!,
-          locationData.longitude!,
-        );
+        selectedLocation = LatLng(position.latitude, position.longitude);
       });
     } catch (e, s) {
       logger.e(e);
       logger.e(s);
+    }
+  }
+
+  Future<void> _showLocationServiceDialog() async {
+    if (!mounted) return;
+    _isServiceDialogShowing = true;
+
+    final openSettings = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.tr('location_services_disabled')),
+        content: Text(context.tr('location_services_disabled_desc')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(ctx.tr('cancel')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(ctx.tr('open_settings')),
+          ),
+        ],
+      ),
+    );
+
+    _isServiceDialogShowing = false;
+
+    if (openSettings == true) {
+      _waitingForSettings = true;
+      await Geolocator.openLocationSettings();
     }
   }
 

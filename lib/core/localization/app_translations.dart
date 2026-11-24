@@ -230,6 +230,10 @@ const Map<String, Map<String, String>> kTranslations = {
         'You were signed out on this device, but the server could not be reached to end your session.',
     'logout_local_failed': 'Could not sign out. Please try again.',
     'cancel': 'Cancel',
+    'location_services_disabled': 'Location Services Disabled',
+    'location_services_disabled_desc':
+        'Please enable location services (GPS) to use your current location on the map.',
+    'open_settings': 'Open Settings',
     'no_Notifications': 'No Notifications',
     'terms_conditions': 'Terms & Conditions',
     //profile
@@ -685,6 +689,10 @@ const Map<String, Map<String, String>> kTranslations = {
         'تم تسجيل خروجك من هذا الجهاز، لكن تعذر الوصول إلى الخادم لإنهاء الجلسة.',
     'logout_local_failed': 'تعذر تسجيل الخروج. يرجى المحاولة مرة أخرى.',
     'cancel': 'إلغاء',
+    'location_services_disabled': 'خدمات الموقع معطّلة',
+    'location_services_disabled_desc':
+        'يرجى تفعيل خدمات الموقع (GPS) لاستخدام موقعك الحالي على الخريطة.',
+    'open_settings': 'فتح الإعدادات',
     'no_Notifications': "لا يوجد إشعارات",
     'terms_conditions': 'الشروط والأحكام',
     //profile

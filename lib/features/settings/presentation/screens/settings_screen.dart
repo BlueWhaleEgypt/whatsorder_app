@@ -136,6 +136,21 @@ class _SettingsView extends StatelessWidget {
             const SizedBox(height: 8),
             SettingsGroup(
               children: [
+                /// store profile
+                SettingsTile(
+                  icon: SvgPicture.asset(
+                    AppAssets.storeProfile,
+                    width: 20,
+                    height: 20,
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.primaryGreenTint,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  label: context.tr('store_profile'),
+                  onTap: () => _openStoreProfile(context),
+                ),
+
                 /// branches
                 SettingsTile(
                   icon: SvgPicture.asset(
@@ -150,21 +165,6 @@ class _SettingsView extends StatelessWidget {
                   label: context.tr('branches'),
                   onTap: () =>
                       Navigator.pushNamed(context, NamedRoutes.branches),
-                ),
-
-                /// store profile
-                SettingsTile(
-                  icon: SvgPicture.asset(
-                    AppAssets.storeProfile,
-                    width: 20,
-                    height: 20,
-                    colorFilter: const ColorFilter.mode(
-                      AppColors.primaryGreenTint,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                  label: context.tr('store_profile'),
-                  onTap: () => _openStoreProfile(context),
                 ),
 
                 /// products
@@ -310,7 +310,7 @@ class _SettingsView extends StatelessWidget {
             const SizedBox(height: 20),
 
             Text(
-              "v1.2.5+18",
+              "v1.2.6+20",
               style: AppTextStyles.cellMuted13.copyWith(
                 color: AppColors.textGrey,
               ),

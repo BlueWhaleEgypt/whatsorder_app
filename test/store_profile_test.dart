@@ -135,6 +135,18 @@ void main() {
       expect(p.address, '12 Tahrir St');
     });
 
+    test('copyWith replaces only the name and about', () {
+      final p = StoreProfile.fromJson(_vendorJson);
+      final c = p.copyWith(name: 'X', about: 'Y');
+
+      expect(c.name, 'X');
+      expect(c.about, 'Y');
+      expect(c.copyWith(), c);
+      expect(c.address, p.address);
+      expect(c.slug, p.slug);
+      expect(c.workingDays, p.workingDays);
+    });
+
     test('uses safe defaults for an empty payload', () {
       final p = StoreProfile.fromJson(const {});
 
@@ -277,53 +289,24 @@ void main() {
       expect(find.text('Home Appliances'), findsOneWidget);
     });
 
-    testWidgets('fills the form from the vendor, address included', (
-      tester,
-    ) async {
+    testWidgets('shows only the logo, name and about fields', (tester) async {
       await open(tester);
 
       expect(find.text('Home Appliances'), findsOneWidget);
       expect(find.text('About my store'), findsOneWidget);
-      expect(find.text('01012345678'), findsOneWidget);
-      expect(find.text('الحي العاشر، محافظة القاهرة'), findsOneWidget);
-      expect(find.text('Verified'), findsOneWidget);
+      expect(find.byType(AppTextField), findsNWidgets(2));
+      expect(find.text('01012345678'), findsNothing);
+      expect(find.text('الحي العاشر، محافظة القاهرة'), findsNothing);
+      expect(find.text('Kitchen'), findsNothing);
     });
 
-    testWidgets('shows the vendor sectors', (tester) async {
-      await open(tester);
-
-      expect(find.text('Kitchen'), findsOneWidget);
-      expect(find.text('Electronics'), findsOneWidget);
-    });
-
-    testWidgets('hides the sectors row when there are none', (tester) async {
-      adapter.getBody = {..._vendorJson, 'sectors': []};
-      await open(tester);
-
-      expect(find.text('Sectors'), findsNothing);
-    });
-
-    testWidgets('phone and address are not editable', (tester) async {
-      await open(tester);
-
-      bool enabledFor(String text) => tester
-          .widget<AppTextField>(
-            find.ancestor(
-              of: find.text(text),
-              matching: find.byType(AppTextField),
-            ),
-          )
-          .enabled;
-
-      expect(enabledFor('01012345678'), isFalse);
-      expect(enabledFor('الحي العاشر، محافظة القاهرة'), isFalse);
-      expect(enabledFor('Home Appliances'), isTrue);
-    });
-
-    testWidgets('save sends the edited name and the address', (tester) async {
+    testWidgets('save sends the edits and resends the hidden fields', (
+      tester,
+    ) async {
       await open(tester);
 
       await tester.enterText(find.text('Home Appliances'), 'New Name');
+      await tester.enterText(find.text('About my store'), 'New about');
       final save = find.byType(GradientButton);
       await tester.ensureVisible(save);
       await tester.tap(save);
@@ -332,7 +315,13 @@ void main() {
       final put = adapter.requests.singleWhere((r) => r.method == 'PUT');
       final f = _fields(put);
       expect(f['name'], ['New Name']);
+      expect(f['about'], ['New about']);
+      expect(f['slug'], ['elboray']);
       expect(f['address'], ['الحي العاشر، محافظة القاهرة']);
+      expect(f['opensAt'], ['09:30']);
+      expect(f['closesAt'], ['22:00']);
+      expect(f['deliveryFee'], ['30']);
+      expect(f['workingDays'], ['SATURDAY', 'SUNDAY']);
       expect(find.text('Changes saved'), findsOneWidget);
     });
 

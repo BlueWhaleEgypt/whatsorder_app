@@ -55,6 +55,29 @@ class StoreProfile extends Equatable {
     this.onlinePayment = false,
   });
 
+  /// The save endpoint requires the whole store record, so editing a few
+  /// fields means resending the loaded ones unchanged.
+  StoreProfile copyWith({String? name, String? about}) => StoreProfile(
+    name: name ?? this.name,
+    phone: phone,
+    verifiedPhone: verifiedPhone,
+    photo: photo,
+    slug: slug,
+    about: about ?? this.about,
+    address: address,
+    opensAt: opensAt,
+    closesAt: closesAt,
+    deliveryFee: deliveryFee,
+    workingDays: workingDays,
+    deliveryAreas: deliveryAreas,
+    sectors: sectors,
+    acceptNewOrders: acceptNewOrders,
+    showPrices: showPrices,
+    askForDeliveryAddress: askForDeliveryAddress,
+    cashOnDelivery: cashOnDelivery,
+    onlinePayment: onlinePayment,
+  );
+
   static String _hhmm(dynamic v, String fallback) {
     final s = v?.toString() ?? '';
     return s.length >= 5 ? s.substring(0, 5) : fallback;

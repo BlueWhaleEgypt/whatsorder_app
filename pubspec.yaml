@@ -2,7 +2,7 @@ name: whats_order
 
 description: "Flutter app scaffolded with Bloc + factory-based repository architecture."
 publish_to: 'none'
-version: 1.2.5+18
+version: 1.2.6+20
 
 environment:
   sdk: '>=3.8.0 <4.0.0'
@@ -46,7 +46,6 @@ dependencies:
   geocoding: ^5.0.1
   pinput: ^5.0.1
   cupertino_icons: ^1.0.6
-  location: ^10.2.0
   intl: ^0.20.2
 
   # PDF
