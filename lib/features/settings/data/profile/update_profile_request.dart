@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:whats_order/features/orders/data/vendor_model.dart';
 
 class UpdateProfileRequest {
-  /// Bundled image sent as the store photo when the store has none.
-  static const String placeholderAsset = 'assets/images/new_whats_icon.png';
+  /// Bundled placeholder uploaded for every image field the user did not
+  /// replace. The backend requires this exact multipart filename.
+  static const String noPhotoAsset = 'assets/images/noPhoto.jpeg';
+  static const String noPhotoFileName = 'noPhoto.jpeg';
 
   final String userId;
   final Map<String, dynamic> fields;

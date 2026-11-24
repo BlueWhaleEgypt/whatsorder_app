@@ -97,12 +97,23 @@ void main() {
       await tester.pumpAndSettle();
     }
 
+    Future<void> startEditing(WidgetTester tester) async {
+      final edit = find.text('EDIT');
+      await tester.ensureVisible(edit);
+      await tester.tap(edit);
+      await tester.pumpAndSettle();
+    }
+
     Future<void> tapSave(WidgetTester tester) async {
-      final save = find.byType(GradientButton);
+      final save = find.text('Save Changes');
       await tester.ensureVisible(save);
       await tester.tap(save);
       await tester.pumpAndSettle();
     }
+
+    bool fieldsEnabled(WidgetTester tester) => tester
+        .widgetList<AppTextField>(find.byType(AppTextField))
+        .every((f) => f.enabled);
 
     testWidgets('requests the vendor and shows a spinner until it loads', (
       tester,
@@ -130,6 +141,61 @@ void main() {
       expect(find.byType(AppTextField), findsNothing);
     });
 
+    testWidgets('fields are read-only until Edit is pressed', (tester) async {
+      await open(tester);
+
+      expect(fieldsEnabled(tester), isFalse);
+      expect(find.text('EDIT'), findsOneWidget);
+      expect(find.text('Save Changes'), findsNothing);
+      expect(find.text('Change'), findsNothing);
+
+      await startEditing(tester);
+
+      expect(fieldsEnabled(tester), isTrue);
+      expect(find.text('EDIT'), findsNothing);
+      expect(find.text('Save Changes'), findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+    });
+
+    testWidgets('Cancel discards the edits and goes back to read-only', (
+      tester,
+    ) async {
+      await open(tester);
+      await startEditing(tester);
+      await tester.enterText(find.text('Home Appliances'), 'Changed');
+      await tester.enterText(find.text('About my store'), 'Changed about');
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home Appliances'), findsOneWidget);
+      expect(find.text('About my store'), findsOneWidget);
+      expect(find.text('Changed'), findsNothing);
+      expect(fieldsEnabled(tester), isFalse);
+      expect(updateBloc.of<SubmitUpdateProfileEvent>(), isEmpty);
+    });
+
+    testWidgets('while saving the buttons are locked (no duplicate submit)', (
+      tester,
+    ) async {
+      await open(tester);
+      await startEditing(tester);
+
+      updateBloc.show(const UpdateProfileLoading());
+      await tester.pump();
+      await tester.pump();
+
+      expect(fieldsEnabled(tester), isFalse);
+      final cancel = tester.widget<OutlinedButton>(
+        find.widgetWithText(OutlinedButton, 'Cancel'),
+      );
+      expect(cancel.onPressed, isNull);
+
+      await tester.tap(find.byType(GradientButton), warnIfMissed: false);
+      await tester.pump();
+      expect(updateBloc.of<SubmitUpdateProfileEvent>(), isEmpty);
+    });
+
     testWidgets('shows the store name, about and rating', (tester) async {
       await open(tester);
 
@@ -149,6 +215,7 @@ void main() {
 
     testWidgets('save sends the edits through update profile', (tester) async {
       await open(tester);
+      await startEditing(tester);
 
       await tester.enterText(find.text('Home Appliances'), 'New Name');
       await tester.enterText(find.text('About my store'), 'New about');
@@ -169,6 +236,7 @@ void main() {
 
     testWidgets('an empty store name blocks the save', (tester) async {
       await open(tester);
+      await startEditing(tester);
 
       await tester.enterText(find.text('Home Appliances'), '');
       await tapSave(tester);
@@ -181,6 +249,7 @@ void main() {
       tester,
     ) async {
       await open(tester);
+      await startEditing(tester);
       expect(vendorBloc.of<FetchVendorEvent>(), hasLength(1));
 
       updateBloc.show(
@@ -189,6 +258,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Changes saved'), findsOneWidget);
+      expect(find.text('EDIT'), findsOneWidget); // back to read-only
+      expect(fieldsEnabled(tester), isFalse);
       expect(vendorBloc.of<FetchVendorEvent>(), hasLength(2));
     });
 
@@ -196,12 +267,15 @@ void main() {
       tester,
     ) async {
       await open(tester);
+      await startEditing(tester);
       await tester.enterText(find.text('Home Appliances'), 'Edited');
 
       updateBloc.show(const UpdateProfileError('no_internet'));
       await tester.pumpAndSettle();
 
       expect(find.text('Edited'), findsOneWidget);
+      expect(find.text('Save Changes'), findsOneWidget); // still editing
+      expect(fieldsEnabled(tester), isTrue);
       expect(vendorBloc.of<FetchVendorEvent>(), hasLength(1));
     });
 
@@ -236,6 +310,7 @@ void main() {
       tester,
     ) async {
       await open(tester, verified: false);
+      await startEditing(tester);
 
       await tester.tap(find.text('Change'));
       await tester.pumpAndSettle();

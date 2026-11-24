@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
@@ -26,8 +27,6 @@ class UpdateProfileResponse implements BaseRepository {
       return const Left(ServerFailure('invalid_request'));
     }
 
-    Directory? tempDirectory;
-
     try {
       final formData = FormData();
 
@@ -38,9 +37,11 @@ class UpdateProfileResponse implements BaseRepository {
         formData.fields.add(MapEntry(key, value?.toString() ?? ''));
       });
 
-      final downloadDio = Dio();
+      // Backend contract: a field the user did not replace must be sent as
+      // `noPhoto.jpeg`; the server then keeps its stored image. Existing
+      // images are never downloaded or re-uploaded under their old names.
+      Uint8List? noPhotoBytes;
 
-      // Add all existing or newly selected files as MultipartFile.
       for (final fieldName in _fileFields) {
         final newFile = request.files[fieldName];
 
@@ -55,66 +56,22 @@ class UpdateProfileResponse implements BaseRepository {
           formData.files.add(
             MapEntry(fieldName, await MultipartFile.fromFile(newFile.path)),
           );
-
-          // logger.w('$fieldName: using newly selected file');
           continue;
         }
 
-        final oldFileName = request.existingFileNames[fieldName];
-
-        // No previous image exists for this field.
-        if (oldFileName == null || oldFileName.isEmpty) {
-          // Stores without a photo get the bundled placeholder.
-          if (fieldName == 'storePhoto') {
-            final data = await rootBundle.load(
-              UpdateProfileRequest.placeholderAsset,
-            );
-            formData.files.add(
-              MapEntry(
-                fieldName,
-                MultipartFile.fromBytes(
-                  data.buffer.asUint8List(),
-                  filename: 'new_whats_icon.png',
-                ),
-              ),
-            );
-          }
-          // logger.w('$fieldName: no existing file');
-          continue;
-        }
-
-        // Download the previous image from /uploads/.
-        final imageUrl =
-            '${EndPoints.baseUrl}/uploads/'
-            '${Uri.encodeComponent(oldFileName)}';
-
-        final downloadResponse = await downloadDio.get<List<int>>(
-          imageUrl,
-          options: Options(responseType: ResponseType.bytes),
-        );
-
-        final bytes = downloadResponse.data;
-
-        if (bytes == null || bytes.isEmpty) {
-          throw Exception('Could not download existing file: $oldFileName');
-        }
-
-        tempDirectory ??= await Directory.systemTemp.createTemp(
-          'whats_order_profile_',
-        );
-
-        final tempFile = File('${tempDirectory.path}/$fieldName.tmp');
-
-        await tempFile.writeAsBytes(bytes, flush: true);
+        noPhotoBytes ??= (await rootBundle.load(
+          UpdateProfileRequest.noPhotoAsset,
+        )).buffer.asUint8List();
 
         formData.files.add(
           MapEntry(
             fieldName,
-            await MultipartFile.fromFile(tempFile.path, filename: oldFileName),
+            MultipartFile.fromBytes(
+              noPhotoBytes,
+              filename: UpdateProfileRequest.noPhotoFileName,
+            ),
           ),
         );
-
-        // logger.w('$fieldName: reusing existing file $oldFileName');
       }
 
       final url =
@@ -180,10 +137,6 @@ class UpdateProfileResponse implements BaseRepository {
       logger.e('Update profile exception: $e');
 
       return const Left(ServerFailure('something_went_wrong'));
-    } finally {
-      if (tempDirectory != null && await tempDirectory.exists()) {
-        await tempDirectory.delete(recursive: true);
-      }
     }
   }
 }

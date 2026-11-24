@@ -50,6 +50,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
 
   VendorModel? _vendor; // last loaded vendor
   File? _logo; // newly picked, not yet uploaded
+  bool _isEditing = false; // fields are read-only until Edit is pressed
 
   @override
   void initState() {
@@ -101,7 +102,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
   }
 
   Future<void> _pickLogo() async {
-    if (!await _ensureVerified()) return;
+    if (!_isEditing || !await _ensureVerified()) return;
     final x = await _picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 85,
@@ -112,6 +113,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
 
   void _save() {
     final vendor = _vendor;
+    // Ignore taps while a save is already in flight (no duplicate submits).
+    if (context.read<UpdateProfileBloc>().state is UpdateProfileLoading) return;
     if (vendor == null || !_formKey.currentState!.validate()) return;
     context.read<UpdateProfileBloc>().add(
       SubmitUpdateProfileEvent(
@@ -126,9 +129,19 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
     );
   }
 
+  /// Discards the unsaved edits and restores the last loaded values.
+  void _cancelEdit() {
+    final vendor = _vendor;
+    setState(() {
+      if (vendor != null) _fill(vendor);
+      _isEditing = false;
+    });
+  }
+
   void _onUpdateState(BuildContext context, UpdateProfileState state) {
     final messenger = ScaffoldMessenger.of(context);
     if (state is UpdateProfileSuccess) {
+      setState(() => _isEditing = false);
       context.read<VendorBloc>().add(const FetchVendorEvent());
       messenger.showSnackBar(
         SnackBar(
@@ -163,7 +176,9 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
         listener: _onUpdateState,
         child: BlocConsumer<VendorBloc, VendorState>(
           listener: (context, state) {
-            if (state is VendorLoaded && state.vendorResponse.vendor != null) {
+            if (state is VendorLoaded &&
+                state.vendorResponse.vendor != null &&
+                (!_isEditing || _vendor == null)) {
               setState(() => _fill(state.vendorResponse.vendor!));
             }
           },
@@ -206,6 +221,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                           url: (_vendor!.storePhoto ?? '').isEmpty
                               ? null
                               : '${EndPoints.baseUrl}/uploads/${Uri.encodeComponent(_vendor!.storePhoto!)}',
+                          editable: _isEditing && !saving,
                           onChange: _pickLogo,
                           onRemove: () => setState(() => _logo = null),
                         ),
@@ -251,6 +267,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                           label: context.tr('sp_store_name'),
                           required: true,
                           controller: _name,
+                          enabled: _isEditing && !saving,
                           validator: _required,
                           maxLength: 100,
                         ),
@@ -258,6 +275,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                         AppTextField(
                           label: context.tr('sp_about'),
                           controller: _about,
+                          enabled: _isEditing && !saving,
                           maxLines: 4,
                           maxLength: _maxAbout,
                         ),
@@ -275,11 +293,37 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                     ),
 
                     const SizedBox(height: 20),
-                    GradientButton(
-                      label: context.tr('sp_save'),
-                      loading: saving,
-                      onPressed: _save,
-                    ),
+                    if (!_isEditing)
+                      GradientButton(
+                        label: context.tr('edit_label'),
+                        onPressed: () => setState(() => _isEditing = true),
+                      )
+                    else
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: saving ? null : _cancelEdit,
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(52),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(context.tr('cancel')),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 2,
+                            child: GradientButton(
+                              label: context.tr('save_changes'),
+                              loading: saving,
+                              onPressed: saving ? () {} : _save,
+                            ),
+                          ),
+                        ],
+                      ),
                     const SizedBox(height: 24),
                   ],
                 ),
@@ -332,11 +376,13 @@ class _LogoRow extends StatelessWidget {
   final String? url;
   final VoidCallback onChange;
   final VoidCallback onRemove;
+  final bool editable;
   const _LogoRow({
     required this.file,
     required this.url,
     required this.onChange,
     required this.onRemove,
+    required this.editable,
   });
 
   @override
@@ -389,24 +435,26 @@ class _LogoRow extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(width: 8),
-        OutlinedButton(
-          onPressed: onChange,
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.primaryGreen,
-            side: const BorderSide(color: AppColors.border),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+        if (editable) ...[
+          const SizedBox(width: 8),
+          OutlinedButton(
+            onPressed: onChange,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primaryGreen,
+              side: const BorderSide(color: AppColors.border),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
+            child: Text(context.tr('sp_change')),
           ),
-          child: Text(context.tr('sp_change')),
-        ),
-        if (file != null)
-          TextButton(
-            onPressed: onRemove,
-            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
-            child: Text(context.tr('sp_remove')),
-          ),
+          if (file != null)
+            TextButton(
+              onPressed: onRemove,
+              style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+              child: Text(context.tr('sp_remove')),
+            ),
+        ],
       ],
     );
   }

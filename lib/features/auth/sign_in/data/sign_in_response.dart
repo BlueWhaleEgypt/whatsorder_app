@@ -9,7 +9,6 @@ import '../../../../core/cache/cache_keys.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/network/dio_helper.dart';
 import '../../../../core/network/end_points.dart';
-import '../../../../core/utils/logger.dart';
 import 'sign_in_request.dart';
 import 'user_model.dart';
 
@@ -74,28 +73,28 @@ class SignInResponse extends Equatable implements BaseRepository {
       // Check if phone is not verified.
       if (response.data is Map<String, dynamic> &&
           response.data['message'] == 'User phone not verified yet') {
-        logger.w("<<<<<<<<<<< SignIn >>>>>>>>> User phone not verified yet");
+        //logger.w("<<<<<<<<<<< SignIn >>>>>>>>> User phone not verified yet");
         return const Left(ServerFailure('User phone not verified yet'));
       }
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final signInResponse = SignInResponse.fromJson(response.data);
-        logger.i(
-          'Verification Status: ${signInResponse.user?.verificationStatus}',
-        );
-        logger.i('activation Status: ${signInResponse.user?.activation}');
+        // logger.i(
+        //   'Verification Status: ${signInResponse.user?.verificationStatus}',
+        // );
+        // logger.i('activation Status: ${signInResponse.user?.activation}');
         await CacheHelper.saveDataSharedPreference(
           key: CacheKeys.accessToken,
           value: signInResponse.accessToken,
         );
-        logger.e('<<<<<<<<<<< token >>>>>>>>> ${signInResponse.accessToken}');
+        //logger.e('<<<<<<<<<<< token >>>>>>>>> ${signInResponse.accessToken}');
         await CacheHelper.saveDataSharedPreference(
           key: CacheKeys.refreshToken,
           value: signInResponse.refreshToken,
         );
-        logger.w(
-          "<<<<<<<<<<< refreshToken >>>>>>>>> ${signInResponse.refreshToken}",
-        );
+        // logger.w(
+        //   "<<<<<<<<<<< refreshToken >>>>>>>>> ${signInResponse.refreshToken}",
+        // );
 
         await CacheHelper.saveDataSharedPreference(
           key: CacheKeys.userId,
@@ -136,8 +135,8 @@ class SignInResponse extends Equatable implements BaseRepository {
         return Left(ServerFailure("Error: $response"));
       }
     } on DioException catch (e) {
-      logger.e("Status Code: ${e.response?.statusCode}");
-      logger.e("Response: ${e.response?.data.toString()}");
+      //logger.e("Status Code: ${e.response?.statusCode}");
+      //logger.e("Response: ${e.response?.data.toString()}");
 
       String message = 'Something went wrong';
 
