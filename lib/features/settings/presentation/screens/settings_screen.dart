@@ -3,10 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:whats_order/core/constants/app_assets.dart';
-import 'package:whats_order/core/cache/cache_helper.dart';
-import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
-import 'package:whats_order/features/orders/presentation/screens/account_verification_screen.dart';
 import 'package:whats_order/features/orders/notification/presentation/bloc/notification_counter.dart';
 import 'package:whats_order/features/settings/presentation/bloc/event/logout_event.dart';
 import 'package:whats_order/features/settings/presentation/bloc/logout_bloc.dart';
@@ -83,35 +80,6 @@ class SettingsScreen extends StatelessWidget {
 }
 
 class _SettingsView extends StatelessWidget {
-  /// Opens the store profile for verified vendors (by the status cached after
-  /// the last vendor fetch); otherwise offers to verify the account first.
-  Future<void> _openStoreProfile(BuildContext context) async {
-    final isVerified =
-        CacheHelper.getDataFromSharedPreference(
-          key: CacheKeys.verificationStatus,
-        ) ==
-        'Verified';
-    if (isVerified) {
-      Navigator.pushNamed(context, NamedRoutes.storeProfile);
-      return;
-    }
-
-    final verify = await showSettingsConfirmationDialog(
-      context,
-      title: context.tr('store_profile'),
-      message: context.tr('store_profile_requires_verification'),
-      iconAsset: null,
-      color: AppColors.primaryGreen,
-      confirmLabel: context.tr('verify_account'),
-    );
-    if (verify == true && context.mounted) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const AccountVerificationScreen()),
-      );
-    }
-  }
-
   const _SettingsView();
 
   @override
@@ -148,7 +116,8 @@ class _SettingsView extends StatelessWidget {
                     ),
                   ),
                   label: context.tr('store_profile'),
-                  onTap: () => _openStoreProfile(context),
+                  onTap: () =>
+                      Navigator.pushNamed(context, NamedRoutes.storeProfile),
                 ),
 
                 /// branches

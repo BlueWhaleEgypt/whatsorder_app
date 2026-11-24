@@ -54,7 +54,9 @@ class VendorResponse extends Equatable implements BaseRepository {
 
       if (response.statusCode == 200) {
         final vendorResponse = VendorResponse.fromJson(response.data);
-        // logger.w("RAW VENDOR RESPONSE => ${response.data}");
+        logger.i(
+          'vendorResponse API response:\n${AppLogPrinter.formatJson(response.data)}',
+        );
         logger.i("Vendor ID Saved => ${vendorResponse.vendor?.id}");
         CacheHelper.saveDataSharedPreference(
           key: CacheKeys.vendorId,

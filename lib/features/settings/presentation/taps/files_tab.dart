@@ -63,6 +63,11 @@ class _FilesTabState extends State<FilesTab> {
     );
   }
 
+  /// Personal accounts have no commercial register: the card is the store's
+  /// front photo instead.
+  bool get _isPersonal =>
+      const {'personal', 'AccountType.person'}.contains(widget.vendor.type);
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<UpdateProfileBloc, UpdateProfileState>(
@@ -113,7 +118,11 @@ class _FilesTabState extends State<FilesTab> {
                 canEdit: canEdit,
               ),
               _buildFileCard(
-                title: context.tr('commercial_register_title'),
+                title: context.tr(
+                  _isPersonal
+                      ? 'front_store_photo'
+                      : 'commercial_register_title',
+                ),
                 fieldName: 'commercialRegister',
                 fileName: widget.vendor.commercialRegister,
                 icon: Icons.business_center_outlined,

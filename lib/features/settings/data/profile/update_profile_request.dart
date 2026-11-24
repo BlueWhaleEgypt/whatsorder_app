@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:whats_order/features/orders/data/vendor_model.dart';
 
 class UpdateProfileRequest {
+  /// Bundled image sent as the store photo when the store has none.
+  static const String placeholderAsset = 'assets/images/new_whats_icon.png';
+
   final String userId;
   final Map<String, dynamic> fields;
   final Map<String, File> files;
@@ -20,6 +23,10 @@ class UpdateProfileRequest {
     required VendorModel vendor,
     Map<String, dynamic> overrides = const {},
     Map<String, File> files = const {},
+    String? storeName,
+    String? storeAbout,
+    File? storePhoto,
+    String? existingStorePhoto,
   }) {
     final fields = <String, dynamic>{
       'firstName': vendor.firstName ?? '',
@@ -43,10 +50,16 @@ class UpdateProfileRequest {
 
     fields.addAll(overrides);
 
+    // Always resend the store fields: the PUT replaces the profile, so
+    // omitting them would clear them.
+    fields['storeName'] = storeName ?? vendor.storeName ?? '';
+    fields['storeAbout'] = storeAbout ?? vendor.storeAbout ?? '';
+
     // File fields must never be sent as String values.
     fields.remove('faceIdCard');
     fields.remove('backIdCard');
     fields.remove('commercialRegister');
+    fields.remove('storePhoto');
 
     final existingFileNames = <String, String>{
       if ((vendor.faceIdCard ?? '').trim().isNotEmpty)
@@ -55,12 +68,14 @@ class UpdateProfileRequest {
         'backIdCard': vendor.backIdCard!.trim(),
       if ((vendor.commercialRegister ?? '').trim().isNotEmpty)
         'commercialRegister': vendor.commercialRegister!.trim(),
+      if (((existingStorePhoto ?? vendor.storePhoto) ?? '').trim().isNotEmpty)
+        'storePhoto': (existingStorePhoto ?? vendor.storePhoto)!.trim(),
     };
 
     return UpdateProfileRequest(
       userId: userId,
       fields: fields,
-      files: files,
+      files: {...files, if (storePhoto != null) 'storePhoto': storePhoto},
       existingFileNames: existingFileNames,
     );
   }

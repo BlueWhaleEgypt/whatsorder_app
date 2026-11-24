@@ -53,7 +53,6 @@ class EndPoints {
   static const String epSaveNewPassword = '/api/auth/saveNewPassword';
   static const String epUpdateProfile = '/api/auth/updateProfile';
   // Store profile (PUT `/{userId}`)
-  static const String epStoreProfile = '/api/auth/storeProfile';
   // Branches
   static const String epAllBranches = '/api/branch/all';
   static const String epAddBranch = '/api/branch/add';

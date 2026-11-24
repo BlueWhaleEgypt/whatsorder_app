@@ -3,12 +3,20 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:whats_order/core/cache/cache_helper.dart';
+import 'package:whats_order/core/cache/cache_keys.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:whats_order/core/network/end_points.dart';
-import 'package:whats_order/features/settings/data/store_profile/store_profile_response.dart';
-import 'package:whats_order/features/settings/presentation/bloc/event/store_profile_event.dart';
-import 'package:whats_order/features/settings/presentation/bloc/states/store_profile_state.dart';
-import 'package:whats_order/features/settings/presentation/bloc/store_profile_bloc.dart';
+import 'package:whats_order/features/orders/data/vendor_model.dart';
+import 'package:whats_order/features/orders/presentation/screens/account_verification_screen.dart';
+import 'package:whats_order/features/settings/presentation/widgets/settings_confirmation_dialog.dart';
+import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
+import 'package:whats_order/features/orders/presentation/bloc/vendor_event.dart';
+import 'package:whats_order/features/orders/presentation/bloc/vendor_state.dart';
+import 'package:whats_order/features/settings/data/profile/update_profile_request.dart';
+import 'package:whats_order/features/settings/presentation/bloc/event/update_profile_event.dart';
+import 'package:whats_order/features/settings/presentation/bloc/states/update_profile_state.dart';
+import 'package:whats_order/features/settings/presentation/bloc/update_profile_bloc.dart';
 import 'package:whats_order/core/theme/app_colors.dart';
 import 'package:whats_order/core/theme/app_text_styles.dart';
 import 'package:whats_order/core/widgets/app_text_field.dart';
@@ -40,20 +48,20 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
   final _name = TextEditingController();
   final _about = TextEditingController();
 
-  StoreProfile? _profile; // last loaded / saved record
+  VendorModel? _vendor; // last loaded vendor
   File? _logo; // newly picked, not yet uploaded
 
   @override
   void initState() {
     super.initState();
     _about.addListener(() => setState(() {}));
-    context.read<StoreProfileBloc>().add(const LoadStoreProfileEvent());
+    context.read<VendorBloc>().add(const FetchVendorEvent());
   }
 
-  void _fill(StoreProfile p) {
-    _profile = p;
-    _name.text = p.name;
-    _about.text = p.about;
+  void _fill(VendorModel v) {
+    _vendor = v;
+    _name.text = v.storeName ?? '';
+    _about.text = v.storeAbout ?? '';
     _logo = null;
   }
 
@@ -65,7 +73,35 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
     super.dispose();
   }
 
+  /// Changing the store photo needs a verified account (by the status cached
+  /// after the last vendor fetch); otherwise offers to verify it first.
+  Future<bool> _ensureVerified() async {
+    final isVerified =
+        CacheHelper.getDataFromSharedPreference(
+          key: CacheKeys.verificationStatus,
+        ) ==
+        'Verified';
+    if (isVerified) return true;
+
+    final verify = await showSettingsConfirmationDialog(
+      context,
+      title: context.tr('store_profile'),
+      message: context.tr('store_photo_requires_verification'),
+      iconAsset: null,
+      color: AppColors.primaryGreen,
+      confirmLabel: context.tr('verify_account'),
+    );
+    if (verify == true && mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const AccountVerificationScreen()),
+      );
+    }
+    return false;
+  }
+
   Future<void> _pickLogo() async {
+    if (!await _ensureVerified()) return;
     final x = await _picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 85,
@@ -75,29 +111,32 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
   }
 
   void _save() {
-    final profile = _profile;
-    if (profile == null || !_formKey.currentState!.validate()) return;
-    context.read<StoreProfileBloc>().add(
-      SaveStoreProfileEvent(
-        profile.copyWith(name: _name.text.trim(), about: _about.text.trim()),
-        newPhoto: _logo,
+    final vendor = _vendor;
+    if (vendor == null || !_formKey.currentState!.validate()) return;
+    context.read<UpdateProfileBloc>().add(
+      SubmitUpdateProfileEvent(
+        request: UpdateProfileRequest.fromVendor(
+          userId: vendor.id ?? '',
+          vendor: vendor,
+          storeName: _name.text.trim(),
+          storeAbout: _about.text.trim(),
+          storePhoto: _logo,
+        ),
       ),
     );
   }
 
-  void _onState(BuildContext context, StoreProfileState state) {
+  void _onUpdateState(BuildContext context, UpdateProfileState state) {
     final messenger = ScaffoldMessenger.of(context);
-    if (state is StoreProfileLoaded) {
-      setState(() => _fill(state.profile));
-    } else if (state is StoreProfileSaved) {
-      setState(() => _fill(state.profile));
+    if (state is UpdateProfileSuccess) {
+      context.read<VendorBloc>().add(const FetchVendorEvent());
       messenger.showSnackBar(
         SnackBar(
           content: Text(context.tr('sp_saved')),
           backgroundColor: AppColors.primaryGreenTint,
         ),
       );
-    } else if (state is StoreProfileError && state.whileSaving) {
+    } else if (state is UpdateProfileError) {
       messenger.showSnackBar(
         SnackBar(
           content: Text(context.trMessage(state.message)),
@@ -120,88 +159,134 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
           style: AppTextStyles.heading18,
         ),
       ),
-      body: BlocConsumer<StoreProfileBloc, StoreProfileState>(
-        listener: _onState,
-        builder: (context, state) {
-          if (_profile == null) {
-            if (state is StoreProfileError) {
-              return Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(context.trMessage(state.message)),
-                    TextButton(
-                      onPressed: () => context.read<StoreProfileBloc>().add(
-                        const LoadStoreProfileEvent(),
-                      ),
-                      child: Text(context.tr('retry')),
-                    ),
-                  ],
-                ),
-              );
+      body: BlocListener<UpdateProfileBloc, UpdateProfileState>(
+        listener: _onUpdateState,
+        child: BlocConsumer<VendorBloc, VendorState>(
+          listener: (context, state) {
+            if (state is VendorLoaded && state.vendorResponse.vendor != null) {
+              setState(() => _fill(state.vendorResponse.vendor!));
             }
-            return const Center(child: CircularProgressIndicator());
-          }
-          final saving = state is StoreProfileSaving;
-          return SafeArea(
-            child: Form(
-              key: _formKey,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  // ── Store identity ──────────────────────────────────────────
-                  _SectionCard(
-                    title: context.tr('sp_identity'),
-                    subtitle: context.tr('sp_identity_sub'),
+          },
+          builder: (context, state) {
+            if (_vendor == null) {
+              if (state is VendorError) {
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      _LogoRow(
-                        file: _logo,
-                        url: _profile!.photo == null
-                            ? null
-                            : '${EndPoints.baseUrl}/uploads/${Uri.encodeComponent(_profile!.photo!)}',
-                        onChange: _pickLogo,
-                        onRemove: () => setState(() => _logo = null),
-                      ),
-                      const SizedBox(height: 16),
-                      AppTextField(
-                        label: context.tr('sp_store_name'),
-                        required: true,
-                        controller: _name,
-                        validator: _required,
-                        maxLength: 100,
-                      ),
-                      const SizedBox(height: 14),
-                      AppTextField(
-                        label: context.tr('sp_about'),
-                        controller: _about,
-                        maxLines: 4,
-                        maxLength: _maxAbout,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        context.tr('sp_about_hint', {
-                          'count': '${_about.text.length}',
-                          'max': '$_maxAbout',
-                        }),
-                        style: AppTextStyles.cellMuted13.copyWith(
-                          fontSize: 11.5,
+                      Text(context.trMessage(state.message)),
+                      TextButton(
+                        onPressed: () => context.read<VendorBloc>().add(
+                          const FetchVendorEvent(),
                         ),
+                        child: Text(context.tr('retry')),
                       ),
                     ],
                   ),
+                );
+              }
+              return const Center(child: CircularProgressIndicator());
+            }
+            final saving =
+                context.watch<UpdateProfileBloc>().state
+                    is UpdateProfileLoading;
+            return SafeArea(
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    // ── Store identity ──────────────────────────────────────────
+                    _SectionCard(
+                      title: context.tr('sp_identity'),
+                      subtitle: context.tr('sp_identity_sub'),
+                      children: [
+                        _LogoRow(
+                          file: _logo,
+                          url: (_vendor!.storePhoto ?? '').isEmpty
+                              ? null
+                              : '${EndPoints.baseUrl}/uploads/${Uri.encodeComponent(_vendor!.storePhoto!)}',
+                          onChange: _pickLogo,
+                          onRemove: () => setState(() => _logo = null),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.mapGreenLight,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.primaryGreenLight,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.star_rounded,
+                                color: Color(0xFFFFB800),
+                                size: 22,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                context.tr('sp_rating'),
+                                style: AppTextStyles.cellText13.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                (_vendor!.rate ?? 0).toStringAsFixed(1),
+                                style: AppTextStyles.cardTitle15.copyWith(
+                                  color: AppColors.primaryGreen,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        AppTextField(
+                          label: context.tr('sp_store_name'),
+                          required: true,
+                          controller: _name,
+                          validator: _required,
+                          maxLength: 100,
+                        ),
+                        const SizedBox(height: 14),
+                        AppTextField(
+                          label: context.tr('sp_about'),
+                          controller: _about,
+                          maxLines: 4,
+                          maxLength: _maxAbout,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          context.tr('sp_about_hint', {
+                            'count': '${_about.text.length}',
+                            'max': '$_maxAbout',
+                          }),
+                          style: AppTextStyles.cellMuted13.copyWith(
+                            fontSize: 11.5,
+                          ),
+                        ),
+                      ],
+                    ),
 
-                  const SizedBox(height: 20),
-                  GradientButton(
-                    label: context.tr('sp_save'),
-                    loading: saving,
-                    onPressed: _save,
-                  ),
-                  const SizedBox(height: 24),
-                ],
+                    const SizedBox(height: 20),
+                    GradientButton(
+                      label: context.tr('sp_save'),
+                      loading: saving,
+                      onPressed: _save,
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -259,11 +344,12 @@ class _LogoRow extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 64,
-          height: 64,
+          width: 70,
+          height: 70,
           decoration: const BoxDecoration(
             color: AppColors.editIconBg,
-            shape: BoxShape.circle,
+            shape: BoxShape.rectangle,
+            borderRadius: BorderRadius.all(Radius.circular(12)),
           ),
           clipBehavior: Clip.antiAlias,
           child: file != null

@@ -7,7 +7,6 @@ import 'package:whats_order/core/widgets/map_picker_field.dart';
 import 'package:whats_order/features/auth/sign_up/presentation/screens/widgets/map_picker_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whats_order/core/localization/app_localizations.dart';
-import 'package:whats_order/core/theme/app_colors.dart';
 import 'package:whats_order/core/widgets/app_text_field.dart';
 import 'package:whats_order/core/widgets/gradient_button.dart';
 import 'package:whats_order/features/orders/data/vendor_model.dart';
@@ -26,10 +25,17 @@ class LocationTab extends StatefulWidget {
 }
 
 class _LocationTabState extends State<LocationTab> {
+  // Full street address resolved from the coordinates (display only).
+  final TextEditingController addressController = TextEditingController();
+
   late final TextEditingController latitudeController;
   late final TextEditingController longitudeController;
   late final TextEditingController cityController;
   late final TextEditingController stateController;
+  late final TextEditingController streetController;
+  late final TextEditingController buildingController;
+  late final TextEditingController areaController;
+  late final TextEditingController neighborhoodController;
   late final TextEditingController serviceDistanceController;
 
   late bool servingTheEntireGovernorate;
@@ -59,6 +65,18 @@ class _LocationTabState extends State<LocationTab> {
     stateController = TextEditingController(
       text: widget.vendor.state?.trim() ?? '',
     );
+    streetController = TextEditingController(
+      text: widget.vendor.street?.trim() ?? '',
+    );
+    buildingController = TextEditingController(
+      text: widget.vendor.building?.trim() ?? '',
+    );
+    areaController = TextEditingController(
+      text: widget.vendor.area?.trim() ?? '',
+    );
+    neighborhoodController = TextEditingController(
+      text: widget.vendor.neighborhood?.trim() ?? '',
+    );
 
     serviceDistanceController = TextEditingController(
       text: widget.vendor.serviceDistance?.toString() ?? '',
@@ -70,6 +88,7 @@ class _LocationTabState extends State<LocationTab> {
     availableInAllRegions = widget.vendor.availableInAllRegions ?? false;
 
     _snapshot();
+    _resolveAddress(widget.vendor.latitude, widget.vendor.longitude);
   }
 
   @override
@@ -80,8 +99,13 @@ class _LocationTabState extends State<LocationTab> {
     if (widget.vendor != oldWidget.vendor && !_isEditing) {
       latitudeController.text = widget.vendor.latitude?.toString() ?? '';
       longitudeController.text = widget.vendor.longitude?.toString() ?? '';
+      _resolveAddress(widget.vendor.latitude, widget.vendor.longitude);
       cityController.text = widget.vendor.city?.trim() ?? '';
       stateController.text = widget.vendor.state?.trim() ?? '';
+      streetController.text = widget.vendor.street?.trim() ?? '';
+      buildingController.text = widget.vendor.building?.trim() ?? '';
+      areaController.text = widget.vendor.area?.trim() ?? '';
+      neighborhoodController.text = widget.vendor.neighborhood?.trim() ?? '';
       serviceDistanceController.text =
           widget.vendor.serviceDistance?.toString() ?? '';
       servingTheEntireGovernorate =
@@ -98,6 +122,10 @@ class _LocationTabState extends State<LocationTab> {
       'lng': longitudeController.text,
       'city': cityController.text,
       'state': stateController.text,
+      'street': streetController.text,
+      'building': buildingController.text,
+      'area': areaController.text,
+      'neighborhood': neighborhoodController.text,
       'distance': serviceDistanceController.text,
     };
     _savedSwitches = [
@@ -113,6 +141,10 @@ class _LocationTabState extends State<LocationTab> {
       longitudeController.text = _savedTexts['lng']!;
       cityController.text = _savedTexts['city']!;
       stateController.text = _savedTexts['state']!;
+      streetController.text = _savedTexts['street']!;
+      buildingController.text = _savedTexts['building']!;
+      areaController.text = _savedTexts['area']!;
+      neighborhoodController.text = _savedTexts['neighborhood']!;
       serviceDistanceController.text = _savedTexts['distance']!;
       servingTheEntireGovernorate = _savedSwitches[0];
       servingTheEntireArea = _savedSwitches[1];
@@ -123,10 +155,15 @@ class _LocationTabState extends State<LocationTab> {
 
   @override
   void dispose() {
+    addressController.dispose();
     latitudeController.dispose();
     longitudeController.dispose();
     cityController.dispose();
     stateController.dispose();
+    streetController.dispose();
+    buildingController.dispose();
+    areaController.dispose();
+    neighborhoodController.dispose();
     serviceDistanceController.dispose();
     super.dispose();
   }
@@ -158,13 +195,48 @@ class _LocationTabState extends State<LocationTab> {
       );
       if (placemarks.isNotEmpty && mounted) {
         final place = placemarks.first;
+        addressController.text = _buildAddress(place);
         setState(() {
           cityController.text = place.locality ?? '';
           stateController.text = place.administrativeArea ?? '';
+          streetController.text = place.street ?? place.thoroughfare ?? '';
+          buildingController.text = place.subThoroughfare ?? '';
+          areaController.text = place.subAdministrativeArea ?? '';
+          neighborhoodController.text = place.subLocality ?? '';
         });
       }
     } catch (e) {
       logger.e(e);
+    }
+  }
+
+  /// Joins the placemark parts, skipping empty and repeated values.
+  String _buildAddress(Placemark p) {
+    final parts = <String>[];
+    for (final v in [
+      p.street,
+      p.subLocality,
+      p.locality,
+      p.administrativeArea,
+      p.postalCode,
+      p.country,
+    ]) {
+      final s = v?.trim() ?? '';
+      if (s.isNotEmpty && !parts.contains(s)) parts.add(s);
+    }
+    return parts.join(', ');
+  }
+
+  Future<void> _resolveAddress(double? lat, double? lng) async {
+    if (lat == null || lng == null || lat.abs() > 90 || lng.abs() > 180) {
+      return;
+    }
+    try {
+      final places = await geocoding.placemarkFromCoordinates(lat, lng);
+      if (places.isEmpty || !mounted) return;
+      addressController.text = _buildAddress(places.first);
+    } catch (e) {
+      logger.e('Address lookup failed: $e');
     }
   }
 
@@ -202,6 +274,10 @@ class _LocationTabState extends State<LocationTab> {
             if (serviceDistance != null) 'serviceDistance': serviceDistance,
             'city': cityController.text.trim(),
             'state': stateController.text.trim(),
+            'street': streetController.text.trim(),
+            'building': buildingController.text.trim(),
+            'area': areaController.text.trim(),
+            'neighborhood': neighborhoodController.text.trim(),
             'servingTheEntireGovernorate': servingTheEntireGovernorate,
             'servingTheEntireArea': servingTheEntireArea,
             'availableInAllRegions': availableInAllRegions,
@@ -252,24 +328,11 @@ class _LocationTabState extends State<LocationTab> {
                 onTap: canEdit ? _pickLocation : () {},
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _field(
-                      label: context.tr('latitude'),
-                      controller: latitudeController,
-                      enabled: false,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: _field(
-                      label: context.tr('longitude'),
-                      controller: longitudeController,
-                      enabled: false,
-                    ),
-                  ),
-                ],
+              AppTextField(
+                label: context.tr('location'),
+                hint: context.tr('location'),
+                controller: addressController,
+                enabled: false,
               ),
               const SizedBox(height: 16),
               Row(
@@ -288,6 +351,50 @@ class _LocationTabState extends State<LocationTab> {
                       label: context.tr('state'),
                       hint: context.tr('state'),
                       controller: stateController,
+                      enabled: canEdit,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppTextField(
+                      label: context.tr('area'),
+                      hint: context.tr('area'),
+                      controller: areaController,
+                      enabled: canEdit,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: AppTextField(
+                      label: context.tr('neighborhood'),
+                      hint: context.tr('neighborhood'),
+                      controller: neighborhoodController,
+                      enabled: canEdit,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppTextField(
+                      label: context.tr('street'),
+                      hint: context.tr('street'),
+                      controller: streetController,
+                      enabled: canEdit,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: AppTextField(
+                      label: context.tr('building'),
+                      hint: context.tr('building'),
+                      controller: buildingController,
                       enabled: canEdit,
                     ),
                   ),
@@ -361,28 +468,6 @@ class _LocationTabState extends State<LocationTab> {
           ),
         );
       },
-    );
-  }
-
-  Widget _field({
-    required String label,
-    required TextEditingController controller,
-    required bool enabled,
-  }) {
-    return TextFormField(
-      controller: controller,
-      enabled: enabled,
-      readOnly: true,
-      keyboardType: const TextInputType.numberWithOptions(
-        decimal: true,
-        signed: true,
-      ),
-      decoration: InputDecoration(
-        labelText: label,
-        filled: true,
-        fillColor: AppColors.surface,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      ),
     );
   }
 }

@@ -18,7 +18,6 @@ import 'package:whats_order/features/settings/data/product/products_response.dar
 import 'package:whats_order/features/settings/data/phone/change_phone_response.dart';
 import 'package:whats_order/features/settings/data/profile/update_profile_response.dart';
 import 'package:whats_order/features/settings/data/sector/sector_tap_response.dart';
-import 'package:whats_order/features/settings/data/store_profile/store_profile_response.dart';
 import 'package:whats_order/features/wallet/data/transaction_response.dart';
 import 'package:whats_order/features/wallet/data/wallet_response.dart';
 import '../core/error/failures.dart';
@@ -77,8 +76,6 @@ abstract class BaseRepository {
     if (responseType == 'SectorTapResponse') return const SectorTapResponse();
     if (responseType == 'UpdateProfileResponse') return UpdateProfileResponse();
 
-    if (responseType == 'StoreProfileResponse')
-      return const StoreProfileResponse();
     if (responseType == 'ProductsResponse') return const ProductsResponse();
     if (responseType == 'UpdateProductResponse') {
       return const UpdateProductResponse();

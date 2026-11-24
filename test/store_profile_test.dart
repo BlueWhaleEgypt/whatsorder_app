@@ -1,367 +1,250 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:whats_order/core/cache/cache_keys.dart';
-import 'package:whats_order/core/network/dio_helper.dart';
-import 'package:whats_order/core/network/end_points.dart';
-import 'package:whats_order/core/network/network_info.dart';
 import 'package:whats_order/core/widgets/app_text_field.dart';
 import 'package:whats_order/core/widgets/gradient_button.dart';
-import 'package:whats_order/features/settings/data/store_profile/store_profile_response.dart';
-import 'package:whats_order/features/settings/presentation/bloc/event/store_profile_event.dart';
-import 'package:whats_order/features/settings/presentation/bloc/states/store_profile_state.dart';
-import 'package:whats_order/features/settings/presentation/bloc/store_profile_bloc.dart';
+import 'package:whats_order/features/orders/data/vendor_model.dart';
+import 'package:whats_order/features/orders/data/vendor_response.dart';
+import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
+import 'package:whats_order/features/orders/presentation/bloc/vendor_event.dart';
+import 'package:whats_order/features/orders/presentation/bloc/vendor_state.dart';
+import 'package:whats_order/features/settings/data/profile/update_profile_request.dart';
+import 'package:whats_order/features/settings/presentation/bloc/event/update_profile_event.dart';
+import 'package:whats_order/features/settings/presentation/bloc/states/update_profile_state.dart';
+import 'package:whats_order/features/settings/presentation/bloc/update_profile_bloc.dart';
 import 'package:whats_order/features/settings/presentation/screens/store_profile_screen.dart';
 
 import 'helpers/harness.dart';
 
-/// Vendor payload as the server returns it: no dedicated address field, only
-/// the location parts.
-const _vendorJson = {
-  'id': 'v1',
-  'firstName': 'Ahmed',
-  'lastName': 'Ali',
-  'companyName': 'Home Appliances',
-  'phone': '01012345678',
-  'verifiedPhone': true,
-  'storeSlug': 'elboray',
-  'storeAbout': 'About my store',
-  'storeOpensAt': '09:30:00',
-  'storeClosesAt': '22:00',
-  'storeDeliveryFee': 30,
-  'workingDays': ['saturday', 'SUNDAY'],
-  'city': 'الحي العاشر',
-  'state': 'محافظة القاهرة',
-  'street': '',
-  'building': '',
-  'sectors': [
-    {'id': '1', 'name': 'Kitchen'},
-    {'id': '2', 'name': 'Electronics'},
-  ],
-};
-
-class _Adapter implements HttpClientAdapter {
-  int getStatus = 200;
-  int putStatus = 200;
-  Object getBody = _vendorJson;
-  Completer<void>? gate;
-  final requests = <RequestOptions>[];
-
-  @override
-  Future<ResponseBody> fetch(
-    RequestOptions options,
-    Stream<Uint8List>? requestStream,
-    Future<void>? cancelFuture,
-  ) async {
-    requests.add(options);
-    await gate?.future;
-    final isGet = options.method == 'GET';
-    final status = isGet ? getStatus : putStatus;
-    final body = status >= 400
-        ? {'message': 'server says no'}
-        : (isGet ? getBody : _vendorJson);
-    return ResponseBody.fromString(
-      jsonEncode(body),
-      status,
-      headers: {
-        Headers.contentTypeHeader: [Headers.jsonContentType],
-      },
-    );
-  }
-
-  @override
-  void close({bool force = false}) {}
-}
-
-class _Network implements NetworkInfo {
-  bool connected = true;
-  @override
-  Future<bool> get isConnected async => connected;
-}
-
-Map<String, List<String>> _fields(RequestOptions r) {
-  final out = <String, List<String>>{};
-  for (final e in (r.data as FormData).fields) {
-    out.putIfAbsent(e.key, () => []).add(e.value);
-  }
-  return out;
-}
+const _vendor = VendorModel(
+  id: 'v1',
+  firstName: 'Ahmed',
+  lastName: 'Ali',
+  phone: '01012345678',
+  email: 'a@b.com',
+  city: 'Cairo',
+  rate: 4.5,
+  faceIdCard: 'face.jpg',
+  storeName: 'Home Appliances',
+  storeAbout: 'About my store',
+  storePhoto: 'photo.jpg',
+);
 
 void main() {
-  late _Adapter adapter;
-  late _Network network;
-
-  setUp(() async {
-    await initPrefs({CacheKeys.userModel: '{"id":"v1"}'});
-    adapter = _Adapter();
-    network = _Network();
-    DioHelper.dio = Dio(BaseOptions(baseUrl: EndPoints.baseUrl))
-      ..httpClientAdapter = adapter;
-  });
-
-  group('StoreProfile.fromJson', () {
-    test('maps the store fields and trims times to HH:mm', () {
-      final p = StoreProfile.fromJson(_vendorJson);
-
-      expect(p.name, 'Home Appliances');
-      expect(p.slug, 'elboray');
-      expect(p.about, 'About my store');
-      expect(p.opensAt, '09:30');
-      expect(p.closesAt, '22:00');
-      expect(p.deliveryFee, 30);
-      expect(p.verifiedPhone, isTrue);
-      expect(p.workingDays, ['SATURDAY', 'SUNDAY']);
-      expect(p.sectors, ['Kitchen', 'Electronics']);
+  group('UpdateProfileRequest store fields', () {
+    test('resends the vendor store fields when none are given', () {
+      final r = UpdateProfileRequest.fromVendor(userId: 'v1', vendor: _vendor);
+      expect(r.fields['storeName'], 'Home Appliances');
+      expect(r.fields['storeAbout'], 'About my store');
+      expect(r.fields.containsKey('storePhoto'), isFalse);
+      expect(r.existingFileNames['storePhoto'], 'photo.jpg');
+      expect(r.existingFileNames['faceIdCard'], 'face.jpg');
     });
 
-    test('builds the address from the location parts, skipping empties', () {
-      expect(
-        StoreProfile.fromJson(_vendorJson).address,
-        'الحي العاشر، محافظة القاهرة',
+    test('explicit values override the vendor ones', () {
+      final r = UpdateProfileRequest.fromVendor(
+        userId: 'v1',
+        vendor: _vendor,
+        storeName: 'New',
+        storeAbout: 'New about',
       );
+      expect(r.fields['storeName'], 'New');
+      expect(r.fields['storeAbout'], 'New about');
     });
 
-    test('prefers a dedicated storeAddress when the server sends one', () {
-      final p = StoreProfile.fromJson(const {
-        ..._vendorJson,
-        'storeAddress': '12 Tahrir St',
-      });
-
-      expect(p.address, '12 Tahrir St');
-    });
-
-    test('copyWith replaces only the name and about', () {
-      final p = StoreProfile.fromJson(_vendorJson);
-      final c = p.copyWith(name: 'X', about: 'Y');
-
-      expect(c.name, 'X');
-      expect(c.about, 'Y');
-      expect(c.copyWith(), c);
-      expect(c.address, p.address);
-      expect(c.slug, p.slug);
-      expect(c.workingDays, p.workingDays);
-    });
-
-    test('uses safe defaults for an empty payload', () {
-      final p = StoreProfile.fromJson(const {});
-
-      expect(p.address, '');
-      expect(p.opensAt, '10:00');
-      expect(p.sectors, isEmpty);
-      expect(p.workingDays, isEmpty);
-    });
-  });
-
-  group('StoreProfileBloc', () {
-    late StoreProfileBloc bloc;
-    late List<StoreProfileState> emitted;
-
-    setUp(() {
-      bloc = StoreProfileBloc(network);
-      emitted = [];
-      bloc.stream.listen(emitted.add);
-    });
-
-    tearDown(() => bloc.close());
-
-    Future<void> run(StoreProfileEvent e) async {
-      bloc.add(e);
-      await bloc.stream
-          .firstWhere(
-            (s) => s is! StoreProfileLoading && s is! StoreProfileSaving,
-          )
-          .timeout(const Duration(seconds: 5));
-    }
-
-    test('load fetches the vendor by the cached id', () async {
-      await run(const LoadStoreProfileEvent());
-
-      expect(emitted.first, const StoreProfileLoading());
-      expect(emitted.last, isA<StoreProfileLoaded>());
-      expect(adapter.requests.single.method, 'GET');
-      expect(adapter.requests.single.uri.path, endsWith('/vendors/v1'));
-    });
-
-    test('load failure is reported, not as a save failure', () async {
-      adapter.getStatus = 500;
-
-      await run(const LoadStoreProfileEvent());
-
-      final s = emitted.last as StoreProfileError;
-      expect(s.message, 'server says no');
-      expect(s.whileSaving, isFalse);
-    });
-
-    test('load while offline makes no request', () async {
-      network.connected = false;
-
-      await run(const LoadStoreProfileEvent());
-
-      expect(emitted.last, const StoreProfileError('no_internet'));
-      expect(adapter.requests, isEmpty);
-    });
-
-    test('save PUTs only storeProfile with every required field', () async {
-      final profile = StoreProfile.fromJson(_vendorJson);
-
-      await run(SaveStoreProfileEvent(profile));
-
-      expect(emitted, [const StoreProfileSaving(), isA<StoreProfileSaved>()]);
-      expect(adapter.requests, hasLength(1));
-      final r = adapter.requests.single;
-      expect(r.method, 'PUT');
-      expect(r.uri.path, endsWith('/api/auth/storeProfile/v1'));
-
-      final f = _fields(r);
-      expect(f['name'], ['Home Appliances']);
-      expect(f['slug'], ['elboray']);
-      expect(f['about'], ['About my store']);
-      expect(f['address'], ['الحي العاشر، محافظة القاهرة']);
-      expect(f['opensAt'], ['09:30']);
-      expect(f['closesAt'], ['22:00']);
-      expect(f['deliveryFee'], ['30']);
-      expect(f['workingDays'], ['SATURDAY', 'SUNDAY']);
-      expect((r.data as FormData).files, isEmpty);
-    });
-
-    test('save failure keeps the whileSaving flag for the form', () async {
-      adapter.putStatus = 400;
-
-      await run(SaveStoreProfileEvent(StoreProfile.fromJson(_vendorJson)));
-
-      final s = emitted.last as StoreProfileError;
-      expect(s.whileSaving, isTrue);
-      expect(s.message, 'server says no');
-    });
-
-    test('save without a cached user is rejected before any request', () async {
-      await initPrefs();
-
-      await run(SaveStoreProfileEvent(StoreProfile.fromJson(_vendorJson)));
-
-      expect(
-        (emitted.last as StoreProfileError).message,
-        'current_user_not_identified',
+    test('a vendor without store data sends empty strings, no photo name', () {
+      final r = UpdateProfileRequest.fromVendor(
+        userId: 'v1',
+        vendor: const VendorModel(id: 'v1'),
       );
-      expect(adapter.requests, isEmpty);
+      expect(r.fields['storeName'], '');
+      expect(r.fields['storeAbout'], '');
+      expect(r.existingFileNames.containsKey('storePhoto'), isFalse);
     });
   });
 
   group('StoreProfileScreen', () {
-    Future<void> open(WidgetTester tester) async {
+    late RecordingVendorBloc vendorBloc;
+    late RecordingUpdateProfileBloc updateBloc;
+
+    Future<void> open(
+      WidgetTester tester, {
+      VendorModel vendor = _vendor,
+      bool verified = true,
+    }) async {
+      await initPrefs({
+        CacheKeys.verificationStatus: verified ? 'Verified' : 'Pending',
+      });
       useTallScreen(tester);
+      vendorBloc = RecordingVendorBloc();
+      updateBloc = RecordingUpdateProfileBloc();
       await tester.pumpWidget(
         localizedApp(
-          BlocProvider(
-            create: (_) => StoreProfileBloc(network),
+          MultiBlocProvider(
+            providers: [
+              BlocProvider<VendorBloc>.value(value: vendorBloc),
+              BlocProvider<UpdateProfileBloc>.value(value: updateBloc),
+            ],
             child: const StoreProfileScreen(),
           ),
         ),
       );
+      await tester.pump();
+      vendorBloc.show(
+        VendorLoaded(vendorResponse: VendorResponse(vendor: vendor)),
+      );
       await tester.pumpAndSettle();
     }
 
-    testWidgets('shows a spinner until the data arrives', (tester) async {
-      adapter.gate = Completer<void>();
+    Future<void> tapSave(WidgetTester tester) async {
+      final save = find.byType(GradientButton);
+      await tester.ensureVisible(save);
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('requests the vendor and shows a spinner until it loads', (
+      tester,
+    ) async {
+      await initPrefs();
       useTallScreen(tester);
+      vendorBloc = RecordingVendorBloc();
       await tester.pumpWidget(
         localizedApp(
-          BlocProvider(
-            create: (_) => StoreProfileBloc(network),
+          MultiBlocProvider(
+            providers: [
+              BlocProvider<VendorBloc>.value(value: vendorBloc),
+              BlocProvider<UpdateProfileBloc>.value(
+                value: RecordingUpdateProfileBloc(),
+              ),
+            ],
             child: const StoreProfileScreen(),
           ),
         ),
       );
       await tester.pump();
 
+      expect(vendorBloc.of<FetchVendorEvent>(), hasLength(1));
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.byType(AppTextField), findsNothing);
-
-      adapter.gate!.complete();
-      await tester.pumpAndSettle();
-
-      expect(find.byType(CircularProgressIndicator), findsNothing);
-      expect(find.text('Home Appliances'), findsOneWidget);
     });
 
-    testWidgets('shows only the logo, name and about fields', (tester) async {
+    testWidgets('shows the store name, about and rating', (tester) async {
       await open(tester);
 
       expect(find.text('Home Appliances'), findsOneWidget);
       expect(find.text('About my store'), findsOneWidget);
+      expect(find.text('4.5'), findsOneWidget);
       expect(find.byType(AppTextField), findsNWidgets(2));
-      expect(find.text('01012345678'), findsNothing);
-      expect(find.text('الحي العاشر، محافظة القاهرة'), findsNothing);
-      expect(find.text('Kitchen'), findsNothing);
     });
 
-    testWidgets('save sends the edits and resends the hidden fields', (
-      tester,
-    ) async {
+    testWidgets('a missing rate shows 0.0', (tester) async {
+      await open(
+        tester,
+        vendor: const VendorModel(id: 'v1', storeName: 'S'),
+      );
+      expect(find.text('0.0'), findsOneWidget);
+    });
+
+    testWidgets('save sends the edits through update profile', (tester) async {
       await open(tester);
 
       await tester.enterText(find.text('Home Appliances'), 'New Name');
       await tester.enterText(find.text('About my store'), 'New about');
-      final save = find.byType(GradientButton);
-      await tester.ensureVisible(save);
-      await tester.tap(save);
-      await tester.pumpAndSettle();
+      await tapSave(tester);
 
-      final put = adapter.requests.singleWhere((r) => r.method == 'PUT');
-      final f = _fields(put);
-      expect(f['name'], ['New Name']);
-      expect(f['about'], ['New about']);
-      expect(f['slug'], ['elboray']);
-      expect(f['address'], ['الحي العاشر، محافظة القاهرة']);
-      expect(f['opensAt'], ['09:30']);
-      expect(f['closesAt'], ['22:00']);
-      expect(f['deliveryFee'], ['30']);
-      expect(f['workingDays'], ['SATURDAY', 'SUNDAY']);
-      expect(find.text('Changes saved'), findsOneWidget);
+      final events = updateBloc.of<SubmitUpdateProfileEvent>();
+      expect(events, hasLength(1));
+      final r = events.single.request;
+      expect(r.userId, 'v1');
+      expect(r.fields['storeName'], 'New Name');
+      expect(r.fields['storeAbout'], 'New about');
+      // Other profile data is resent unchanged.
+      expect(r.fields['firstName'], 'Ahmed');
+      expect(r.fields['city'], 'Cairo');
+      expect(r.existingFileNames['storePhoto'], 'photo.jpg');
+      expect(r.files, isEmpty);
     });
 
     testWidgets('an empty store name blocks the save', (tester) async {
       await open(tester);
 
       await tester.enterText(find.text('Home Appliances'), '');
-      final save = find.byType(GradientButton);
-      await tester.ensureVisible(save);
-      await tester.tap(save);
-      await tester.pumpAndSettle();
+      await tapSave(tester);
 
-      expect(adapter.requests.where((r) => r.method == 'PUT'), isEmpty);
+      expect(updateBloc.of<SubmitUpdateProfileEvent>(), isEmpty);
       expect(find.text('This field is required'), findsOneWidget);
     });
 
-    testWidgets('a failed save shows the server message', (tester) async {
-      adapter.putStatus = 400;
+    testWidgets('a successful save shows a message and reloads the vendor', (
+      tester,
+    ) async {
       await open(tester);
+      expect(vendorBloc.of<FetchVendorEvent>(), hasLength(1));
 
-      final save = find.byType(GradientButton);
-      await tester.ensureVisible(save);
-      await tester.tap(save);
+      updateBloc.show(
+        const UpdateProfileSuccess('profile_updated_successfully'),
+      );
       await tester.pumpAndSettle();
 
-      expect(find.text('server says no'), findsOneWidget);
-      expect(find.text('Home Appliances'), findsOneWidget);
+      expect(find.text('Changes saved'), findsOneWidget);
+      expect(vendorBloc.of<FetchVendorEvent>(), hasLength(2));
+    });
+
+    testWidgets('a failed save shows the error and keeps the form', (
+      tester,
+    ) async {
+      await open(tester);
+      await tester.enterText(find.text('Home Appliances'), 'Edited');
+
+      updateBloc.show(const UpdateProfileError('no_internet'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edited'), findsOneWidget);
+      expect(vendorBloc.of<FetchVendorEvent>(), hasLength(1));
     });
 
     testWidgets('a failed load offers a retry', (tester) async {
-      adapter.getStatus = 500;
-      await open(tester);
-
-      expect(find.text('server says no'), findsOneWidget);
-
-      adapter.getStatus = 200;
-      await tester.tap(find.text('Retry'));
+      await initPrefs();
+      useTallScreen(tester);
+      vendorBloc = RecordingVendorBloc();
+      await tester.pumpWidget(
+        localizedApp(
+          MultiBlocProvider(
+            providers: [
+              BlocProvider<VendorBloc>.value(value: vendorBloc),
+              BlocProvider<UpdateProfileBloc>.value(
+                value: RecordingUpdateProfileBloc(),
+              ),
+            ],
+            child: const StoreProfileScreen(),
+          ),
+        ),
+      );
+      await tester.pump();
+      vendorBloc.show(const VendorError(message: 'no_internet'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Home Appliances'), findsOneWidget);
+      await tester.tap(find.text('Retry'));
+      await tester.pump();
+
+      expect(vendorBloc.of<FetchVendorEvent>(), hasLength(2));
+    });
+
+    testWidgets('an unverified vendor is asked to verify before the photo', (
+      tester,
+    ) async {
+      await open(tester, verified: false);
+
+      await tester.tap(find.text('Change'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('You need to verify your account to change the store photo.'),
+        findsOneWidget,
+      );
+      expect(find.text('Verify account'), findsOneWidget);
     });
   });
 }

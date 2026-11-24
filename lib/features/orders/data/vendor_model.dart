@@ -51,6 +51,9 @@ class VendorModel extends Equatable {
   final int? trialDays;
   final bool? firstLogin;
   final bool? readLicense;
+  final String? storePhoto;
+  final String? storeName;
+  final String? storeAbout;
 
   const VendorModel({
     this.id,
@@ -93,6 +96,9 @@ class VendorModel extends Equatable {
     this.trialDays,
     this.firstLogin,
     this.readLicense,
+    this.storePhoto,
+    this.storeName,
+    this.storeAbout,
   });
 
   factory VendorModel.fromJson(Map<String, dynamic> json) =>
@@ -138,6 +144,9 @@ class VendorModel extends Equatable {
     trialDays,
     firstLogin,
     readLicense,
+    storePhoto,
+    storeName,
+    storeAbout,
   ];
 }
 

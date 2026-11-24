@@ -29,6 +29,10 @@ VendorModel _$VendorModelFromJson(Map<String, dynamic> json) => VendorModel(
       ?.map((e) => e as String)
       .toList(),
   city: json['city'] as String?,
+  street: json['street'] as String?,
+  building: json['building'] as String?,
+  area: json['area'] as String?,
+  neighborhood: json['neighborhood'] as String?,
   state: json['state'] as String?,
   servingTheEntireGovernorate: json['servingTheEntireGovernorate'] as bool?,
   servingTheEntireArea: json['servingTheEntireArea'] as bool?,
@@ -49,6 +53,9 @@ VendorModel _$VendorModelFromJson(Map<String, dynamic> json) => VendorModel(
   trialDays: (json['trialDays'] as num?)?.toInt(),
   firstLogin: json['firstLogin'] as bool?,
   readLicense: json['readLicense'] as bool?,
+  storePhoto: json['storePhoto'] as String?,
+  storeName: json['storeName'] as String?,
+  storeAbout: json['storeAbout'] as String?,
 );
 
 Map<String, dynamic> _$VendorModelToJson(VendorModel instance) =>
@@ -71,6 +78,10 @@ Map<String, dynamic> _$VendorModelToJson(VendorModel instance) =>
       'rolesStr': instance.rolesStr,
       'privilegesStr': instance.privilegesStr,
       'city': instance.city,
+      'street': instance.street,
+      'building': instance.building,
+      'area': instance.area,
+      'neighborhood': instance.neighborhood,
       'state': instance.state,
       'servingTheEntireGovernorate': instance.servingTheEntireGovernorate,
       'servingTheEntireArea': instance.servingTheEntireArea,
@@ -89,6 +100,9 @@ Map<String, dynamic> _$VendorModelToJson(VendorModel instance) =>
       'trialDays': instance.trialDays,
       'firstLogin': instance.firstLogin,
       'readLicense': instance.readLicense,
+      'storePhoto': instance.storePhoto,
+      'storeName': instance.storeName,
+      'storeAbout': instance.storeAbout,
     };
 
 VendorSectorModel _$VendorSectorModelFromJson(Map<String, dynamic> json) =>

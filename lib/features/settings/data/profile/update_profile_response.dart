@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:whats_order/base/base_repository.dart';
 import 'package:whats_order/core/error/failures.dart';
 import 'package:whats_order/core/network/dio_helper.dart';
 import 'package:whats_order/core/network/end_points.dart';
+import 'package:whats_order/core/utils/logger.dart';
 
 import 'update_profile_request.dart';
 
@@ -15,6 +17,7 @@ class UpdateProfileResponse implements BaseRepository {
     'faceIdCard',
     'backIdCard',
     'commercialRegister',
+    'storePhoto',
   };
 
   @override
@@ -61,6 +64,21 @@ class UpdateProfileResponse implements BaseRepository {
 
         // No previous image exists for this field.
         if (oldFileName == null || oldFileName.isEmpty) {
+          // Stores without a photo get the bundled placeholder.
+          if (fieldName == 'storePhoto') {
+            final data = await rootBundle.load(
+              UpdateProfileRequest.placeholderAsset,
+            );
+            formData.files.add(
+              MapEntry(
+                fieldName,
+                MultipartFile.fromBytes(
+                  data.buffer.asUint8List(),
+                  filename: 'new_whats_icon.png',
+                ),
+              ),
+            );
+          }
           // logger.w('$fieldName: no existing file');
           continue;
         }
@@ -129,7 +147,9 @@ class UpdateProfileResponse implements BaseRepository {
       // logger.w('========== UPDATE PROFILE RESPONSE ==========');
       // logger.w('Status Code: ${response.statusCode}');
       // logger.w('Response Data: $data');
-
+      // logger.i(
+      //   'profile store API response:\n${AppLogPrinter.formatJson(data)}',
+      // );
       if (response.statusCode != null &&
           response.statusCode! >= 200 &&
           response.statusCode! < 300) {
@@ -145,10 +165,11 @@ class UpdateProfileResponse implements BaseRepository {
     } on DioException catch (e) {
       final responseData = e.response?.data;
 
-      // logger.e('========== UPDATE PROFILE ERROR ==========');
-      // logger.e('Status Code: ${e.response?.statusCode}');
-      // logger.e('Response Data: $responseData');
-      // logger.e('Error: ${e.message}');
+      logger.e('========== UPDATE PROFILE ERROR ==========');
+      logger.e('URL: ${e.requestOptions.uri}');
+      logger.e('Status Code: ${e.response?.statusCode}');
+      logger.e('Response Data: $responseData');
+      logger.e('Error: ${e.message}');
 
       final message = responseData is Map
           ? responseData['message']?.toString()
@@ -156,8 +177,7 @@ class UpdateProfileResponse implements BaseRepository {
 
       return Left(ServerFailure(message ?? 'profile_update_failed'));
     } catch (e) {
-      // logger.e('Update profile exception: $e');
-      // logger.e('Stack trace: $stackTrace');
+      logger.e('Update profile exception: $e');
 
       return const Left(ServerFailure('something_went_wrong'));
     } finally {

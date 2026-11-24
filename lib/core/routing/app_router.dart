@@ -11,10 +11,10 @@ import 'package:whats_order/features/orders/notification/presentation/screens/no
 import 'package:whats_order/features/orders/sms/presentation/sms_messages_screen.dart';
 import 'package:whats_order/features/orders/presentation/bloc/orders_bloc.dart';
 import 'package:whats_order/features/orders/presentation/bloc/vendor_bloc.dart';
+import 'package:whats_order/features/settings/presentation/bloc/update_profile_bloc.dart';
 import 'package:whats_order/features/orders/presentation/screens/order_details_screen.dart';
 import 'package:whats_order/features/settings/presentation/bloc/branches_bloc.dart';
 import 'package:whats_order/features/settings/presentation/screens/products_screen.dart';
-import 'package:whats_order/features/settings/presentation/bloc/store_profile_bloc.dart';
 import 'package:whats_order/features/settings/presentation/screens/store_profile_screen.dart';
 import 'package:whats_order/features/settings/presentation/screens/profile_screen.dart';
 import 'package:whats_order/features/settings/presentation/taps/branches_tab.dart';
@@ -45,8 +45,13 @@ class AppRouter {
     switch (settings.name) {
       case NamedRoutes.storeProfile:
         return MaterialPageRoute(
-          builder: (_) => BlocProvider(
-            create: (_) => sl<StoreProfileBloc>(),
+          builder: (_) => MultiBlocProvider(
+            providers: [
+              BlocProvider<VendorBloc>(create: (_) => sl<VendorBloc>()),
+              BlocProvider<UpdateProfileBloc>(
+                create: (_) => sl<UpdateProfileBloc>(),
+              ),
+            ],
             child: const StoreProfileScreen(),
           ),
         );

@@ -1,5 +1,4 @@
 import 'package:get_it/get_it.dart';
-import 'package:whats_order/features/settings/presentation/bloc/store_profile_bloc.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:whats_order/core/localization/locale_cubit.dart';
@@ -58,7 +57,6 @@ Future<void> init() async {
   sl.registerFactory(() => ChangePhoneBloc(sl()));
   sl.registerFactory(() => SectorsBloc(sl()));
   sl.registerFactory(() => UpdateProfileBloc(sl()));
-  sl.registerFactory(() => StoreProfileBloc(sl()));
   sl.registerFactory(() => LogoutBloc(sl(), const LocalSessionCleaner()));
 
   // Add every new feature's Bloc here, e.g.:

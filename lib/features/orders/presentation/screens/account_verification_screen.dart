@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:whats_order/core/localization/app_localizations.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:whats_order/core/theme/app_text_styles.dart';
 
 class AccountVerificationScreen extends StatefulWidget {
   const AccountVerificationScreen({super.key});
@@ -41,7 +43,12 @@ class _AccountVerificationScreenState extends State<AccountVerificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Account Verification')),
+      appBar: AppBar(
+        title: Text(
+          context.tr('account_verification'),
+          style: AppTextStyles.heading18,
+        ),
+      ),
       body: Stack(
         children: [
           WebViewWidget(controller: _controller),
